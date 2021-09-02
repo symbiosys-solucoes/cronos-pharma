@@ -5,5 +5,7 @@ class ItemCONSYS  (
     val quantidade: Double,
     val codigoCONSYS: String,
 ){
-
+    override fun toString(): String {
+        return "ItemCONSYS(codigo='$codigo', quantidade=$quantidade, codigoCONSYS='$codigoCONSYS')"
+    }
 }
