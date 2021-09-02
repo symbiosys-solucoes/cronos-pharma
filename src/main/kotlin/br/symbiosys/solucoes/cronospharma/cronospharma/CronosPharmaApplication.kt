@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class CronosPharmaApplication
 
 fun main(args: Array<String>) {
-	runApplication<CronosPharmaApplication>(*args)
+	val runApplication = runApplication<CronosPharmaApplication>(*args)
 }

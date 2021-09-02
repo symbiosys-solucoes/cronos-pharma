@@ -25,6 +25,10 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 
 	implementation("commons-net:commons-net:3.8.0")
+	implementation("org.mockftpserver:MockFtpServer:2.7.1")
+
+	testImplementation("org.hamcrest:hamcrest-library:2.2")
+
 
 }
 
