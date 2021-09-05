@@ -53,6 +53,15 @@ class PedidoPalmRepository(
 
     private final val sqlFindCodCliforByCnpj = "" +
             "SELECT VALOR = CodCliFor FROM Cli_For where dbo.fn_LimpaStr(CPFCGCCLIFOR) = :cnpj"
+
+    private final val sqlFindCodPortadorByCnpj = "" +
+            "SELECT VALOR = CodPortador FROM Cli_For where dbo.fn_LimpaStr(CPFCGCCLIFOR) = :cnpj"
+
+    private final val sqlFindCodVendedorByCnpj = "" +
+            "SELECT VALOR = CodFunc FROM Cli_For where dbo.fn_LimpaStr(CPFCGCCLIFOR) = :cnpj"
+
+    private final val sqlFindCodCondPagByCnpj = "" +
+            "SELECT VALOR = CodCondPag FROM Cli_For where dbo.fn_LimpaStr(CPFCGCCLIFOR) = :cnpj"
     
     private final val sqlInsertPedidoPalm =
                 "BEGIN TRANSACTION \n" +

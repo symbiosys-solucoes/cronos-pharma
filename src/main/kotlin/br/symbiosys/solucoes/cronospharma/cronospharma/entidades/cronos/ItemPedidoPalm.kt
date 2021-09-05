@@ -6,7 +6,9 @@ import java.time.LocalDateTime
 
 class ItemPedidoPalm(
 
-    val IdPedidoPalm: Long?,
+    var IdItemPedidoPalm: Long? = null,
+
+    var IdPedidoPalm: Long?,
 
     val Item: Int?,
 
@@ -14,17 +16,17 @@ class ItemPedidoPalm(
 
     val CodProdutoArq: String?,
 
-    val IdProduto: Int?,
+    var IdProduto: Int?,
 
-    val CodProduto: String?,
+    var CodProduto: String?,
 
     val Qtd: Double?,
 
     val QtdConfirmada: Double?,
 
-    val IdPrecoTabela: String?,
+    var IdPrecoTabela: String?,
 
-    val PrecoUnit: BigDecimal?,
+    var PrecoUnit: BigDecimal?,
 
     val PercDescontoItem: Double?,
 
@@ -43,5 +45,5 @@ class ItemPedidoPalm(
     val DataOperacao: LocalDateTime = LocalDateTime.now(),
 
     ) {
-    var IdItemPedidoPalm: Int? = null
+
 }
