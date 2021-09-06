@@ -17,3 +17,7 @@
 * sym_dir_ped_local : Varchar(255)
 * sym_dir_imp_local : Varchar(255)
 * CodTd_sym_tipo: Tabela Dinâmica(sym_tipo)
+
+### Filiais
+
+* sym_nextNumMov: Varchar(255)

@@ -32,7 +32,8 @@ class PedidoCONSYS (
             itens = produtos.map { ItemPedidoPalm(
                 CodProdutoArq = it.codigo,
                 Qtd = it.quantidade,
-                LogImportacao = it.codigoCONSYS
+                LogImportacao = it.codigoCONSYS,
+                Item = produtos.indexOf(it)
             ) }
 
         )

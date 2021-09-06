@@ -1,5 +1,6 @@
 package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos
 
+import org.springframework.jdbc.core.PreparedStatementCallback
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
@@ -68,6 +69,23 @@ class PedidoPalmRepository(
             .addValue("cnpj", pedido.CnpjCpfCliFor)
             .addValue("origem", pedido.Origem)
         return jdbcTemplate.query(sqlDadosItem, params, mapperDadosPedido).first() ?: null
+    }
+
+    fun findById(id: Long):PedidoPalm?{
+
+        val pedido = jdbcTemplate.query("select * from PedidoPalm where IdPedidoPalm = :id", MapSqlParameterSource().addValue("id", id), mapperPedidoPalm).first()
+        pedido.itens = itemPedidoPalmRepository.findAllByIdPedido(pedido?.IdPedidoPalm ?:0 )
+
+        return pedido
+    }
+
+    fun toMovimento(pedido: PedidoPalm): String? {
+        if(pedido.IdPedidoPalm == null || pedido.SituacaoPedido != "P" ){
+            return "0"
+        }
+
+        return jdbcTemplate.query(sqlToMovimento, MapSqlParameterSource().addValue("idPedidoPalm", pedido.IdPedidoPalm), mapperString).first()
+
     }
 
     companion object{
@@ -173,6 +191,198 @@ class PedidoPalmRepository(
                     "RAISERROR('Nao foi possivel inserir os dados',1,1)\t\t"
 
     }
+
+    private final val sqlToMovimento = "" +
+            "\n" +
+            "            DECLARE\n" +
+            "                     @IdPedidoPalm \tINT, @IdItemPedidoPalm INT,\n" +
+            "                     @PrecoUnit \t\tMONEY,\n" +
+            "                     @Qtd      \t\tNUMERIC(15,6),  @QtdSolic NUMERIC(15,6),\n" +
+            "                     @SdoAtual    NUMERIC(15,6),\n" +
+            "                           @IdMovNew  \t\tINT,\n" +
+            "                           @Item\t  \t\tINT,\n" +
+            "                           @IdItemMovNew  \t\tINT,  @NumeroMovNew VARCHAR(20),\n" +
+            "                           @AceitaEstoqueNegativo   VARCHAR(1),  @ControleLote  VARCHAR(1),\n" +
+            "                           @IdProduto\t \tINT,\n" +
+            "                           @CodProduto\t \tVARCHAR(20),\n" +
+            "                           @IDMOV \t\t\tINT,\n" +
+            "                           @CODFILIAL\t \tVARCHAR(2), @CODLOCAL  VARCHAR(2), @IDEMPRESA INT,\n" +
+            "                           @INDPRECOVENDA \t\tVARCHAR(1),\n" +
+            "            \n" +
+            "                           @SITUACAOITEMPEDIDO \tVARCHAR(1), @UnidItemMov  VARCHAR(4),\n" +
+            "                           @PercComissaoItem        NUMERIC(6,2),\n" +
+            "                           @PercDescontoItem        FLOAT\n" +
+            "            \n" +
+            "            \n" +
+            "            \n" +
+            "            SET @IDEMPRESA = 1            \n" +
+            "\t\t\tSET @IdPedidoPalm = :idPedidoPalm\n" +
+            "            \n" +
+            "            SET @IdMovNew = 0\n" +
+            "            IF NOT EXISTS( SELECT 1 FROM Movimento M (NOLOCK) WHERE TipoMov ='2.1' AND IdPedidoPalm = @IdPedidoPalm AND Status <> 'C')\n" +
+            "            BEGIN\n" +
+            "            \n" +
+            "            \n" +
+            "             SELECT @NumeroMovNew = sym_nextNumMov FROM ZFiliaisCompl WHERE CodFilial = '01'\n" +
+            "             UPDATE ZFiliaisCompl SET sym_nextNumMov = CAST(sym_nextNumMov as BigInt) + 1\n" +
+            "            \n" +
+            "             EXEC @IdMovNew = dbo.sp_NextId 'Movimento'\n" +
+            "             \n" +
+            "             BEGIN TRANSACTION\n" +
+            "            \n" +
+            "             INSERT INTO MOVIMENTO (IDEMPRESA, CODFILIAL, CODLOCAL, IDMOV, TIPOMOV, NUMMOV, DTMOV, CODCLIFOR, CODCONDPAG, CODVENDEDOR, IdRegiao, PERCCOMISSAO, STATUS, PercDesconto, Observacoes, DataEntrega, DataOperacao, IdUsuario, IdPedidoPalm, IdExpedicao, NumMovAux )\n" +
+            "             SELECT @IdEmpresa,\n" +
+            "                    Vendedores.CODFILIAL,\n" +
+            "                    Vendedores.CodLocal,\n" +
+            "                     @IdMovNew,\n" +
+            "                  '2.1',\n" +
+            "                    CONVERT(VARCHAR(20), @NumeroMovNew),\n" +
+            "                    PedidoPalm.DataPedido,\n" +
+            "                    PedidoPalm.CODCLIFOR,\n" +
+            "                    PedidoPalm.CODCONDPAG,\n" +
+            "                    PedidoPalm.CODVENDEDOR,\n" +
+            "                    Cli_For.IdRegiao,\n" +
+            "                    Vendedores.ComissaoVendedor,\n" +
+            "                    'T',\n" +
+            "                    ISNULL(PedidoPalm.PercDesconto,0),\n" +
+            "                    CONVERT(VARCHAR(400),'Portador: '+ISNULL(Portador.NomePortador,'')+'  /  '+'Obs: '+ISNULL(PedidoPalm.Observacoes,'')),\n" +
+            "                    PedidoPalm.DataEntrega,\n" +
+            "                    GETDATE(),\n" +
+            "                    PedidoPalm.Origem,\n" +
+            "                     PedidoPalm.IdPedidoPalm,\n" +
+            "                    PedidoPalm.IdExpedicao,\n" +
+            "                    PedidoPalm.NumNF\n" +
+            "              FROM PedidoPalm LEFT JOIN Portador ON PedidoPalm.CodPortador = Portador.CodPortador, Cli_For, Vendedores\n" +
+            "             WHERE PedidoPalm.CodCliFor = Cli_For.CodCliFor\n" +
+            "            \n" +
+            "               AND PedidoPalm.CodVendedor = Vendedores.CodVendedor AND PedidoPalm.CodFilial = Vendedores.CodFilial \n" +
+            "               AND Vendedores.CodFilial IS NOT NULL AND Vendedores.CodLocal IS NOT NULL\n" +
+            "               AND PedidoPalm.IdPedidoPalm   = @IdPedidoPalm                    \n" +
+            "\n" +
+            "            \n" +
+            "             DECLARE xItens SCROLL CURSOR FOR\n" +
+            "              SELECT Vendedores.CodFilial, Vendedores.CodLocal, IdItemPedidoPalm, Item, CodProduto, Qtd, IdPrecoTabela, PrecoUnit, ISNULL(PercDescontoItem,0)\n" +
+            "                FROM ItemPedidoPalm, PedidoPalm, Vendedores\n" +
+            "               WHERE ItemPedidoPalm.IdPedidoPalm  = PedidoPalm.IdPedidoPalm\n" +
+            "                 AND PedidoPalm.IdPedidoPalm      = @IdPedidoPalm\n" +
+            "                 AND PedidoPalm.CodVendedor = Vendedores.CodVendedor \n" +
+            "                 AND PedidoPalm.CodFilial = Vendedores.CodFilial \n" +
+            "                 AND Vendedores.CodFilial IS NOT NULL AND Vendedores.CodLocal IS NOT NULL\n" +
+            "              \n" +
+            "             FOR READ ONLY\n" +
+            "            \n" +
+            "            OPEN xItens\n" +
+            "            FETCH FIRST FROM xItens\n" +
+            "             INTO @CodFilial, @CodLocal,\n" +
+            "                  @IdItemPedidoPalm,\n" +
+            "                  @Item,\n" +
+            "                  @CodProduto,\n" +
+            "                  @Qtd,\n" +
+            "                  @IndPrecoVenda,\n" +
+            "                  @PrecoUnit,\n" +
+            "                  @PercDescontoItem\n" +
+            "            \n" +
+            "            WHILE @@FETCH_STATUS = 0\n" +
+            "            BEGIN\n" +
+            "            \n" +
+            "              SELECT @SituacaoItemPedido = 'C'\n" +
+            "            \n" +
+            "              SELECT @IdProduto = MAX(IdProduto),\n" +
+            "                     @PercComissaoItem = ISNULL(MAX(ComissaoProduto),0),\n" +
+            "                     @UnidItemMov  = MAX(Produtos.Unid),\n" +
+            "                     @ControleLote = ISNULL(MAX(Produtos.ControleLote),'N')\n" +
+            "                FROM Produtos\n" +
+            "               WHERE CodProduto = @CodProduto\n" +
+            "            \n" +
+            "              -- Produto nao cadastrado\n" +
+            "              IF @IdProduto IS NULL\n" +
+            "                 SELECT @SituacaoItemPedido = 'I'\n" +
+            "            \n" +
+            "              SELECT @SdoAtual   = ISNULL(MAX(e.SdoAtual),0)\n" +
+            "                FROM Estoque e\n" +
+            "               WHERE e.Codfilial = @CodFilial\n" +
+            "                 AND e.CodLocal  = @CodLocal\n" +
+            "                 AND e.IdProduto = @IdProduto\n" +
+            "            \n" +
+            "              SELECT @AceitaEstoqueNegativo = ISNULL(MAX(Loc.AceitaEstoqueNegativo),'N')\n" +
+            "                FROM LocalEstoque Loc\n" +
+            "               WHERE Loc.IdEmpresa = @IdEmpresa\n" +
+            "                 AND Loc.CodFilial = @CodFilial\n" +
+            "                 AND Loc.CodLocal  = @CodLocal\n" +
+            "            \n" +
+            "            \n" +
+            "               SET @QtdSolic = @Qtd\n" +
+            "            \n" +
+            "               IF @AceitaEstoqueNegativo = 'N'\n" +
+            "                IF (@Qtd > @SdoAtual)\n" +
+            "                BEGIN\n" +
+            "                  IF @SdoAtual > 0\n" +
+            "                    SELECT @Qtd = @SdoAtual\n" +
+            "                  ELSE\n" +
+            "                    SELECT @Qtd = 0\n" +
+            "                  SELECT @SituacaoItemPedido = 'I'\n" +
+            "                END\n" +
+            "            \n" +
+            "               IF @IdProduto IS NOT NULL AND NOT EXISTS (SELECT 1 FROM ItensMov im (NOLOCK) WHERE im.IdMov = @IdMovNew AND im.IdProduto = @IdProduto)\n" +
+            "               BEGIN\n" +
+            "            \n" +
+            "                EXEC @IdItemMovNew = dbo.sp_NextId 'ItensMov'\n" +
+            "            \n" +
+            "                INSERT INTO ItensMov (IdEmpresa, IdItemMov, IDMOV, IdProduto, UnidItemMov,  QtdSolic, QTD, PRECOUNIT, IDPRECOTABELA, PercDescontoItem, PercComissaoItem, DATAOPERACAO, IDUSUARIO)\n" +
+            "                VALUES(@IdEmpresa,\n" +
+            "                       @IdItemMovNew,\n" +
+            "                       @IdMovNew,\n" +
+            "                       @IdProduto,\n" +
+            "                       @UnidItemMov,\n" +
+            "                       @QtdSolic,\n" +
+            "                       dbo.fn_Fmt(@QTD,'Q'),\n" +
+            "                       dbo.fn_Fmt(@PRECOUNIT,'P'),\n" +
+            "                       @IndPrecoVenda,\n" +
+            "                       @PercDescontoItem,\n" +
+            "                       @PercComissaoItem,\n" +
+            "                     GETDATE(),\n" +
+            "                     'PALM'\n" +
+            "                      )\n" +
+            "            \n" +
+            "                   IF @ControleLote = 'S'\n" +
+            "                     EXEC dbo.sp_GeraItemLoteAuto @IdItemMovNew\n" +
+            "            \n" +
+            "               END\n" +
+            "            \n" +
+            "               UPDATE dbo.ItemPedidoPalm SET SituacaoItemPedido = @SituacaoItemPedido, QtdConfirmada = @Qtd\n" +
+            "                WHERE IdItemPedidoPalm  = @IdItemPedidoPalm\n" +
+            "              \n" +
+            "            \n" +
+            "              FETCH NEXT FROM xItens\n" +
+            "               INTO @CodFilial, @CodLocal,\n" +
+            "                    @IdItemPedidoPalm,\n" +
+            "                    @Item,\n" +
+            "                    @CodProduto,\n" +
+            "                    @Qtd,\n" +
+            "                    @IndPrecoVenda,\n" +
+            "                    @PrecoUnit,\n" +
+            "                    @PercDescontoItem\n" +
+            "            \n" +
+            "            END\n" +
+            "            \n" +
+            "            CLOSE xItens\n" +
+            "            DEALLOCATE xItens\n" +
+            "            \n" +
+            "            -- Grava o pedido como C-Confirmado\n" +
+            "            IF EXISTS (SELECT 1 FROM Movimento WHERE IdMov = @IdMovNew)\n" +
+            "             UPDATE PedidoPalm SET SituacaoPedido = 'C', NumPedidoCRONOS = @NumeroMovNew\n" +
+            "              WHERE IdPedidoPalm  = @IdPedidoPalm\n" +
+            "            ELSE\n" +
+            "             SET @IdMovNew = 0        \n" +
+            "             SELECT VALOR = @NumeroMovNew\n" +
+            "            END \n" +
+            "            \n" +
+            "\n" +
+            "\t\t\tIF @@ERROR = 0\n" +
+            "\t\t\tCOMMIT\n" +
+            "\t\t\tELSE\n" +
+            "\t\t\tROLLBACK\n" +
+            "\t\t\tRAISERROR('Nao foi possivel inserir os dados',1,1)        \n"
 
 }
 

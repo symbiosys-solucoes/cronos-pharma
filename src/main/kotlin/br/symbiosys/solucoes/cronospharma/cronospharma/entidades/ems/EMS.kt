@@ -34,6 +34,7 @@ class EMS(
                 CodProdutoArq = it.codigoProduto,
                 Qtd = it.quantidade,
                 PercDescontoItem = it.desconto,
+                Item = produtos.indexOf(it)
             ) }
 
         )
