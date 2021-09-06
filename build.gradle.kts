@@ -28,6 +28,7 @@ dependencies {
 	implementation("org.mockftpserver:MockFtpServer:2.7.1")
 
 	testImplementation("org.hamcrest:hamcrest-library:2.2")
+	runtimeOnly("com.h2database:h2")
 
 
 }

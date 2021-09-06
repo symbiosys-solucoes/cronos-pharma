@@ -30,10 +30,10 @@ internal class TipoIntegracaoTest {
         assertThat(ems.numeroPedidoCliente, equalTo("LEG585786"))
         assertThat(ems.codigoRepresentante, equalTo("3009"))
         assertThat(ems.produtos, hasSize(31))
-        assertThat(ems.produtos?.first()?.codigoProduto ?: "Prdouto Nulo", equalTo("7894916142632"))
-        assertThat(ems.produtos?.first()?.quantidade ?: "Prdouto Nulo", equalTo(1.0))
-        assertThat(ems.produtos?.first()?.desconto ?: "Prdouto Nulo", equalTo(57.72))
-        assertThat(ems.produtos?.first()?.prazo ?: "Prdouto Nulo", equalTo("000"))
+        assertThat(ems.produtos?.first()?.codigoProduto ?: "Produto Nulo", equalTo("7894916142632"))
+        assertThat(ems.produtos?.first()?.quantidade ?: "Produto Nulo", equalTo(1.0))
+        assertThat(ems.produtos?.first()?.desconto ?: "Produto Nulo", equalTo(57.72))
+        assertThat(ems.produtos?.first()?.prazo ?: "Produto Nulo", equalTo("000"))
 
     }
 

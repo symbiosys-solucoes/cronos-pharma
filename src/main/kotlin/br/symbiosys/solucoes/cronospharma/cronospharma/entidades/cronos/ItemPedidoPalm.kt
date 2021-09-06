@@ -8,37 +8,37 @@ class ItemPedidoPalm(
 
     var IdItemPedidoPalm: Long? = null,
 
-    var IdPedidoPalm: Long?,
+    var IdPedidoPalm: Long? = null,
 
-    val Item: Int?,
+    val Item: Int? = null,
 
     val IdEmpresa:Long = 1,
 
-    val CodProdutoArq: String?,
+    val CodProdutoArq: String,
 
-    var IdProduto: Int?,
+    var IdProduto: Int? = null,
 
-    var CodProduto: String?,
+    var CodProduto: String? = null,
 
-    val Qtd: Double?,
+    val Qtd: Double,
 
-    val QtdConfirmada: Double?,
+    val QtdConfirmada: Double? = null,
 
-    var IdPrecoTabela: String?,
+    var IdPrecoTabela: String? = null,
 
-    var PrecoUnit: BigDecimal?,
+    var PrecoUnit: BigDecimal? = null,
 
-    val PercDescontoItem: Double?,
+    val PercDescontoItem: Double? = null,
 
-    val PercComissaoItem: Double?,
+    val PercComissaoItem: Double? = null,
 
-    val SituacaoItemPedido: String?,
+    val SituacaoItemPedido: String? = "P",
 
-    val LogImportacao: String?,
+    val LogImportacao: String? = null,
 
-    val CodRetornoItem: String?,
+    val CodRetornoItem: String? = null,
 
-    val DscRetornoItem: String?,
+    val DscRetornoItem: String? = null,
 
     val IdUsuario:String = "SYM",
 
