@@ -4,6 +4,7 @@ import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.Integrador
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.TipoIntegracao
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.ItemPedidoPalm
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.PedidoPalm
+import java.io.File
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -37,5 +38,9 @@ class PedidoCONSYS (
             ) }
 
         )
+    }
+
+    override fun gerarRetorno(): File {
+        TODO("Not yet implemented")
     }
 }

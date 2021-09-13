@@ -1,7 +1,7 @@
 package br.symbiosys.solucoes.cronospharma.cronospharma.ftp
 
 
-import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.diretorios.Diretorios
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.diretorios.Diretorio
 import org.apache.commons.net.ftp.FTPClient
 import org.apache.commons.net.ftp.FTPFile
 import org.apache.commons.net.ftp.FTPReply
@@ -12,8 +12,6 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.util.*
 import java.util.stream.Collectors
-import kotlin.reflect.KFunction1
-import kotlin.streams.toList
 
 
 //https://www.baeldung.com/java-ftp-client
@@ -23,7 +21,7 @@ class ClienteFTP(
    private val user: String,
    private val password: String,
 ) {
-    constructor(d: Diretorios): this(server = d.url, user = d.login, password = d.senha)
+    constructor(d: Diretorio): this(server = d.url, user = d.login, password = d.senha)
     private var ftp: FTPClient = FTPClient()
     private val logger = LoggerFactory.getLogger(ClienteFTP::class.java)
 

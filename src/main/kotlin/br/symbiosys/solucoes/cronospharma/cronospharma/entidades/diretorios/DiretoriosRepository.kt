@@ -11,13 +11,13 @@ class DiretoriosRepository (
     private val jdbcTemplate: NamedParameterJdbcTemplate
     ){
 
-    fun findAll(): List<Diretorios> {
+    fun findAll(): List<Diretorio> {
 
-        return jdbcTemplate.query(sqlDiretorios,mapperDiretorios)
+        return jdbcTemplate.query(sqlDiretorios,mapperDiretorio)
     }
 
-    private final val mapperDiretorios = RowMapper<Diretorios> { rs: ResultSet, rowNum: Int ->
-        Diretorios(
+    private final val mapperDiretorio = RowMapper<Diretorio> { rs: ResultSet, rowNum: Int ->
+        Diretorio(
             tipoIntegracao = TipoIntegracao.valueOf(rs.getString("CodTd_sym_tipo")),
             usaFTP = rs.getBoolean("sym_usaFTP"),
             ativo = rs.getBoolean("sym_ativo"),

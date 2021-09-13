@@ -2,7 +2,7 @@ package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.diretorios
 
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.TipoIntegracao
 
-class Diretorios
+class Diretorio
     (
     val tipoIntegracao: TipoIntegracao,
     val usaFTP: Boolean,
@@ -17,6 +17,6 @@ class Diretorios
     val diretorioImportadosLocal: String?
             ) {
     override fun toString(): String {
-        return "Diretorios(tipoIntegracao=$tipoIntegracao, usaFTP=$usaFTP, ativo=$ativo, url=$url, login=$login, senha=$senha, diretorioPedidoFTP=$diretorioPedidoFTP, diretorioRetornoFTP=$diretorioRetornoFTP, diretorioPedidoLocal=$diretorioPedidoLocal, diretorioRetornoLocal=$diretorioRetornoLocal, diretorioImportadosLocal=$diretorioImportadosLocal)"
+        return "Diretorio(tipoIntegracao=$tipoIntegracao, usaFTP=$usaFTP, ativo=$ativo, url=$url, login=$login, senha=$senha, diretorioPedidoFTP=$diretorioPedidoFTP, diretorioRetornoFTP=$diretorioRetornoFTP, diretorioPedidoLocal=$diretorioPedidoLocal, diretorioRetornoLocal=$diretorioRetornoLocal, diretorioImportadosLocal=$diretorioImportadosLocal)"
     }
 }

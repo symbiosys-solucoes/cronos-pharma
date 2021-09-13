@@ -1,0 +1,150 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > PedidoPalm</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/highlight-idea.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.pack.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos</a>
+</div>
+
+<h1>Coverage Summary for Class: PedidoPalm (br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PedidoPalm</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (35/35)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<div class="sourceCode" id="sourceCode"><i class="no-highlight">1</i>&nbsp;package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos
+<i class="no-highlight">2</i>&nbsp;
+<i class="no-highlight">3</i>&nbsp;import java.math.BigDecimal
+<i class="no-highlight">4</i>&nbsp;import java.time.LocalDateTime
+<i class="no-highlight">5</i>&nbsp;
+<b class="fc"><i class="no-highlight">6</i>&nbsp;class PedidoPalm (</b>
+<b class="fc"><i class="no-highlight">7</i>&nbsp;    val IdPedidoPalm: Long? = null,</b>
+<b class="fc"><i class="no-highlight">8</i>&nbsp;    val  Origem: String,</b>
+<b class="fc"><i class="no-highlight">9</i>&nbsp;    val  CodFilial:String = &quot;01&quot;,</b>
+<b class="fc"><i class="no-highlight">10</i>&nbsp;    val  IdEmpresa: Long = 1,</b>
+<b class="fc"><i class="no-highlight">11</i>&nbsp;    val  NumPedidoPalm:String,</b>
+<b class="fc"><i class="no-highlight">12</i>&nbsp;    var  CodVendedor:String? = null,</b>
+<b class="fc"><i class="no-highlight">13</i>&nbsp;    var  CodCliFor:String? = null,</b>
+<b class="fc"><i class="no-highlight">14</i>&nbsp;    val  CnpjCpfCliFor:String? = null,</b>
+<b class="fc"><i class="no-highlight">15</i>&nbsp;    val  DataPedido: LocalDateTime? = null,</b>
+<b class="fc"><i class="no-highlight">16</i>&nbsp;    val  PercComissao:Double? = null,</b>
+<b class="fc"><i class="no-highlight">17</i>&nbsp;    var  CodCondPag:String? = null,</b>
+<b class="fc"><i class="no-highlight">18</i>&nbsp;    var  CodPortador:String? = null,</b>
+<b class="fc"><i class="no-highlight">19</i>&nbsp;    val  PercDesconto:Double? = null,</b>
+<b class="fc"><i class="no-highlight">20</i>&nbsp;    val  TotalPedido: BigDecimal? = null,</b>
+<b class="fc"><i class="no-highlight">21</i>&nbsp;    val  DataEntrega:LocalDateTime? = null,</b>
+<b class="fc"><i class="no-highlight">22</i>&nbsp;    val  Observacoes:String? = null,</b>
+<b class="fc"><i class="no-highlight">23</i>&nbsp;    val  IdExpedicao:Long? = null,</b>
+<b class="fc"><i class="no-highlight">24</i>&nbsp;    val  DataProxVisita:LocalDateTime? = null,</b>
+<b class="fc"><i class="no-highlight">25</i>&nbsp;    val  SituacaoPedido:String = &quot;P&quot;,</b>
+<b class="fc"><i class="no-highlight">26</i>&nbsp;    val  NumNF:String? = null,</b>
+<b class="fc"><i class="no-highlight">27</i>&nbsp;    val  LogImportacao:String? = null,</b>
+<b class="fc"><i class="no-highlight">28</i>&nbsp;    val  StatusRetorno:String? = null,</b>
+<b class="fc"><i class="no-highlight">29</i>&nbsp;    val  CodRetorno:String? = null,</b>
+<b class="fc"><i class="no-highlight">30</i>&nbsp;    val  DscRetorno:String? = null,</b>
+<b class="fc"><i class="no-highlight">31</i>&nbsp;    val  NumPedidoCRONOS:String? = null,</b>
+<b class="fc"><i class="no-highlight">32</i>&nbsp;    val  ArqRetPed:String? = null,</b>
+<b class="fc"><i class="no-highlight">33</i>&nbsp;    val  ArqRetNF:String? = null,</b>
+<b class="fc"><i class="no-highlight">34</i>&nbsp;    val  ArqRet2Ped:String? = null,</b>
+<b class="fc"><i class="no-highlight">35</i>&nbsp;    val  VerLayout:String? = null,</b>
+<b class="fc"><i class="no-highlight">36</i>&nbsp;    val  NumPedidoPalmAux:String? = null,</b>
+<b class="fc"><i class="no-highlight">37</i>&nbsp;    val  IdUsuario:String = &quot;SYM&quot;,</b>
+<b class="fc"><i class="no-highlight">38</i>&nbsp;    val  DataOperacao:LocalDateTime = LocalDateTime.now(),</b>
+<b class="fc"><i class="no-highlight">39</i>&nbsp;    var itens:List&lt;ItemPedidoPalm&gt;,</b>
+<i class="no-highlight">40</i>&nbsp;
+<i class="no-highlight">41</i>&nbsp;        ){
+<i class="no-highlight">42</i>&nbsp;    override fun toString(): String {
+<b class="fc"><i class="no-highlight">43</i>&nbsp;        return &quot;PedidoPalm(IdPedidoPalm=$IdPedidoPalm, Origem=&#39;$Origem&#39;, CodFilial=&#39;$CodFilial&#39;, IdEmpresa=$IdEmpresa, NumPedidoPalm=&#39;$NumPedidoPalm&#39;, CodVendedor=$CodVendedor, CodCliFor=$CodCliFor, CnpjCpfCliFor=$CnpjCpfCliFor, DataPedido=$DataPedido, PercComissao=$PercComissao, CodCondPag=$CodCondPag, CodPortador=$CodPortador, PercDesconto=$PercDesconto, TotalPedido=$TotalPedido, DataEntrega=$DataEntrega, Observacoes=$Observacoes, IdExpedicao=$IdExpedicao, DataProxVisita=$DataProxVisita, SituacaoPedido=&#39;$SituacaoPedido&#39;, NumNF=$NumNF, LogImportacao=$LogImportacao, StatusRetorno=$StatusRetorno, CodRetorno=$CodRetorno, DscRetorno=$DscRetorno, NumPedidoCRONOS=$NumPedidoCRONOS, ArqRetPed=$ArqRetPed, ArqRetNF=$ArqRetNF, ArqRet2Ped=$ArqRet2Ped, VerLayout=$VerLayout, NumPedidoPalmAux=$NumPedidoPalmAux, IdUsuario=&#39;$IdUsuario&#39;, DataOperacao=$DataOperacao, itens=$itens)&quot;</b>
+<i class="no-highlight">44</i>&nbsp;    }
+<i class="no-highlight">45</i>&nbsp;}
+</div>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+        var codeBlock = document.getElementById('sourceCode');
+
+        if (codeBlock) {
+            hljs.highlightBlock(codeBlock);
+        }
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-09-11 20:02</div>
+</div>
+</body>
+</html>
