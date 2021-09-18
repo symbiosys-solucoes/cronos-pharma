@@ -46,4 +46,20 @@ class Arquivo {
             e.printStackTrace()
         }
     }
+
+    fun listaArquivos(diretorio: String): List<String> {
+        val file = File(diretorio)
+        if(!file.exists() && !file.isDirectory){
+            throw IOException("Caminho não existe ou não é uma pasta")
+        }
+        return file.list().asList()
+    }
+
+    fun moverArquivo(origem: String, destino: String){
+        val arquivoOrigem= File(origem)
+        val arquivoDestino = File(destino)
+        if (arquivoOrigem.exists() && !arquivoDestino.exists()){
+            arquivoOrigem.renameTo(arquivoDestino)
+        }
+    }
 }

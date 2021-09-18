@@ -50,11 +50,11 @@ class EMS(
 
     override fun gerarRetorno(cnpj: String, pedidoPalm: PedidoPalm, diretorio: Diretorio): File {
         var conteudo: StringBuilder = StringBuilder()
-        val data = LocalDateTime.now()
-        conteudo.append("0RETORNO PED OL 0${cnpj}${data.dayOfMonth}${data.monthValue}${data.year}${data.hour}${data.minute}${data.second}${data.nano}\n")
+        val data = LocalDateTime.now().toString()
+        conteudo.append("0RETORNO PED OL 0${cnpj}${data.substring(8,10)}${data.substring(5,7)}${data.substring(0,4)}${data.substring(11,13)}${data.substring(14,16)}${data.substring(17,19)}00\n")
 
-        conteudo.append("10${this.codigoCliente}${StringUtils.rightPad(numeroPedido,12," ")}"+
-                "${data.dayOfMonth}${data.monthValue}${data.year}${data.hour}${data.minute}${data.second}${data.nano}"+
+        conteudo.append("10${pedidoPalm.CnpjCpfCliFor}${StringUtils.rightPad(numeroPedido,12," ")}"+
+                "${cnpj}${data.substring(8,10)}${data.substring(5,7)}${data.substring(0,4)}${data.substring(11,13)}${data.substring(14,16)}${data.substring(17,19)}00"+
                 "${pedidoPalm.NumPedidoCRONOS}${pedidoPalm.CodRetorno}\n")
         val R2 = pedidoPalm.itens.map {
             "2${it.CodProdutoArq}${StringUtils.rightPad(pedidoPalm.NumPedidoPalm, 12, " ")}"+
@@ -68,7 +68,7 @@ class EMS(
         conteudo.append("3${StringUtils.rightPad(pedidoPalm.NumPedidoPalm,12, " ")}${StringUtils.leftPad(R2.size.toString(),5,"0")}"+
             "${StringUtils.leftPad(R2.size.toString(),5,"0")}${StringUtils.leftPad(R2.size.toString(),5,"0")}")
 
-        val nomeDoArquivo = "RETEMS_${cnpj}_${data.year}${data.monthValue}${data.dayOfMonth}${data.hour}${data.minute}${data.second}${data.nano}.txt"
+        val nomeDoArquivo = "RETEMS_${cnpj}_${data.substring(0,4)}${data.substring(5,7)}${data.substring(8,10)}${data.substring(11,13)}${data.substring(14,16)}${data.substring(17,19)}.txt"
 
         val file = File(diretorio.diretorioRetornoLocal + nomeDoArquivo)
         file.writeText(conteudo.toString())
