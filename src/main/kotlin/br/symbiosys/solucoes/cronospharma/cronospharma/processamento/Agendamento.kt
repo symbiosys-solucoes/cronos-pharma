@@ -7,14 +7,14 @@ import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.PedidoPa
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.PedidoPalmRepository
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.diretorios.Diretorio
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.diretorios.DiretoriosRepository
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.EMS
 import br.symbiosys.solucoes.cronospharma.cronospharma.ftp.ClienteFTP
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
-
 import org.springframework.stereotype.Component
 import java.sql.SQLException
-import kotlin.math.log
 
 @Component
 @EnableScheduling
@@ -23,35 +23,72 @@ class Agendamento (
     val pedidoPalmRepository: PedidoPalmRepository,
     val finalizaMovimento: FinalizaMovimento,
     val bloqueioMovimentoRepository: BloqueioMovimentoRepository
-        ) {
+) {
     val logger = LoggerFactory.getLogger(Agendamento::class.java)
+    @Value("\${app.filial.cnpj}")
+    lateinit var cnpj: String
+
+    // To-Do:
     // Passo 1 - Pegar os Diretórios
+    // Passo 2 - Iterar sobre todos os Diretórios a cada x tempo definido no application.properties
+    // Passo 3 - Fazer download dos devidos arquivos
+    // Passo 4 - Inserir Pedido no Cronos
+    // Passo 5 - Copiar pedido para a pasta de pedidos importados
+    // Passo 6 - Transformar Pedido em Pré-Venda
+    // Passo 7 - Atualizar o Status de Retorno
+    // Passo 8 - Gerar arquivo de Retorno
+    // Passo 9 - Fazer upload de arquivo de Retorno
+    // Passo 10 - Excluir Arquivo de Retorno
+
+
     val diretorios: List<Diretorio> = diretoriosRepository.findAll()
     val arquivo: Arquivo = Arquivo()
 
-    // Passo 2 - Iterar sobre todos os Diretórios a cada x tempo definido no application.properties
+    @Scheduled(cron = "\${app.cron}",)
+    fun execute(){
+        this.diretorios.forEach { diretorio ->
 
-    // Passo 3 - Fazer download dos devidos arquivos
-        fun baixarArquivos(diretorios: List<Diretorio>){
+            baixarArquivos(diretorio)
+            val pedidos = inserePedidos(diretorio)
+            val pedidosFinalizados = inserePreVenda(pedidos)
+            val pedidosComStatusRetorno = atualizaStatusRetorno(pedidosFinalizados)
 
-            diretorios.forEach { dir ->
-                logger.info("Procurando arquivos ${dir.tipoIntegracao.name}")
-                val clienteFTP = ClienteFTP( server = dir.url, user = dir.login, password = dir.senha)
-                clienteFTP.abreConexaoFTP()
-                val arquivos = clienteFTP.listaArquivos(dir.diretorioPedidoFTP ?: throw SQLException("Caminho FTP não pode estar nulo ou em branco"))
-                if(arquivos.isEmpty()){
-                    logger.info("Não Existe arquivos para baixar!")
-                    return
-                }
-                arquivos.forEach { arq ->
-                    clienteFTP.downloadArquivo(arq, dir.diretorioPedidoLocal + arq ?: throw SQLException("Caminho FTP não pode estar nulo ou em branco"))
-                }
-                clienteFTP.fechaConexaoFTP()
-            }
+            gerarArquivoDeRetorno(pedidosComStatusRetorno, diretorio)
+
+            uploadArquivos(diretorio)
+
+            logger.info("Concluido o Processo para o: ${diretorio.login}")
+            //pedidosComStatusRetorno.forEach { println(it.IdPedidoPalm) }
+
         }
-    // Passo 4 - Inserir Pedido no Cronos
-    fun inserePedidos(diretorios: List<Diretorio>): List<PedidoPalm> {
-        val pedidos = geraPedidos(diretorios)
+    }
+
+
+    private fun baixarArquivos(diretorio: Diretorio){
+
+        logger.info("Procurando arquivos ${diretorio.tipoIntegracao.name}")
+        val clienteFTP = ClienteFTP( server = diretorio.url, user = diretorio.login, password = diretorio.senha)
+        clienteFTP.abreConexaoFTP()
+        val arquivos = clienteFTP.listaArquivos(diretorio.diretorioPedidoFTP ?: throw SQLException("Caminho FTP não pode estar nulo ou em branco"))
+
+        if(arquivos.isEmpty()) {
+            logger.info("Não Existe arquivos para baixar!")
+            return
+        }
+
+        arquivos.forEach { arq ->
+            logger.info(arq)
+            clienteFTP.downloadArquivo(
+                diretorio.diretorioPedidoFTP + arq,
+                diretorio.diretorioPedidoLocal + arq,
+            )
+        }
+        clienteFTP.fechaConexaoFTP()
+
+    }
+
+    private fun inserePedidos(diretorio: Diretorio): List<PedidoPalm> {
+        val pedidos = geraPedidos(diretorio)
         var persistedPedidos = mutableListOf<PedidoPalm>()
 
         pedidos.forEach { pedido ->
@@ -61,42 +98,45 @@ class Agendamento (
         return persistedPedidos
     }
 
-    fun geraPedidos(diretorios: List<Diretorio>): List<PedidoPalm> {
+    private fun geraPedidos(diretorio: Diretorio): List<PedidoPalm> {
+
         var pedidos = mutableListOf<PedidoPalm>()
-        diretorios.forEach { dir ->
-            if(dir == null){
-                throw SQLException("Caminho nao existe localmente")
-            }
-            val arquivos = arquivo.listaArquivos(dir.diretorioPedidoLocal!!)
-            if( arquivos.isEmpty()){
-                logger.info("nao existe arquivos para ser importado de ${dir.tipoIntegracao.name}")
-                return pedidos
-            }
-            arquivos.forEach { arq ->
-                when(dir.tipoIntegracao){
-                    TipoIntegracao.EMS -> {
-                      pedidos.add(TipoIntegracao.toEms(arq).toPedidoPalm())
-                    }
-                    TipoIntegracao.CONSYS -> {
-                      TipoIntegracao.toConsys(arq).forEach { pedidos.add(it.toPedidoPalm()) }
-                    }
-                }
-            this.arquivo.moverArquivo(arq, dir.diretorioImportadosLocal + arq.replace(dir.diretorioPedidoLocal,""))
-            }
+
+        if(diretorio == null){
+            throw SQLException("Caminho nao existe localmente")
         }
+        val arquivos = arquivo.listaArquivos(diretorio.diretorioPedidoLocal!!)
+        if( arquivos.isEmpty()){
+            logger.info("nao existe arquivos para ser importado de ${diretorio.tipoIntegracao.name}")
+            return pedidos
+        }
+        arquivos.forEach { arq ->
+            println("carregando arquivo: $arq")
+            when(diretorio.tipoIntegracao){
+                TipoIntegracao.EMS -> {
+                    pedidos.add(TipoIntegracao.toEms(arq).toPedidoPalm())
+                }
+                TipoIntegracao.CONSYS -> {
+                    TipoIntegracao.toConsys(arq).forEach { pedidos.add(it.toPedidoPalm()) }
+                }
+            }
+            this.arquivo.moverArquivo(arq, diretorio.diretorioImportadosLocal + arq.replace(diretorio.diretorioPedidoLocal,""))
+        }
+
         return pedidos
     }
 
-    // Passo 5 - Copiar pedido para a pasta de pedidos importados
 
-    // Passo 6 - Transformar Pedido em Pré-Venda
-    fun inserePreVenda(pedidos: List<PedidoPalm>): List<PedidoPalm> {
+    private fun inserePreVenda(pedidos: List<PedidoPalm>): List<PedidoPalm> {
         var convertidos = mutableListOf<PedidoPalm>()
 
         pedidos.forEach {
-           var result = pedidoPalmRepository.toMovimento(it) ?: ""
+            println(it.IdPedidoPalm.toString() + " esse é o id")
+            var result = pedidoPalmRepository.toMovimento(it) ?: ""
             if (result == ""){
                 logger.info("erro ao gerar Pre-Venda do pedido de id: ${it.IdPedidoPalm}")
+            }else{
+                it.SituacaoPedido = "C"
             }
             var resultFim = finalizaMovimento.finaliza(it)
             logger.info("O pedido id: ${it.IdPedidoPalm} gerou o movimento com status = $resultFim")
@@ -105,18 +145,53 @@ class Agendamento (
         }
         return convertidos
     }
-    // Passo 7 - Atualizar o Status de Retorno
-    fun atualizaStatusRetorno(pedidos: List<PedidoPalm>){
+
+
+    private fun atualizaStatusRetorno(pedidos: List<PedidoPalm>): List<PedidoPalm> {
         var convertidos = mutableListOf<PedidoPalm>()
         pedidos.forEach { bloqueioMovimentoRepository.executaRegrasTipoGravarRetornos(it)
             convertidos.add(pedidoPalmRepository.findById(it.IdPedidoPalm!!)!!)
         }
+        return convertidos
     }
-    // Passo 8 - Gerar arquivo de Retorno
 
-    // Passo 9 - Fazer upload de arquivo de Retorno
 
-    // Passo 10 - Excluir Arquivo de Retorno
+    private fun gerarArquivoDeRetorno(pedidos: List<PedidoPalm>, diretorio: Diretorio) {
+
+        pedidos.forEach {
+            when(it.Origem){
+                "EMS" -> {
+                    val ems = EMS(it)
+                    val retorno = ems.gerarRetorno(cnpj, it, diretorio)
+                    arquivo.criaArquivo(retorno)
+                }
+            }
+        }
+
+    }
+
+
+
+    private fun uploadArquivos(diretorio: Diretorio){
+        val listaArquivos = arquivo.listaArquivos(diretorio.diretorioRetornoLocal ?: throw Exception("Nao existe diretorio de retorno configurado"))
+        if (listaArquivos.isEmpty()){
+            logger.info("nao existe arquivos para enviar")
+            return
+        }
+
+        val client = ClienteFTP(diretorio.url,21,diretorio.login, diretorio.senha)
+        client.abreConexaoFTP()
+
+        listaArquivos.forEach {
+            client.uploadArquivo(it, diretorio?.diretorioRetornoFTP + it.replace(diretorio.diretorioRetornoLocal,"") ?: "/")
+            arquivo.removeArquivo( it)
+        }
+
+
+    }
+
+
+
 
 }
 

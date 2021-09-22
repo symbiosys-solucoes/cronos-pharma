@@ -55,7 +55,7 @@ class BloqueioMovimentoRepository(
                 if(it.ExpressaoSQL != null){
                     val resultado = jdbcTemplate.queryForObject(
                         it.ExpressaoSQL!!.uppercase(),
-                        MapSqlParameterSource("PCHAR1","2.1").addValue(":IDMOV", idMov),
+                        MapSqlParameterSource("PCHAR1","2.1").addValue("IDMOV", idMov),
                         String::class.java
                     )
                     listaDeResultados.add(RetornoRegras(it.NomeBloqueio, resultado, "FINALIZACAO"))
@@ -71,7 +71,7 @@ class BloqueioMovimentoRepository(
                 if(it.ExpressaoSQL != null){
                     val resultado = jdbcTemplate.queryForObject(
                         it.ExpressaoSQL!!.uppercase(),
-                        MapSqlParameterSource("PCHAR1","2.1").addValue(":IDMOV", idMov),
+                        MapSqlParameterSource("PCHAR1","2.1").addValue("IDMOV", idMov),
                         String::class.java
                     )
                     listaDeResultados.add(RetornoRegras(it.NomeBloqueio, resultado, "COMERCIAL"))
@@ -87,7 +87,7 @@ class BloqueioMovimentoRepository(
                 if(it.ExpressaoSQL != null){
                     val resultado = jdbcTemplate.queryForObject(
                         it.ExpressaoSQL!!.uppercase(),
-                        MapSqlParameterSource("PCHAR1","2.1").addValue(":IDMOV", idMov),
+                        MapSqlParameterSource("PCHAR1","2.1").addValue("IDMOV", idMov),
                         String::class.java
                     )
                     listaDeResultados.add(RetornoRegras(it.NomeBloqueio, resultado, "FINANCEIRO"))

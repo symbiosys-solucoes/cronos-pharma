@@ -35,7 +35,7 @@ class PedidoCONSYS (
                 CodProdutoArq = it.codigo,
                 Qtd = it.quantidade,
                 LogImportacao = it.codigoCONSYS,
-                Item = produtos.indexOf(it)
+                Item = produtos.indexOf(it) + 1
             ) }
 
         )

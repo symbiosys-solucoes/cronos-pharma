@@ -28,7 +28,12 @@ class EMS(
     val produtos: List<ItemEMS>
         ): Integrador{
 
-
+        constructor(p: PedidoPalm) : this(
+            codigoCliente = p.CnpjCpfCliFor,
+            numeroPedido = p.NumPedidoPalm,
+            dataPedido = p.DataPedido?.toLocalDate() ?: LocalDate.now(),
+            produtos = listOf()
+        )
 
     override fun toPedidoPalm(): PedidoPalm {
 
@@ -42,7 +47,7 @@ class EMS(
                 CodProdutoArq = it.codigoProduto,
                 Qtd = it.quantidade,
                 PercDescontoItem = it.desconto,
-                Item = produtos.indexOf(it)
+                Item = produtos.indexOf(it) + 1
             ) }
 
         )

@@ -16,10 +16,10 @@ import java.util.stream.Collectors
 
 //https://www.baeldung.com/java-ftp-client
 class ClienteFTP(
-   private val server: String,
-   private val port: Int = 21,
-   private val user: String,
-   private val password: String,
+    private val server: String,
+    private val port: Int = 21,
+    private val user: String,
+    private val password: String,
 ) {
     constructor(d: Diretorio): this(server = d.url, user = d.login, password = d.senha)
     private var ftp: FTPClient = FTPClient()
@@ -50,13 +50,13 @@ class ClienteFTP(
     }
 
     fun fechaConexaoFTP(){
-       try {
-           ftp.disconnect()
-           logger.info("Desconexao realizada com Sucesso na url: ${ftp.passiveHost}")
-       } catch (e: IOException){
-           logger.warn("Desconexao não realizada na url: ${ftp.passiveHost}")
-           logger.warn(e.printStackTrace().toString())
-       }
+        try {
+            ftp.disconnect()
+            logger.info("Desconexao realizada com Sucesso na url: ${this.server}")
+        } catch (e: IOException){
+            logger.warn("Desconexao não realizada na url: ${this.server}")
+            logger.warn(e.printStackTrace().toString())
+        }
     }
 
     fun listaArquivos(path: String): Collection<String> {
@@ -70,24 +70,25 @@ class ClienteFTP(
     }
 
     fun downloadArquivo(origem: String, destino: String) {
-        try {
-            logger.info("Baixando o arquivo $origem, no caminho: $destino")
-            val arquivo = FileOutputStream(destino)
-            ftp.retrieveFile(origem, arquivo)
-        } catch (e: IOException) {
-            logger.warn("Erro ao realizar download do arquivo: ${e.printStackTrace()}")
-        }
 
+        logger.info("Baixando o arquivo $origem, no caminho: $destino")
+        val arquivo = FileOutputStream(destino)
+        if(ftp.retrieveFile(origem, arquivo)){
+            logger.info("arquivo ${destino} baixado com sucesso!")
+            ftp.deleteFile(origem)
+        }
+        arquivo.close()
     }
 
     fun uploadArquivo(origem: String, destino: String){
 
         try {
             logger.info("Subindo o arquivo $origem, no caminho: $destino")
-            var arquivo = File(origem)
-            ftp.storeFile(destino, FileInputStream(arquivo))
+            var arquivo = FileInputStream(File(origem))
+            ftp.storeFile(destino, arquivo)
+            arquivo.close()
         } catch (e: IOException) {
-            logger.warn("Erro ao realizar upload do arquivo: ${e.printStackTrace()}")
+            logger.warn("Erro ao realizar upload do arquivo: ${e.printStackTrace().toString()}")
         }
 
     }

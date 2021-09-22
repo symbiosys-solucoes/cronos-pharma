@@ -22,7 +22,7 @@ class PedidoPalm (
     val  Observacoes:String? = null,
     val  IdExpedicao:Long? = null,
     val  DataProxVisita:LocalDateTime? = null,
-    val  SituacaoPedido:String = "P",
+    var SituacaoPedido:String = "P",
     val  NumNF:String? = null,
     val  LogImportacao:String? = null,
     val  StatusRetorno:String? = null,
@@ -38,7 +38,7 @@ class PedidoPalm (
     val  DataOperacao:LocalDateTime = LocalDateTime.now(),
     var itens:List<ItemPedidoPalm>,
 
-        ){
+    ){
     override fun toString(): String {
         return "PedidoPalm(IdPedidoPalm=$IdPedidoPalm, Origem='$Origem', CodFilial='$CodFilial', IdEmpresa=$IdEmpresa, NumPedidoPalm='$NumPedidoPalm', CodVendedor=$CodVendedor, CodCliFor=$CodCliFor, CnpjCpfCliFor=$CnpjCpfCliFor, DataPedido=$DataPedido, PercComissao=$PercComissao, CodCondPag=$CodCondPag, CodPortador=$CodPortador, PercDesconto=$PercDesconto, TotalPedido=$TotalPedido, DataEntrega=$DataEntrega, Observacoes=$Observacoes, IdExpedicao=$IdExpedicao, DataProxVisita=$DataProxVisita, SituacaoPedido='$SituacaoPedido', NumNF=$NumNF, LogImportacao=$LogImportacao, StatusRetorno=$StatusRetorno, CodRetorno=$CodRetorno, DscRetorno=$DscRetorno, NumPedidoCRONOS=$NumPedidoCRONOS, ArqRetPed=$ArqRetPed, ArqRetNF=$ArqRetNF, ArqRet2Ped=$ArqRet2Ped, VerLayout=$VerLayout, NumPedidoPalmAux=$NumPedidoPalmAux, IdUsuario='$IdUsuario', DataOperacao=$DataOperacao, itens=$itens)"
     }

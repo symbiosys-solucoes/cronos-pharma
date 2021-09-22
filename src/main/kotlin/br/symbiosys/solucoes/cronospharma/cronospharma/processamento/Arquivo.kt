@@ -1,13 +1,27 @@
 package br.symbiosys.solucoes.cronospharma.cronospharma.processamento
 
+import org.slf4j.LoggerFactory
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
 
 class Arquivo {
+    val logger = LoggerFactory.getLogger(Arquivo::class.java)
+    fun removeArquivo(caminho: String){
+
+        val arq = File(caminho)
+        if(!arq.exists()){
+            logger.info("Arquivo, $caminho não existe")
+            return
+        }
+
+        if(!arq.delete()){
+            logger.warn("não foi possivel excluir o arquivo")
+        }
 
 
+    }
     fun criaDiretorio(caminho: String){
         val diretorio = File(caminho)
         if(diretorio.exists()){
@@ -15,6 +29,7 @@ class Arquivo {
         }
 
         diretorio.mkdir()
+
     }
 
     fun criaArquivo(conteudo:String, caminho: String){
@@ -34,14 +49,17 @@ class Arquivo {
 
     fun criaArquivo(file:File){
 
-
-
         if (file.exists()){
             return
         }
 
         try {
-            BufferedWriter(FileWriter(file))
+            val arquivo = FileWriter(file)
+            val output = BufferedWriter(arquivo)
+            output.flush()
+            output.close()
+
+            //BufferedWriter(FileWriter(file)).close()
         } catch (e: IOException){
             e.printStackTrace()
         }
@@ -52,7 +70,7 @@ class Arquivo {
         if(!file.exists() && !file.isDirectory){
             throw IOException("Caminho não existe ou não é uma pasta")
         }
-        return file.list().asList()
+        return file.listFiles().map { file -> file.absolutePath }
     }
 
     fun moverArquivo(origem: String, destino: String){
