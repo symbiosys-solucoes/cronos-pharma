@@ -28,7 +28,9 @@ class DiretoriosRepository (
             diretorioRetornoFTP = rs.getString("sym_dir_ret_ftp"),
             diretorioImportadosLocal = rs.getString("sym_dir_imp_local"),
             diretorioPedidoLocal = rs.getString("sym_dir_ped_local"),
-            diretorioRetornoLocal = rs.getString("sym_dir_ret_local")
+            diretorioRetornoLocal = rs.getString("sym_dir_ret_local"),
+            diretorioEstoqueFTP = rs.getString("sym_dir_est_ftp"),
+            diretorioEstoqueLocal = rs.getString("sym_dir_est_local")
 
         )
     }
@@ -43,6 +45,8 @@ class DiretoriosRepository (
             "sym_dir_ped_local,\n" +
             "sym_dir_ret_local,\n" +
             "sym_dir_imp_local,\n" +
-            "CodTd_sym_tipo\n" +
+            "CodTd_sym_tipo,\n" +
+            "sym_dir_est_ftp,\n" +
+            "sym_dir_est_local\n" +
             "FROM ZProdutosCompl WHERE sym_ativo = 'S'"
 }

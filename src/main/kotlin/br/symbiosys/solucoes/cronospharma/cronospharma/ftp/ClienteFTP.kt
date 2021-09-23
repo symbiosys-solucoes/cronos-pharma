@@ -70,14 +70,17 @@ class ClienteFTP(
     }
 
     fun downloadArquivo(origem: String, destino: String) {
-
-        logger.info("Baixando o arquivo $origem, no caminho: $destino")
-        val arquivo = FileOutputStream(destino)
-        if(ftp.retrieveFile(origem, arquivo)){
-            logger.info("arquivo ${destino} baixado com sucesso!")
-            ftp.deleteFile(origem)
+        try {
+            logger.info("Baixando o arquivo $origem, no caminho: $destino")
+            val arquivo = FileOutputStream(destino)
+            if (ftp.retrieveFile(origem, arquivo)) {
+                logger.info("arquivo ${destino} baixado com sucesso!")
+                ftp.deleteFile(origem)
+            }
+            arquivo.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        arquivo.close()
     }
 
     fun uploadArquivo(origem: String, destino: String){

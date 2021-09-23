@@ -10,11 +10,13 @@ class Diretorio
     val url: String,
     val login: String,
     val senha: String,
-    val diretorioPedidoFTP: String?,
-    val diretorioRetornoFTP: String?,
-    val diretorioPedidoLocal: String?,
-    val diretorioRetornoLocal: String?,
-    val diretorioImportadosLocal: String?
+    val diretorioPedidoFTP: String? = null,
+    val diretorioRetornoFTP: String? = null,
+    val diretorioPedidoLocal: String? = null,
+    val diretorioRetornoLocal: String? = null,
+    val diretorioImportadosLocal: String? = null,
+    val diretorioEstoqueLocal: String? = null,
+    val diretorioEstoqueFTP: String? = null,
             ) {
     override fun toString(): String {
         return "Diretorio(tipoIntegracao=$tipoIntegracao, usaFTP=$usaFTP, ativo=$ativo, url=$url, login=$login, senha=$senha, diretorioPedidoFTP=$diretorioPedidoFTP, diretorioRetornoFTP=$diretorioRetornoFTP, diretorioPedidoLocal=$diretorioPedidoLocal, diretorioRetornoLocal=$diretorioRetornoLocal, diretorioImportadosLocal=$diretorioImportadosLocal)"

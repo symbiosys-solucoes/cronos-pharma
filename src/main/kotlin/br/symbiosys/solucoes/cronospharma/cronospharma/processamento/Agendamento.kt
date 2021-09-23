@@ -8,6 +8,8 @@ import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.PedidoPa
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.diretorios.Diretorio
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.diretorios.DiretoriosRepository
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.EMS
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.EMSRepository
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.geraEstoqueEMS
 import br.symbiosys.solucoes.cronospharma.cronospharma.ftp.ClienteFTP
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -22,7 +24,8 @@ class Agendamento (
     val diretoriosRepository: DiretoriosRepository,
     val pedidoPalmRepository: PedidoPalmRepository,
     val finalizaMovimento: FinalizaMovimento,
-    val bloqueioMovimentoRepository: BloqueioMovimentoRepository
+    val bloqueioMovimentoRepository: BloqueioMovimentoRepository,
+    val emsRepository: EMSRepository
 ) {
     val logger = LoggerFactory.getLogger(Agendamento::class.java)
     @Value("\${app.filial.cnpj}")
@@ -44,7 +47,7 @@ class Agendamento (
     val diretorios: List<Diretorio> = diretoriosRepository.findAll()
     val arquivo: Arquivo = Arquivo()
 
-    @Scheduled(cron = "\${app.cron}",)
+    @Scheduled(cron = "\${app.cron.busca.ftp}")
     fun execute(){
         this.diretorios.forEach { diretorio ->
 
@@ -55,7 +58,7 @@ class Agendamento (
 
             gerarArquivoDeRetorno(pedidosComStatusRetorno, diretorio)
 
-            uploadArquivos(diretorio)
+            uploadArquivos(diretorio, "RETORNO")
 
             logger.info("Concluido o Processo para o: ${diretorio.login}")
             //pedidosComStatusRetorno.forEach { println(it.IdPedidoPalm) }
@@ -63,6 +66,13 @@ class Agendamento (
         }
     }
 
+    @Scheduled(cron = "\${app.cron.gera.estoque}")
+    fun executeEstoque(){
+        this.diretorios.forEach{
+            gerarArquivoDeEstoque(it)
+            uploadArquivos(it, "ESTOQUE")
+        }
+    }
 
     private fun baixarArquivos(diretorio: Diretorio){
 
@@ -170,24 +180,53 @@ class Agendamento (
 
     }
 
+    private fun gerarArquivoDeEstoque(diretorio: Diretorio){
 
-
-    private fun uploadArquivos(diretorio: Diretorio){
-        val listaArquivos = arquivo.listaArquivos(diretorio.diretorioRetornoLocal ?: throw Exception("Nao existe diretorio de retorno configurado"))
-        if (listaArquivos.isEmpty()){
-            logger.info("nao existe arquivos para enviar")
+        if(diretorio.diretorioEstoqueLocal == null){
             return
         }
-
-        val client = ClienteFTP(diretorio.url,21,diretorio.login, diretorio.senha)
-        client.abreConexaoFTP()
-
-        listaArquivos.forEach {
-            client.uploadArquivo(it, diretorio?.diretorioRetornoFTP + it.replace(diretorio.diretorioRetornoLocal,"") ?: "/")
-            arquivo.removeArquivo( it)
+        when(diretorio.tipoIntegracao){
+            TipoIntegracao.EMS -> {
+               val estoque = geraEstoqueEMS(cnpj, emsRepository, diretorio)
+                arquivo.criaArquivo(estoque)
+            }
         }
+    }
 
 
+
+    private fun uploadArquivos(diretorio: Diretorio, tipoEnvio: String){
+        when (tipoEnvio){
+            "RETORNO" -> {
+                val listaArquivos = arquivo.listaArquivos(diretorio.diretorioRetornoLocal ?: throw Exception("Nao existe diretorio de retorno configurado"))
+                if (listaArquivos.isEmpty()){
+                    logger.info("nao existe arquivos para enviar")
+                    return
+                }
+                val client = ClienteFTP(diretorio.url,21,diretorio.login, diretorio.senha)
+                client.abreConexaoFTP()
+
+                listaArquivos.forEach {
+                    client.uploadArquivo(it, diretorio?.diretorioRetornoFTP + it.replace(diretorio.diretorioRetornoLocal,"") ?: "/")
+                    arquivo.removeArquivo( it)
+                }
+            }
+
+            "ESTOQUE" -> {
+                val listaArquivos = arquivo.listaArquivos(diretorio.diretorioEstoqueLocal ?: throw Exception("Nao existe diretorio de retorno configurado"))
+                if (listaArquivos.isEmpty()){
+                    logger.info("nao existe arquivos para enviar")
+                    return
+                }
+                val client = ClienteFTP(diretorio.url,21,diretorio.login, diretorio.senha)
+                client.abreConexaoFTP()
+
+                listaArquivos.forEach {
+                    client.uploadArquivo(it, diretorio?.diretorioEstoqueFTP + it.replace(diretorio.diretorioEstoqueLocal,"") ?: "/")
+                    arquivo.removeArquivo( it)
+                }
+            }
+        }
     }
 
 
