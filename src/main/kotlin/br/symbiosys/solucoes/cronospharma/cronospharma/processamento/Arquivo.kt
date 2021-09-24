@@ -76,7 +76,10 @@ class Arquivo {
     fun moverArquivo(origem: String, destino: String){
         val arquivoOrigem= File(origem)
         val arquivoDestino = File(destino)
-        if (arquivoOrigem.exists() && !arquivoDestino.exists()){
+        if (arquivoDestino.exists()){
+            arquivoDestino.delete()
+        }
+        if (arquivoOrigem.exists()){
             arquivoOrigem.renameTo(arquivoDestino)
         }
     }

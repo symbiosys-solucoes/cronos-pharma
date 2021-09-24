@@ -61,7 +61,9 @@ class ClienteFTP(
 
     fun listaArquivos(path: String): Collection<String> {
 
-        val files: Array<FTPFile> = ftp.listFiles(path)
+        val files: Array<FTPFile> = ftp.listFiles(path).filter { it.name.length > 2 }.toTypedArray()
+
+        //files[0].
 
 
         return Arrays.stream(files)

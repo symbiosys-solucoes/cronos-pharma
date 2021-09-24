@@ -181,7 +181,8 @@ class ItemPedidoPalmRepository (
                 "\t CODPRODUTO = (SELECT CODPRODUTO FROM Produtos WHERE IDPRODUTO = @IDPRODUTO ),\n" +
                 "\t IDPRECOTABELA = @IDPRECO,\n" +
                 "              PRECOUNIT = CASE WHEN IDPRODUTO IN ( SELECT MAX(IDPRODUTO) FROM CondPagRegraCP CP WHERE CP.CodCondPag = @CODCOND AND CP.RegraAtiva = 'S') THEN\n" +
-                "                    ( SELECT MAX(IDPRODUTO) FROM CondPagRegraCP CP WHERE CP.CodCondPag = @CODCOND AND CP.RegraAtiva = 'S')\n" +
+                "                   -- ( SELECT MAX(IDPRODUTO) FROM CondPagRegraCP CP WHERE CP.CodCondPag = @CODCOND AND CP.RegraAtiva = 'S')\n" +
+                "                    ( SELECT MAX(PrecoVenda) FROM CondPagRegraCP CP WHERE CP.CodCondPag = @CODCOND AND CP.RegraAtiva = 'S' AND IdProduto = @IDPRODUTO) \n" +
                 "                    ELSE CASE WHEN @IDPRECO = 1 THEN (SELECT MAX(PRECOVENDA1) FROM Produtos WHERE IDPRODUTO=@IDPRODUTO )\n" +
                 "                    WHEN @IDPRECO = 2 THEN (SELECT MAX(PrecoVenda2) FROM Produtos WHERE IDPRODUTO=@IDPRODUTO )  \n" +
                 "                    WHEN @IDPRECO = 3 THEN (SELECT MAX(PrecoVenda3) FROM Produtos WHERE IDPRODUTO=@IDPRODUTO ) \n" +
