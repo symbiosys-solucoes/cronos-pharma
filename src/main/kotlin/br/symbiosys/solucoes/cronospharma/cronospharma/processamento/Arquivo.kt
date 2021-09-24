@@ -59,7 +59,6 @@ class Arquivo {
             output.flush()
             output.close()
 
-            //BufferedWriter(FileWriter(file)).close()
         } catch (e: IOException){
             e.printStackTrace()
         }

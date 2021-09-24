@@ -44,6 +44,4 @@ class ItemPedidoPalm(
 
     val DataOperacao: LocalDateTime = LocalDateTime.now(),
 
-    ) {
-
-}
+    )

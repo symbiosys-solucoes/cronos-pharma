@@ -62,7 +62,7 @@ class EMS(
             "2${it.CodProdutoArq}${StringUtils.rightPad(pedidoPalm.NumPedidoPalm, 12, " ")}"+
                     "0${StringUtils.leftPad(it.QtdConfirmada.toString().replace(".",""), 5, "0")}" +
                     "${it.PercDescontoItem.toString().replace(".","")}00030" +
-                    "${StringUtils.leftPad((it.Qtd - (it.QtdConfirmada ?: 0.0)).toString().replace(".",""),5,"0")}"+
+                    StringUtils.leftPad((it.Qtd - (it.QtdConfirmada ?: 0.0)).toString().replace(".",""),5,"0") +
                     "${it.CodRetornoItem}${it.DscRetornoItem?.trim()}\n"
         }
         R2.forEach { conteudo.append(it) }

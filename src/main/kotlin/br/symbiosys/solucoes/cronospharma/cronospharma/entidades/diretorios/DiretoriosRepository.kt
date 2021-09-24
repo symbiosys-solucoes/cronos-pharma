@@ -16,7 +16,7 @@ class DiretoriosRepository (
         return jdbcTemplate.query(sqlDiretorios,mapperDiretorio)
     }
 
-    private final val mapperDiretorio = RowMapper<Diretorio> { rs: ResultSet, rowNum: Int ->
+    private val mapperDiretorio = RowMapper<Diretorio> { rs: ResultSet, rowNum: Int ->
         Diretorio(
             tipoIntegracao = TipoIntegracao.valueOf(rs.getString("CodTd_sym_tipo")),
             usaFTP = rs.getBoolean("sym_usaFTP"),
@@ -34,7 +34,7 @@ class DiretoriosRepository (
 
         )
     }
-    private final val sqlDiretorios: String = "SELECT \n" +
+    private val sqlDiretorios: String = "SELECT \n" +
             "sym_ativo,\n" +
             "sym_usaFTP,\n" +
             "sym_url,\n" +

@@ -16,5 +16,4 @@ class BloqueioMovimento(
     var DataUltAlteracao: LocalDateTime? = null,
     var UserUltAlteracao: String? = null
 
-) {
-}
+)

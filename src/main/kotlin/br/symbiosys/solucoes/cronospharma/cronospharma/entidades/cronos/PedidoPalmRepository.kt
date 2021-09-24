@@ -1,6 +1,5 @@
 package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos
 
-import org.springframework.jdbc.core.PreparedStatementCallback
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
@@ -16,17 +15,9 @@ class PedidoPalmRepository(
     fun save(pedidoPalm: PedidoPalm): PedidoPalm{
 
         when(pedidoPalm.Origem) {
-            "EMS" -> {
-                val dadosPedido = getDadosPedido(pedidoPalm)
-                if (dadosPedido != null) {
-                    pedidoPalm.CodCliFor = dadosPedido.codClifor
-                    pedidoPalm.CodVendedor = dadosPedido.codVendedor
-                    pedidoPalm.CodPortador = dadosPedido.codPortador
-                    pedidoPalm.CodCondPag = dadosPedido.codCondPag
-                }
-
-            }
-            "CONSYS" -> {
+            "" -> {//to-do
+                 }
+            else -> {
                 val dadosPedido = getDadosPedido(pedidoPalm)
                 if (dadosPedido != null) {
                     pedidoPalm.CodCliFor = dadosPedido.codClifor
@@ -89,7 +80,7 @@ class PedidoPalmRepository(
     }
 
     companion object{
-        private final val mapperDadosPedido = RowMapper<DadosPedido>{ rs: ResultSet, rowNum: Int ->
+        private val mapperDadosPedido = RowMapper<DadosPedido>{ rs: ResultSet, rowNum: Int ->
             DadosPedido(
                 codClifor = rs.getString("CODCLIFOR"),
                 codPortador = rs.getString("CODPORTADOR"),
@@ -98,7 +89,7 @@ class PedidoPalmRepository(
             )
 
         }
-        private final val mapperPedidoPalm = RowMapper<PedidoPalm> {rs: ResultSet, rowNum: Int ->
+        private val mapperPedidoPalm = RowMapper<PedidoPalm> { rs: ResultSet, rowNum: Int ->
             PedidoPalm(
                 Origem = rs.getString("Origem"),
                 IdEmpresa = rs.getLong("IdEmpresa"),
@@ -135,10 +126,10 @@ class PedidoPalmRepository(
                 IdPedidoPalm = rs.getLong("IdPedidoPalm")
             )
         }
-        private final val mapperString = RowMapper<String> { rs: ResultSet, rowNum: Int ->
+        private val mapperString = RowMapper<String> { rs: ResultSet, rowNum: Int ->
             rs.getString("VALOR")
         }
-        private final val sqlDadosItem = "" +
+        private val sqlDadosItem = "" +
                 "\n" +
                 "  DECLARE @CNPJ VARCHAR(14), @ORIGEM VARCHAR(20)\n" +
                 "  SET @CNPJ = :cnpj\n" +
@@ -162,11 +153,10 @@ class PedidoPalmRepository(
                 "\t\t\t  FROM CLI_FOR WHERE dbo.fn_LimpaStr(CPFCGCCLIFOR) = @CNPJ \n" +
                 "              END"
 
-        private final val sqlInsertPedidoPalm =
+        private const val sqlInsertPedidoPalm =
             "BEGIN TRANSACTION \n" +
                     "\n" +
                     " INSERT INTO  PedidoPalm ( Origem, IdEmpresa, NumPedidoPalm, CodVendedor, CodCliFor, DataPedido, CodCondPag, CodPortador, TotalPedido, SituacaoPedido, IdUsuario, DataOperacao, CnpjCpfCliFor, CodFilial)\n" +
-                    "              \n" +
                     "\tOUTPUT INSERTED.*\n" +
                     "\t\tSELECT \t\n" +
                     "\t\tORIGEM = :origem ,\n" +
@@ -192,7 +182,7 @@ class PedidoPalmRepository(
 
     }
 
-    private final val sqlToMovimento = "" +
+    private val sqlToMovimento = "" +
             "\n" +
             "            DECLARE\n" +
             "                     @IdPedidoPalm \tINT, @IdItemPedidoPalm INT,\n" +
@@ -208,13 +198,9 @@ class PedidoPalmRepository(
             "                           @IDMOV \t\t\tINT,\n" +
             "                           @CODFILIAL\t \tVARCHAR(2), @CODLOCAL  VARCHAR(2), @IDEMPRESA INT,\n" +
             "                           @INDPRECOVENDA \t\tVARCHAR(1),\n" +
-            "            \n" +
             "                           @SITUACAOITEMPEDIDO \tVARCHAR(1), @UnidItemMov  VARCHAR(4),\n" +
             "                           @PercComissaoItem        NUMERIC(6,2),\n" +
             "                           @PercDescontoItem        FLOAT\n" +
-            "            \n" +
-            "            \n" +
-            "            \n" +
             "            SET @IDEMPRESA = 1            \n" +
             "\t\t\tSET @IdPedidoPalm = :idPedidoPalm\n" +
             "            \n" +

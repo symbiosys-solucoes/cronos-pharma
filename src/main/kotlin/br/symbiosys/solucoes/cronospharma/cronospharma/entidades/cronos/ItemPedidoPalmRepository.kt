@@ -22,18 +22,9 @@ class ItemPedidoPalmRepository (
             throw SQLException("IdPedidoPalm não pode ser nulo")
         }
         when (pedido.Origem) {
-            "EMS" -> {
-                val dadosItem = findDadosItem(pedido, item)
-                if (dadosItem != null) {
-                    item.IdPedidoPalm = pedido.IdPedidoPalm
-                    item.IdProduto = dadosItem.idProduto?.toInt() ?: 0
-                    item.CodProduto = dadosItem.codProduto
-                    item.PrecoUnit = dadosItem.precoUnit
-                    item.IdPrecoTabela = dadosItem.idPrecoTabela
-                }
-
-            }
-            "CONSYS" -> {
+            "" -> { // to-do: implement
+                 }
+            else -> {
                 val dadosItem = findDadosItem(pedido, item)
                 if (dadosItem != null) {
                     item.IdPedidoPalm = pedido.IdPedidoPalm
@@ -81,11 +72,7 @@ class ItemPedidoPalmRepository (
     }
     companion object{
 
-        private final val mapperString = RowMapper<String> { rs: ResultSet, _: Int ->
-            rs.getString(1)
-        }
-
-        private final val mapperItemPedidoPalm = RowMapper<ItemPedidoPalm> { rs: ResultSet, _: Int ->
+        private  val mapperItemPedidoPalm = RowMapper<ItemPedidoPalm> { rs: ResultSet, _: Int ->
             ItemPedidoPalm(
                 IdPedidoPalm = rs.getLong("IdPedidoPalm"),
                 Item = rs.getInt("Item"),
@@ -109,7 +96,7 @@ class ItemPedidoPalmRepository (
 
             )
         }
-        private final val sqlInsertItemPedidoPalm = "" +
+        private const val sqlInsertItemPedidoPalm = "" +
                 "DECLARE @ItemPedido Table (id int) \n" +
                 "BEGIN TRANSACTION\n" +
                 "\n" +
@@ -143,7 +130,7 @@ class ItemPedidoPalmRepository (
                 "ROLLBACK\n" +
                 "RAISERROR('Nao foi possivel inserir os dados',1,1)\n" +
                 "SELECT * FROM ItemPedidoPalm where IdItemPedidoPalm = (SELECT id FROM @ItemPedido)"
-        private final val mapperDadosItem = RowMapper<DadosItem> { rs: ResultSet, _: Int ->
+        private  val mapperDadosItem = RowMapper<DadosItem> { rs: ResultSet, _: Int ->
             DadosItem(
                 idProduto = rs.getString("IDPRODUTO"),
                 codProduto = rs.getString("CODPRODUTO"),
@@ -151,7 +138,7 @@ class ItemPedidoPalmRepository (
                 precoUnit = rs.getBigDecimal("PRECOUNIT")
             )
         }
-        private final val sqlDadosItem = "" +
+        private const val sqlDadosItem = "" +
                 "DECLARE @CODIGOBARRAS VARCHAR(14), @ORIGEM VARCHAR(20), @CODCOND VARCHAR(20), @CNPJ Varchar(20)\n" +
                 "SET @CODIGOBARRAS = :codigoBarras\n" +
                 "SET @ORIGEM = :origem\n" +
@@ -203,4 +190,3 @@ data class DadosItem(
     var idPrecoTabela: String?,
     var precoUnit: BigDecimal?
 )
-{}

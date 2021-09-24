@@ -62,8 +62,8 @@ class FinalizaMovimento(
     }
 
     companion object{
-        private final val idmovByIdPedidoPalm = "select IdMov from Movimento where IdPedidoPalm = :idPedido "
-        private final val paramRules = "" +
+        private val idmovByIdPedidoPalm = "select IdMov from Movimento where IdPedidoPalm = :idPedido "
+        private val paramRules = "" +
                 "DECLARE @IDMOV INT --, @COMBLOQ CHAR(1) = 'S', @FINBLOQ CHAR(1) ='S'\n" +
                 "\n" +
                 "SET @IDMOV = :id \n" +

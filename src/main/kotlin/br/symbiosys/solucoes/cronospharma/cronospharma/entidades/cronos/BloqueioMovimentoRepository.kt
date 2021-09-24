@@ -31,7 +31,7 @@ class BloqueioMovimentoRepository(
 
                     jdbcTemplate.query(it.ExpressaoSQL!!.uppercase(),
                         MapSqlParameterSource().addValue("PINT1",pedido.IdPedidoPalm),
-                        RowMapper<String> { rs: ResultSet, rowNum: Int -> rs.getString(1) }
+                        { rs: ResultSet, rowNum: Int -> rs.getString(1) }
                     )
                 }
 
@@ -133,6 +133,4 @@ data class RetornoRegras(
     val nome: String?,
     val ok: String?,
     val tipo: String?
-){
-
-}
+)

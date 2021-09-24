@@ -8,6 +8,4 @@ class ItemEMS (
     val prazo: String? = null,
     val ulizaDesconto: String? = null,
     val utilizaPrazo: String? = null
-        ) {
-
-}
+        )

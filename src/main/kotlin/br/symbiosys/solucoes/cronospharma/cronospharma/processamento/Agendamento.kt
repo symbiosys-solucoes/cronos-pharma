@@ -11,6 +11,7 @@ import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.EMS
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.EMSRepository
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.geraEstoqueEMS
 import br.symbiosys.solucoes.cronospharma.cronospharma.ftp.ClienteFTP
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.EnableScheduling
@@ -27,7 +28,7 @@ class Agendamento (
     val bloqueioMovimentoRepository: BloqueioMovimentoRepository,
     val emsRepository: EMSRepository
 ) {
-    val logger = LoggerFactory.getLogger(Agendamento::class.java)
+    val logger: Logger = LoggerFactory.getLogger(Agendamento::class.java)
     @Value("\${app.filial.cnpj}")
     lateinit var cnpj: String
 
@@ -103,8 +104,9 @@ class Agendamento (
 
         pedidos.forEach { pedido ->
             persistedPedidos.add(pedidoPalmRepository.save(pedido))
-        }
 
+        }
+        persistedPedidos.forEach { logger.info("Gerado o Pedido da OL: ${it.Origem}  numero: ${it.NumPedidoPalm}, Cliente: ${it.CodCliFor}") }
         return persistedPedidos
     }
 
@@ -113,7 +115,7 @@ class Agendamento (
         var pedidos = mutableListOf<PedidoPalm>()
 
         if(diretorio == null){
-            throw SQLException("Caminho nao existe localmente")
+            logger.info("Não foi Possivel carregar o Diretorio")
         }
         val arquivos = arquivo.listaArquivos(diretorio.diretorioPedidoLocal!!)
         if( arquivos.isEmpty()){
@@ -121,7 +123,7 @@ class Agendamento (
             return pedidos
         }
         arquivos.forEach { arq ->
-            println("carregando arquivo: $arq")
+            logger.info("carregando arquivo: $arq")
             when(diretorio.tipoIntegracao){
                 TipoIntegracao.EMS -> {
                     pedidos.add(TipoIntegracao.toEms(arq).toPedidoPalm())
@@ -141,18 +143,19 @@ class Agendamento (
         var convertidos = mutableListOf<PedidoPalm>()
 
         pedidos.forEach {
-            println(it.IdPedidoPalm.toString() + " esse é o id")
+            logger.info("Gerando Pre-Venda do pedido numero: ${it.NumPedidoPalm}")
             var result = pedidoPalmRepository.toMovimento(it) ?: ""
             if (result == ""){
-                logger.info("erro ao gerar Pre-Venda do pedido de id: ${it.IdPedidoPalm}")
+                logger.warn("erro ao gerar Pre-Venda do pedido de numero: ${it.NumPedidoPalm}")
             }else{
                 it.SituacaoPedido = "C"
             }
-            var resultFim = finalizaMovimento.finaliza(it)
-            logger.info("O pedido id: ${it.IdPedidoPalm} gerou o movimento com status = $resultFim")
+            //var resultFim = finalizaMovimento.finaliza(it)
+
             convertidos.add(pedidoPalmRepository.findById(it.IdPedidoPalm!!)!!)
 
         }
+        convertidos.forEach { logger.info("O pedido de numero: ${it.NumPedidoPalm}, Gerou a Pre-Venda numero: ${it.NumPedidoCRONOS}") }
         return convertidos
     }
 
@@ -162,6 +165,8 @@ class Agendamento (
         pedidos.forEach { bloqueioMovimentoRepository.executaRegrasTipoGravarRetornos(it)
             convertidos.add(pedidoPalmRepository.findById(it.IdPedidoPalm!!)!!)
         }
+
+        convertidos.forEach { logger.info("O pedido numero: ${it.NumPedidoPalm}, gerou o status: ${it.DscRetorno}") }
         return convertidos
     }
 
@@ -176,6 +181,8 @@ class Agendamento (
                     arquivo.criaArquivo(retorno)
                 }
             }
+
+            logger.info("Gerado o arquivo de retorno do pedido numero: ${it.NumPedidoPalm}")
         }
 
     }
@@ -190,7 +197,9 @@ class Agendamento (
                val estoque = geraEstoqueEMS(cnpj, emsRepository, diretorio)
                 arquivo.criaArquivo(estoque)
             }
+            else -> { logger.info("Nao existe layout de estoque configuradao para essa OL")}
         }
+        logger.info("Gerado o arquivo de estoque da: ${diretorio.tipoIntegracao.name}")
     }
 
 
@@ -207,13 +216,19 @@ class Agendamento (
                 client.abreConexaoFTP()
 
                 listaArquivos.forEach {
-                    client.uploadArquivo(it, diretorio?.diretorioRetornoFTP + it.replace(diretorio.diretorioRetornoLocal,"") ?: "/")
+                    client.uploadArquivo(it,
+                        diretorio.diretorioRetornoFTP + it.replace(diretorio.diretorioRetornoLocal,"")
+                    )
                     arquivo.removeArquivo( it)
                 }
             }
 
             "ESTOQUE" -> {
-                val listaArquivos = arquivo.listaArquivos(diretorio.diretorioEstoqueLocal ?: throw Exception("Nao existe diretorio de retorno configurado"))
+                if(diretorio.diretorioEstoqueLocal.isNullOrEmpty()){
+                    logger.info("Nao existe diretorio de retorno configurado")
+                    return
+                }
+                val listaArquivos = arquivo.listaArquivos(diretorio.diretorioEstoqueLocal )
                 if (listaArquivos.isEmpty()){
                     logger.info("nao existe arquivos para enviar")
                     return
@@ -222,7 +237,9 @@ class Agendamento (
                 client.abreConexaoFTP()
 
                 listaArquivos.forEach {
-                    client.uploadArquivo(it, diretorio?.diretorioEstoqueFTP + it.replace(diretorio.diretorioEstoqueLocal,"") ?: "/")
+                    client.uploadArquivo(it,
+                        diretorio.diretorioEstoqueFTP + it.replace(diretorio.diretorioEstoqueLocal,"")
+                    )
                     arquivo.removeArquivo( it)
                 }
             }

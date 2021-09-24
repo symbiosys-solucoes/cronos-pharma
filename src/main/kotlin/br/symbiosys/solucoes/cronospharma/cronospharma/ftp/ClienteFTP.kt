@@ -14,7 +14,9 @@ import java.util.*
 import java.util.stream.Collectors
 
 
-//https://www.baeldung.com/java-ftp-client
+/*
+* https://www.baeldung.com/java-ftp-client
+*  */
 class ClienteFTP(
     private val server: String,
     private val port: Int = 21,
@@ -26,7 +28,6 @@ class ClienteFTP(
     private val logger = LoggerFactory.getLogger(ClienteFTP::class.java)
 
     fun abreConexaoFTP(): FTPClient{
-        //val ftp = FTPClient()
 
         ftp.connect(server, port)
         val codigoResposta = ftp.replyCode
@@ -39,11 +40,11 @@ class ClienteFTP(
                     "Mensagem de Erro: $mensagemResposta ")
         }
         try {
+
             ftp.login(user,password)
-//            logger.info("Conexao Realizada com sucesso na url: ${server}")
         } catch (e: IOException){
-            logger.warn("Conexao não realizada na url: ${server}")
-            logger.warn(e.stackTrace.toString())
+            logger.warn("Conexao não realizada na url: $server")
+
         }
 
         return ftp
@@ -55,16 +56,13 @@ class ClienteFTP(
             logger.info("Desconexao realizada com Sucesso na url: ${this.server}")
         } catch (e: IOException){
             logger.warn("Desconexao não realizada na url: ${this.server}")
-            logger.warn(e.printStackTrace().toString())
+
         }
     }
 
     fun listaArquivos(path: String): Collection<String> {
 
         val files: Array<FTPFile> = ftp.listFiles(path).filter { it.name.length > 2 }.toTypedArray()
-
-        //files[0].
-
 
         return Arrays.stream(files)
             .map(FTPFile::getName)
@@ -76,12 +74,12 @@ class ClienteFTP(
             logger.info("Baixando o arquivo $origem, no caminho: $destino")
             val arquivo = FileOutputStream(destino)
             if (ftp.retrieveFile(origem, arquivo)) {
-                logger.info("arquivo ${destino} baixado com sucesso!")
+                logger.info("arquivo $destino baixado com sucesso!")
                 ftp.deleteFile(origem)
             }
             arquivo.close()
         } catch (e: Exception) {
-            e.printStackTrace()
+            logger.warn("Erro ao realizar download do arquivo}")
         }
     }
 
@@ -93,7 +91,7 @@ class ClienteFTP(
             ftp.storeFile(destino, arquivo)
             arquivo.close()
         } catch (e: IOException) {
-            logger.warn("Erro ao realizar upload do arquivo: ${e.printStackTrace().toString()}")
+            logger.warn("Erro ao realizar upload do arquivo")
         }
 
     }

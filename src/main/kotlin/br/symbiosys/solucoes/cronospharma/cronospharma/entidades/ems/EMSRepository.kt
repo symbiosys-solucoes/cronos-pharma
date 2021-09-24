@@ -25,13 +25,13 @@ class EMSRepository (
     }
 
     companion object{
-        private final val findEstoqueMapper = RowMapper<EstoqueEMS> { rs: ResultSet, rowNum: Int ->
+        private val findEstoqueMapper = RowMapper<EstoqueEMS> { rs: ResultSet, rowNum: Int ->
             EstoqueEMS(
                 codigoBarras = rs.getString("CodigoBarras"),
                 quantidade = rs.getDouble("quantidade")
             )
         }
-        private final val findEstoque = "" +
+        private val findEstoque = "" +
                 "SELECT CodigoBarras, NomeProduto, quantidade=ISNULL(sdoAtual, 0)\n" +
                 "FROM CodigoBarras cb, Produtos Prod LEFT JOIN Estoque Est ON prod.IdProduto = Est.IdProduto\n" +
                 "WHERE cb.idproduto = prod.idproduto\n" +
