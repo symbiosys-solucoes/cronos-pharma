@@ -63,7 +63,11 @@ class ItemPedidoPalmRepository (
             .addValue("origem", pedido.Origem)
             .addValue("codCond", pedido.CodCondPag)
             .addValue("cnpj", pedido.CnpjCpfCliFor)
-        return jdbcTemplate.query(sqlDadosItem, paramsDadosItem, mapperDadosItem).first() ?: null
+        val dados = jdbcTemplate.query(sqlDadosItem, paramsDadosItem, mapperDadosItem)
+        if(dados.isEmpty()){
+            return null
+        }
+        return dados.first()
     }
 
     fun findAllByIdPedido(idPedido: Long): List<ItemPedidoPalm>{

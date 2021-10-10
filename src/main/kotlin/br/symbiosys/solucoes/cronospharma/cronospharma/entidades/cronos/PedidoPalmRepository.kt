@@ -16,7 +16,7 @@ class PedidoPalmRepository(
 
         when(pedidoPalm.Origem) {
             "" -> {//to-do
-                 }
+            }
             else -> {
                 val dadosPedido = getDadosPedido(pedidoPalm)
                 if (dadosPedido != null) {
@@ -77,6 +77,14 @@ class PedidoPalmRepository(
 
         return jdbcTemplate.query(sqlToMovimento, MapSqlParameterSource().addValue("idPedidoPalm", pedido.IdPedidoPalm), mapperString).first()
 
+    }
+
+    fun updateNomeArquivoRetorno(nomeArquivo: String, id: Long) {
+        jdbcTemplate.queryForObject(
+            "UPDATE PedidoPalm set ArqRetPed = :nomeArquivo OUTPUT Inserted.ArqRetPed where IdPedidoPalm = :id",
+            MapSqlParameterSource("nomeArquivo", nomeArquivo).addValue("id", id),
+            String::class.java,
+        )
     }
 
     companion object{

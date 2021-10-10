@@ -2,6 +2,7 @@ package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos
 
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
@@ -12,10 +13,20 @@ class FinalizaMovimento(
     private val jdbcTemplate: NamedParameterJdbcTemplate
 
 ) {
+
+    @Value("\${app.usa.regras.comercias}")
+    private lateinit var usaRegrasComercias: String
+    @Value("\${app.usa.regras.financeiras}")
+    private lateinit var usaRegrasFinanceiras: String
+    @Value("\${app.usa.regras.finalizacao}")
+    private lateinit var usaRegrasFinalizacao: String
+
     @Autowired
     private lateinit var bloqueioMovimentoRepository: BloqueioMovimentoRepository
 
     private val logger = LoggerFactory.getLogger(FinalizaMovimento::class.java)
+
+
 
     fun finaliza(pedidoPalm: PedidoPalm): String?{
 
@@ -23,21 +34,23 @@ class FinalizaMovimento(
             throw SQLException("Erro IdPedido esta nulo")
         }
         val idmov = jdbcTemplate.queryForObject(idmovByIdPedidoPalm, MapSqlParameterSource("idPedido", pedidoPalm.IdPedidoPalm), Long::class.java)
-        println("esse é o idmov encontrado: $idmov")
+
         val listaResultados = idmov?.let { bloqueioMovimentoRepository.executaRegrasMovimento(it) }
 
         listaResultados!!.forEach {
-            if (it.ok == "S" && it.tipo == "COMERCIAL") {
+
+            if (it.ok == "S" && it.tipo == "COMERCIAL" && usaRegrasComercias=="true") {
                 jdbcTemplate.queryForObject("UPDATE Movimento SET StatusSeparacao = 'B', BloqueioComercial = 'S'" +
                         "WHERE IdMov = :id\n" +
                         "SELECT BloqueioComercial FROM Movimento WHERE IdMov = :id ", MapSqlParameterSource("id", idmov), String::class.java)
             }
-            if (it.ok == "S" && it.tipo == "FINANCEIRO") {
+            if (it.ok == "S" && it.tipo == "FINANCEIRO" && usaRegrasFinanceiras == "true") {
                 jdbcTemplate.queryForObject("UPDATE Movimento SET StatusSeparacao = 'B', BloqueioFinanceiro = 'S' " +
                         "WHERE IdMov = :id\n" +
                         "SELECT BloqueioFinanceiro FROM Movimento WHERE IdMov = :id ", MapSqlParameterSource("id", idmov), String::class.java)
             }
-            if (it.ok == "S" && it.tipo == "FINALIZACAO"){
+
+            if (it.ok == "S" && it.tipo == "FINALIZACAO" && usaRegrasFinalizacao == "true"){
                 jdbcTemplate.queryForObject("DECLARE @IDMOV INT\n" +
                         "SET @IDMOV = :id\n" +
                         "IF EXISTS(SELECT 1 FROM ZMovimentoCompl WHERE IdMov = @IDMOV)\n" +
@@ -52,7 +65,10 @@ class FinalizaMovimento(
         }
 
 
-        val statusSeparacao = jdbcTemplate.queryForObject(paramRules, MapSqlParameterSource("id", idmov), String::class.java)
+        val statusSeparacao = jdbcTemplate.queryForObject(paramRules,
+            MapSqlParameterSource("id", idmov)
+                .addValue("comercial", usaRegrasComercias)
+                .addValue("financeiro", usaRegrasFinanceiras), String::class.java)
         when (statusSeparacao) {
             "N" -> logger.info("O Movimento não foi finalizado, pois alguma regra de négocio impediu a finalização")
             "B" -> logger.info("O Movimento foi atualizado com status Bloqueado, pois não passou em alguma regra")
@@ -64,7 +80,9 @@ class FinalizaMovimento(
     companion object{
         private val idmovByIdPedidoPalm = "select IdMov from Movimento where IdPedidoPalm = :idPedido "
         private val paramRules = "" +
-                "DECLARE @IDMOV INT --, @COMBLOQ CHAR(1) = 'S', @FINBLOQ CHAR(1) ='S'\n" +
+                "DECLARE @IDMOV INT , @COMBLOQ VARCHAR(10), @FINBLOQ VARCHAR(10)\n" +
+                "SET @COMBLOQ = :comercial\n" +
+                "SET @FINBLOQ = :financeiro\n" +
                 "\n" +
                 "SET @IDMOV = :id \n" +
                 "\n" +
@@ -99,13 +117,14 @@ class FinalizaMovimento(
                 "WHERE  idmov = @IDMOV\n" +
                 "\n" +
                 "-- DESCONTOS COMERCIAIS \n" +
-                "IF EXISTS (SELECT 1\n" +
-                "           FROM   movimento\n" +
-                "           WHERE  statusseparacao = 'N'\n" +
-                "                  AND idusuarioautorizacaocom IS NULL\n" +
-                "                  AND dataautorizacaocom IS NULL\n" +
-                "                  AND ISNULL((SELECT sym_deveFinalizar FROM ZMovimentoCompl WHERE IdMov = @IDMOV),'N') = 'N'\n" +
-                "                  AND idmov = @IDMOV)\n" +
+                "-- IF EXISTS (SELECT 1\n" +
+                "--           FROM   movimento\n" +
+                "--           WHERE  statusseparacao = 'N'\n" +
+                "--                  AND idusuarioautorizacaocom IS NULL\n" +
+                "--                  AND dataautorizacaocom IS NULL\n" +
+                "--                  AND ISNULL((SELECT sym_deveFinalizar FROM ZMovimentoCompl WHERE IdMov = @IDMOV),'N') = 'N'\n" +
+                "--                  AND idmov = @IDMOV)\n" +
+                "IF @COMBLOQ = 'true'\n" +
                 "  BEGIN\n" +
                 "      /* VERIFICA DESCONTO DA CONDICAO DE PAGAMENTO */\n" +
                 "      IF EXISTS(SELECT 1\n" +
@@ -226,8 +245,10 @@ class FinalizaMovimento(
                 "                                   ELSE bloqueiocomercial\n" +
                 "                                 END\n" +
                 "      WHERE  idmov = @IDMOV\n" +
-                "\n" +
+                "END\n" +
                 "      --------------------------------------------------------------------------- \n" +
+                "IF @FINBLOQ = 'true'\n" +
+                "BEGIN\n" +
                 "      -- REGRAS FINANCEIRAS \n" +
                 "      /* VERIFICANDO LIMITE DE CREDITO DO CLIENTE */\n" +
                 "      INSERT INTO @LIMITE\n" +
@@ -291,8 +312,11 @@ class FinalizaMovimento(
                 "                                    ELSE bloqueiofinanceiro\n" +
                 "                                  END\n" +
                 "      WHERE  idmov = @IDMOV\n" +
-                "  END\n" +
-                "\n" +
+                "END\n" +
+                "IF EXISTS (SELECT 1 FROM MOVIMENTO WHERE idmov = @IDMOV AND STATUSSEPARACAO = 'N')\n" +
+                "BEGIN\n" +
+                "   UPDATE MOVIMENTO SET statusseparacao='F' WHERE IDMOV = @IDMOV \n" +
+                "END\n" +
                 "SELECT statusseparacao\n" +
                 "FROM   movimento\n" +
                 "WHERE  idmov = @IDMOV\n" +

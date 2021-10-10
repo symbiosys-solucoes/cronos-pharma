@@ -1,6 +1,7 @@
 package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos
 
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
@@ -11,6 +12,13 @@ import java.sql.ResultSet
 class BloqueioMovimentoRepository(
     private val jdbcTemplate: NamedParameterJdbcTemplate
 ) {
+    @Value("\${app.usa.regras.comercias}")
+    private lateinit var usaRegrasComercias: String
+    @Value("\${app.usa.regras.financeiras}")
+    private lateinit var usaRegrasFinanceiras: String
+    @Value("\${app.usa.regras.finalizacao}")
+    private lateinit var usaRegrasFinalizacao: String
+
     val logger = LoggerFactory.getLogger(BloqueioMovimentoRepository::class.java)
     fun findByTipoBloqueio(tipoBloqueio: String): List<BloqueioMovimento>{
 
@@ -45,55 +53,64 @@ class BloqueioMovimentoRepository(
     fun executaRegrasMovimento(idMov: Long): List<RetornoRegras> {
 
         val listaDeResultados = mutableListOf<RetornoRegras>()
+        if(usaRegrasComercias == "true") {
+            val regrasBloqueioComercial = jdbcTemplate.query(sqlTipoBloqueioByTipoAndAcao, MapSqlParameterSource("tipoAcao", "AUT").addValue("tipoBloqueio", "COM"), mapperBloqueioMovimento)
 
-        val regrasAbortaFinalizacao = jdbcTemplate.query(sqlTipoBloqueioByTipoAndAcao, MapSqlParameterSource("tipoAcao", "FIN").addValue("tipoBloqueio", "COM"), mapperBloqueioMovimento)
-        val regrasBloqueioComercial = jdbcTemplate.query(sqlTipoBloqueioByTipoAndAcao, MapSqlParameterSource("tipoAcao", "AUT").addValue("tipoBloqueio", "COM"), mapperBloqueioMovimento)
-        val regrasBloqueioFinanceiro = jdbcTemplate.query(sqlTipoBloqueioByTipoAndAcao, MapSqlParameterSource("tipoAcao", "AUF").addValue("tipoBloqueio", "COM"), mapperBloqueioMovimento)
-
-        regrasAbortaFinalizacao.forEach {
-            try {
-                if(it.ExpressaoSQL != null){
-                    val resultado = jdbcTemplate.queryForObject(
-                        it.ExpressaoSQL!!.uppercase(),
-                        MapSqlParameterSource("PCHAR1","2.1").addValue("IDMOV", idMov),
-                        String::class.java
-                    )
-                    listaDeResultados.add(RetornoRegras(it.NomeBloqueio, resultado, "FINALIZACAO"))
+            regrasBloqueioComercial.forEach {
+                try {
+                    if(it.ExpressaoSQL != null){
+                        val resultado = jdbcTemplate.queryForObject(
+                            it.ExpressaoSQL!!.uppercase(),
+                            MapSqlParameterSource("PCHAR1","2.1").addValue("IDMOV", idMov),
+                            String::class.java
+                        )
+                        listaDeResultados.add(RetornoRegras(it.NomeBloqueio, resultado, "COMERCIAL"))
+                    }
+                } catch (e: Exception){
+                    logger.error("Erro ao executar regra: ${it.NomeBloqueio} | ${e.message}")
                 }
-            } catch (e: Exception){
-                logger.error("Erro ao executar regra: ${it.NomeBloqueio} | ${e.message}")
+
+            }
+        }
+
+        if(usaRegrasFinanceiras == "true") {
+            val regrasBloqueioFinanceiro = jdbcTemplate.query(sqlTipoBloqueioByTipoAndAcao, MapSqlParameterSource("tipoAcao", "AUF").addValue("tipoBloqueio", "COM"), mapperBloqueioMovimento)
+
+            regrasBloqueioFinanceiro.forEach {
+                try {
+                    if(it.ExpressaoSQL != null){
+                        val resultado = jdbcTemplate.queryForObject(
+                            it.ExpressaoSQL!!.uppercase(),
+                            MapSqlParameterSource("PCHAR1","2.1").addValue("IDMOV", idMov),
+                            String::class.java
+                        )
+                        listaDeResultados.add(RetornoRegras(it.NomeBloqueio, resultado, "FINANCEIRO"))
+                    }
+                } catch (e: Exception){
+                    logger.error("Erro ao executar regra: ${it.NomeBloqueio} | ${e.message}")
+                }
+
             }
 
         }
 
-        regrasBloqueioComercial.forEach {
-            try {
-                if(it.ExpressaoSQL != null){
-                    val resultado = jdbcTemplate.queryForObject(
-                        it.ExpressaoSQL!!.uppercase(),
-                        MapSqlParameterSource("PCHAR1","2.1").addValue("IDMOV", idMov),
-                        String::class.java
-                    )
-                    listaDeResultados.add(RetornoRegras(it.NomeBloqueio, resultado, "COMERCIAL"))
-                }
-            } catch (e: Exception){
-                logger.error("Erro ao executar regra: ${it.NomeBloqueio} | ${e.message}")
-            }
+        if(usaRegrasFinalizacao == "true"){
+            val regrasAbortaFinalizacao = jdbcTemplate.query(sqlTipoBloqueioByTipoAndAcao, MapSqlParameterSource("tipoAcao", "FIN").addValue("tipoBloqueio", "COM"), mapperBloqueioMovimento)
 
-        }
-
-        regrasBloqueioFinanceiro.forEach {
-            try {
-                if(it.ExpressaoSQL != null){
-                    val resultado = jdbcTemplate.queryForObject(
-                        it.ExpressaoSQL!!.uppercase(),
-                        MapSqlParameterSource("PCHAR1","2.1").addValue("IDMOV", idMov),
-                        String::class.java
-                    )
-                    listaDeResultados.add(RetornoRegras(it.NomeBloqueio, resultado, "FINANCEIRO"))
+            regrasAbortaFinalizacao.forEach {
+                try {
+                    if(it.ExpressaoSQL != null){
+                        val resultado = jdbcTemplate.queryForObject(
+                            it.ExpressaoSQL!!.uppercase(),
+                            MapSqlParameterSource("PCHAR1","2.1").addValue("IDMOV", idMov),
+                            String::class.java
+                        )
+                        listaDeResultados.add(RetornoRegras(it.NomeBloqueio, resultado, "FINALIZACAO"))
+                    }
+                } catch (e: Exception){
+                    logger.error("Erro ao executar regra: ${it.NomeBloqueio} | ${e.message}")
                 }
-            } catch (e: Exception){
-                logger.error("Erro ao executar regra: ${it.NomeBloqueio} | ${e.message}")
+
             }
 
         }

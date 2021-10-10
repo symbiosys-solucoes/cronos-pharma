@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "br.symbiosys.solucoes.cronos-pharma"
-version = "1.1.3"
+version = "1.2.0"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 repositories {
@@ -30,6 +30,11 @@ dependencies {
 
 	testImplementation("org.hamcrest:hamcrest-library:2.2")
 	runtimeOnly("com.h2database:h2")
+
+	// Spring WEB
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
 
 }

@@ -16,6 +16,21 @@ import java.io.File
 
 internal class FtpTest {
 
+//    @Test
+//    fun `dado um arquivo remoto deve retornar uma lista de arquivos - meirelles`(){
+//       // val instancia = setup()
+//        //val clienteFTP = instancia.get("ClienteFTP") as ClienteFTP
+//        val clienteFTP = ClienteFTP(server="br698.hostgator.com.br", user = "legrand@meirellesfarma.com.br", password = "Dr4tHZKcv7" )
+//        clienteFTP.abreConexaoFTP()
+//        val files: Collection<String> = clienteFTP.listaArquivos("/PB/PEDIDO/")
+//        clienteFTP.fechaConexaoFTP()
+//        //clean(instancia)
+//
+//        files.forEach { println(it)}
+//        assertThat(files).contains("PEDEMS_12520483000134_20211005162156.txt")
+//
+//
+//    }
     @Test
     fun `dado um arquivo remoto deve retornar uma lista de arquivos`(){
         val instancia = setup()

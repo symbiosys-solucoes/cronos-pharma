@@ -2,14 +2,12 @@ package br.symbiosys.solucoes.cronospharma.cronospharma.ftp
 
 
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.diretorios.Diretorio
+import org.apache.commons.net.PrintCommandListener
 import org.apache.commons.net.ftp.FTPClient
 import org.apache.commons.net.ftp.FTPFile
 import org.apache.commons.net.ftp.FTPReply
 import org.slf4j.LoggerFactory
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.IOException
+import java.io.*
 import java.util.*
 import java.util.stream.Collectors
 
@@ -27,9 +25,15 @@ class ClienteFTP(
     private var ftp: FTPClient = FTPClient()
     private val logger = LoggerFactory.getLogger(ClienteFTP::class.java)
 
+
+
     fun abreConexaoFTP(): FTPClient{
+        ftp.addProtocolCommandListener(PrintCommandListener(PrintWriter(System.out)))
+        ftp.listHiddenFiles = false
+
 
         ftp.connect(server, port)
+
         val codigoResposta = ftp.replyCode
         val mensagemResposta = ftp.replyString
 
@@ -62,14 +66,14 @@ class ClienteFTP(
 
     fun listaArquivos(path: String): Collection<String> {
 
-        val files: Array<FTPFile> = ftp.listFiles(path).filter { it.name.length > 2 }.toTypedArray()
+        ftp.enterLocalPassiveMode()
 
-        return Arrays.stream(files)
-            .map(FTPFile::getName)
-            .collect(Collectors.toList())
+        return ftp.listNames(path).filter { it.replace(path, "").length > 2 }.toList()
+
     }
 
     fun downloadArquivo(origem: String, destino: String) {
+        ftp.enterLocalPassiveMode()
         try {
             logger.info("Baixando o arquivo $origem, no caminho: $destino")
             val arquivo = FileOutputStream(destino)
@@ -79,12 +83,13 @@ class ClienteFTP(
             }
             arquivo.close()
         } catch (e: Exception) {
-            logger.warn("Erro ao realizar download do arquivo}")
+            e.printStackTrace()
+            logger.warn("Erro ao realizar download do arquivo")
         }
     }
 
     fun uploadArquivo(origem: String, destino: String){
-
+        ftp.enterLocalPassiveMode()
         try {
             logger.info("Subindo o arquivo $origem, no caminho: $destino")
             var arquivo = FileInputStream(File(origem))

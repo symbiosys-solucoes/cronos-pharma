@@ -1,5 +1,6 @@
 package br.symbiosys.solucoes.cronospharma.cronospharma.processamento
 
+import br.symbiosys.solucoes.cronospharma.cronospharma.controllers.processamento.ProcessamentoDto
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.TipoIntegracao
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.BloqueioMovimentoRepository
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.FinalizaMovimento
@@ -32,6 +33,12 @@ class Agendamento (
     @Value("\${app.filial.cnpj}")
     lateinit var cnpj: String
 
+    companion object {
+        @JvmField
+        val processamento: MutableList<ProcessamentoDto> = mutableListOf()
+
+    }
+
     // To-Do:
     // Passo 1 - Pegar os Diretórios
     // Passo 2 - Iterar sobre todos os Diretórios a cada x tempo definido no application.properties
@@ -50,6 +57,30 @@ class Agendamento (
 
     @Scheduled(cron = "\${app.cron.busca.ftp}")
     fun execute(){
+        this.diretorios.forEach { diretorio ->
+
+            val arquivos = baixarArquivos(diretorio)
+            val pedidos = inserePedidos(diretorio)
+            val pedidosFinalizados = inserePreVenda(pedidos)
+            val pedidosComStatusRetorno = atualizaStatusRetorno(pedidosFinalizados)
+
+            gerarArquivoDeRetorno(pedidosComStatusRetorno, diretorio)
+
+            uploadArquivos(diretorio, "RETORNO")
+
+            logger.info("Concluido o Processo para o: ${diretorio.login}")
+            //pedidosComStatusRetorno.forEach { println(it.IdPedidoPalm) }
+            processamento.add(
+                ProcessamentoDto(
+                arquivos = arquivos,
+                pedidosGerados = pedidos.map { it.NumPedidoPalm },
+                preVendasGeradas = pedidos.map { it.NumPedidoCRONOS },
+                tipoIntegracao = diretorio.tipoIntegracao,
+            ))
+        }
+    }
+
+    fun executeWithoutSchedule(){
         this.diretorios.forEach { diretorio ->
 
             baixarArquivos(diretorio)
@@ -75,8 +106,8 @@ class Agendamento (
         }
     }
 
-    private fun baixarArquivos(diretorio: Diretorio){
-
+    private fun baixarArquivos(diretorio: Diretorio): List<String>? {
+        val listaArquivos = mutableListOf<String>()
         logger.info("Procurando arquivos ${diretorio.tipoIntegracao.name}")
         val clienteFTP = ClienteFTP( server = diretorio.url, user = diretorio.login, password = diretorio.senha)
         clienteFTP.abreConexaoFTP()
@@ -84,18 +115,20 @@ class Agendamento (
 
         if(arquivos.isEmpty()) {
             logger.info("Não Existe arquivos para baixar!")
-            return
+            return null
         }
 
         arquivos.forEach { arq ->
             logger.info(arq)
             clienteFTP.downloadArquivo(
-                diretorio.diretorioPedidoFTP + arq,
-                diretorio.diretorioPedidoLocal + arq,
+                arq,
+                diretorio.diretorioPedidoLocal + arq.replace(diretorio.diretorioPedidoFTP,""),
             )
+            listaArquivos.add(arq)
         }
         clienteFTP.fechaConexaoFTP()
 
+        return listaArquivos
     }
 
     private fun inserePedidos(diretorio: Diretorio): List<PedidoPalm> {
@@ -150,7 +183,8 @@ class Agendamento (
             }else{
                 it.SituacaoPedido = "C"
             }
-            //var resultFim = finalizaMovimento.finaliza(it)
+            //var resultFim =
+            finalizaMovimento.finaliza(it)
 
             convertidos.add(pedidoPalmRepository.findById(it.IdPedidoPalm!!)!!)
 
@@ -179,6 +213,7 @@ class Agendamento (
                     val ems = EMS(it)
                     val retorno = ems.gerarRetorno(cnpj, it, diretorio)
                     arquivo.criaArquivo(retorno)
+                    pedidoPalmRepository.updateNomeArquivoRetorno(retorno.name, it.IdPedidoPalm!!)
                 }
             }
 
@@ -221,6 +256,7 @@ class Agendamento (
                     )
                     arquivo.removeArquivo( it)
                 }
+                client.fechaConexaoFTP()
             }
 
             "ESTOQUE" -> {
@@ -242,6 +278,8 @@ class Agendamento (
                     )
                     arquivo.removeArquivo( it)
                 }
+
+                client.fechaConexaoFTP()
             }
         }
     }
