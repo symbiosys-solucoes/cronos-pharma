@@ -2,21 +2,20 @@ package br.symbiosys.solucoes.cronospharma.cronospharma.controllers.ftp
 
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.diretorios.DiretoriosRepository
 import br.symbiosys.solucoes.cronospharma.cronospharma.ftp.ClienteFTP
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/v1/integradores")
-class ListaArquivosController
+class BaixaArquivosController
     (
     private val diretoriosRepository: DiretoriosRepository
             )
 {
-    @GetMapping("/{id}/arquivos")
-    public fun lista(@PathVariable id: Long): ResponseEntity<Any>{
+    @PostMapping("/{id}/download", produces = arrayOf(MediaType.APPLICATION_JSON_VALUE))
+    fun lista(@PathVariable id: Long, @RequestParam(name = "arquivo") arquivo: String): ResponseEntity<Any>{
         val diretorio = diretoriosRepository.findById(id)
         if(diretorio ==null){
             return ResponseEntity.notFound().build()
@@ -24,11 +23,13 @@ class ListaArquivosController
 
         val clientFtp = ClienteFTP(diretorio)
         clientFtp.abreConexaoFTP()
-        println(diretorio)
-        val listaArquivos = clientFtp.listaArquivos(diretorio.diretorioPedidoFTP!!)
+        clientFtp.downloadArquivo(diretorio.diretorioPedidoFTP + arquivo, diretorio.diretorioPedidoLocal!!+ arquivo)
         clientFtp.fechaConexaoFTP()
 
-        return ResponseEntity.ok(listaArquivos)
+
+        val response = "{\"resultado\": \"O arquivo ${arquivo}, foi baixado na pasta ${diretorio.diretorioPedidoLocal}\" \n}"
+
+        return ResponseEntity.ok(response)
 
     }
 }

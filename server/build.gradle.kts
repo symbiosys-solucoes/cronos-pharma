@@ -6,6 +6,7 @@ plugins {
 	kotlin("jvm") version "1.5.21"
 	kotlin("plugin.spring") version "1.5.21"
 	kotlin("plugin.jpa") version "1.5.21"
+	id("org.jetbrains.dokka") version "1.5.0"
 }
 
 group = "br.symbiosys.solucoes.cronos-pharma"

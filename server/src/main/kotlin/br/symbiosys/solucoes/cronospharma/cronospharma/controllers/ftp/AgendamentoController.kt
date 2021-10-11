@@ -16,7 +16,7 @@ class AgendamentoController
     @Autowired
     lateinit var agendamento: Agendamento
     @PostMapping
-    public fun executa(): ResponseEntity<Any>{
+    fun executa(): ResponseEntity<Any>{
 
         agendamento.executeWithoutSchedule()
         return ResponseEntity.ok().build()
