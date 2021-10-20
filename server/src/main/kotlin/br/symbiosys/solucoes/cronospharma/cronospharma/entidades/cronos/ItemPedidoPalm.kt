@@ -45,3 +45,8 @@ class ItemPedidoPalm(
     val DataOperacao: LocalDateTime = LocalDateTime.now(),
 
     )
+{
+    override fun toString(): String {
+        return "ItemPedidoPalm(IdItemPedidoPalm=$IdItemPedidoPalm, IdPedidoPalm=$IdPedidoPalm, Item=$Item, IdEmpresa=$IdEmpresa, CodProdutoArq='$CodProdutoArq', IdProduto=$IdProduto, CodProduto=$CodProduto, Qtd=$Qtd, QtdConfirmada=$QtdConfirmada, IdPrecoTabela=$IdPrecoTabela, PrecoUnit=$PrecoUnit, PercDescontoItem=$PercDescontoItem, PercComissaoItem=$PercComissaoItem, SituacaoItemPedido=$SituacaoItemPedido, LogImportacao=$LogImportacao, CodRetornoItem=$CodRetornoItem, DscRetornoItem=$DscRetornoItem, IdUsuario='$IdUsuario', DataOperacao=$DataOperacao)"
+    }
+}

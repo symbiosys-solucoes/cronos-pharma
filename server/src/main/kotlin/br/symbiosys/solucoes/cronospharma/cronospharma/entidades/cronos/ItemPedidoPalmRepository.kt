@@ -26,13 +26,13 @@ class ItemPedidoPalmRepository (
                  }
             else -> {
                 val dadosItem = findDadosItem(pedido, item)
-                if (dadosItem != null) {
+                //if (dadosItem != null) {
                     item.IdPedidoPalm = pedido.IdPedidoPalm
-                    item.IdProduto = dadosItem.idProduto?.toInt() ?: 0
-                    item.CodProduto = dadosItem.codProduto
-                    item.PrecoUnit = dadosItem.precoUnit
-                    item.IdPrecoTabela = dadosItem.idPrecoTabela
-                }
+                    item.IdProduto = dadosItem?.idProduto?.toInt() ?: 0
+                    item.CodProduto = dadosItem?.codProduto ?: "00000"
+                    item.PrecoUnit = dadosItem?.precoUnit ?: BigDecimal("0.0")
+                    item.IdPrecoTabela = dadosItem?.idPrecoTabela ?: "0"
+                //}
             }
         }
         val params = MapSqlParameterSource()
@@ -54,6 +54,11 @@ class ItemPedidoPalmRepository (
             .addValue("codRetorno", item.CodRetornoItem)
             .addValue("dscRetorno", item.DscRetornoItem)
             .addValue("codProdutoArq", item.CodProdutoArq)
+        if(item.IdPedidoPalm == null){
+            println(item)
+            println(pedido)
+            throw SQLException("Objeto esta sem Pedido inserido")
+        }
         return jdbcTemplate.query(sqlInsertItemPedidoPalm, params, mapperItemPedidoPalm).first()
 
     }
@@ -171,7 +176,7 @@ class ItemPedidoPalmRepository (
                 "     IDPRODUTO = @IDPRODUTO,\n" +
                 "\t CODPRODUTO = (SELECT CODPRODUTO FROM Produtos WHERE IDPRODUTO = @IDPRODUTO ),\n" +
                 "\t IDPRECOTABELA = @IDPRECO,\n" +
-                "              PRECOUNIT = CASE WHEN IDPRODUTO IN ( SELECT MAX(IDPRODUTO) FROM CondPagRegraCP CP WHERE CP.CodCondPag = @CODCOND AND CP.RegraAtiva = 'S') THEN\n" +
+                "              PRECOUNIT = CASE WHEN IDPRODUTO IN ( SELECT MAX(IDPRODUTO) FROM CondPagRegraCP CP WHERE CP.CodCondPag = @CODCOND AND CP.RegraAtiva = 'S' AND IdProduto = @IDPRODUTO) THEN\n" +
                 "                   -- ( SELECT MAX(IDPRODUTO) FROM CondPagRegraCP CP WHERE CP.CodCondPag = @CODCOND AND CP.RegraAtiva = 'S')\n" +
                 "                    ( SELECT MAX(PrecoVenda) FROM CondPagRegraCP CP WHERE CP.CodCondPag = @CODCOND AND CP.RegraAtiva = 'S' AND IdProduto = @IDPRODUTO) \n" +
                 "                    ELSE CASE WHEN @IDPRECO = 1 THEN (SELECT MAX(PRECOVENDA1) FROM Produtos WHERE IDPRODUTO=@IDPRODUTO )\n" +

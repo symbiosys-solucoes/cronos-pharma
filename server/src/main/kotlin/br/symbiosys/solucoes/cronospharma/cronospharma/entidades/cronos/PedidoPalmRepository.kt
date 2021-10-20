@@ -81,7 +81,8 @@ class PedidoPalmRepository(
 
     fun updateNomeArquivoRetorno(nomeArquivo: String, id: Long) {
         jdbcTemplate.queryForObject(
-            "UPDATE PedidoPalm set ArqRetPed = :nomeArquivo OUTPUT Inserted.ArqRetPed where IdPedidoPalm = :id",
+            "UPDATE PedidoPalm set ArqRetPed = :nomeArquivo where IdPedidoPalm = :id " +
+                    "SELECT ArqRetPed FROM PedidoPalm WHERE IdPedidoPalm = :id",
             MapSqlParameterSource("nomeArquivo", nomeArquivo).addValue("id", id),
             String::class.java,
         )

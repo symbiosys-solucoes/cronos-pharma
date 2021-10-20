@@ -83,7 +83,7 @@ class Agendamento (
     fun executeWithoutSchedule(){
         this.diretorios.forEach { diretorio ->
 
-            baixarArquivos(diretorio)
+            val arquivos = baixarArquivos(diretorio)
             val pedidos = inserePedidos(diretorio)
             val pedidosFinalizados = inserePreVenda(pedidos)
             val pedidosComStatusRetorno = atualizaStatusRetorno(pedidosFinalizados)
@@ -93,7 +93,13 @@ class Agendamento (
             uploadArquivos(diretorio, "RETORNO")
 
             logger.info("Concluido o Processo para o: ${diretorio.login}")
-            //pedidosComStatusRetorno.forEach { println(it.IdPedidoPalm) }
+            processamento.add(
+                ProcessamentoDto(
+                    arquivos = arquivos,
+                    pedidosGerados = pedidos.map { it.NumPedidoPalm },
+                    preVendasGeradas = pedidos.map { it.NumPedidoCRONOS },
+                    tipoIntegracao = diretorio.tipoIntegracao,
+                ))
 
         }
     }
