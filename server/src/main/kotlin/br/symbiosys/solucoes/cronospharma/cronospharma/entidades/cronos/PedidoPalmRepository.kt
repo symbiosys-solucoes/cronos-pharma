@@ -1,9 +1,11 @@
 package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos
 
+import org.slf4j.LoggerFactory
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
+import java.math.BigDecimal
 import java.sql.ResultSet
 import java.sql.SQLException
 
@@ -12,6 +14,7 @@ class PedidoPalmRepository(
     private val jdbcTemplate: NamedParameterJdbcTemplate,
     private val itemPedidoPalmRepository: ItemPedidoPalmRepository
 ) {
+    val logger = LoggerFactory.getLogger(PedidoPalmRepository::class.java)
     fun save(pedidoPalm: PedidoPalm): PedidoPalm{
 
         when(pedidoPalm.Origem) {
@@ -74,7 +77,7 @@ class PedidoPalmRepository(
         if(pedido.IdPedidoPalm == null || pedido.SituacaoPedido != "P" ){
             return "0"
         }
-
+        insereTotalPedido(pedido)
         return jdbcTemplate.query(sqlToMovimento, MapSqlParameterSource().addValue("idPedidoPalm", pedido.IdPedidoPalm), mapperString).first()
 
     }
@@ -88,6 +91,19 @@ class PedidoPalmRepository(
         )
     }
 
+    fun insereTotalPedido(pedido: PedidoPalm) {
+        try {
+            jdbcTemplate.queryForObject(
+                "UPDATE PedidoPalm set TotalPedido = (select TotalPedido = SUM( (ISNULL(Qtd,0)  *  ISNULL(PrecoUnit, 0)) * (1 - (ISNULL(PercDescontoItem,0) * 0.01))  * (1 - (ISNULL(PercDesconto,0) * 0.01)) )\n" +
+                        "from ItemPedidoPalm Inner Join PedidoPalm on PedidoPalm.IdPedidoPalm = ItemPedidoPalm.IdPedidoPalm \n" +
+                        "where PedidoPalm.IdPedidoPalm=:id) WHERE IdPedidoPalm = :id",
+                MapSqlParameterSource("id", pedido.IdPedidoPalm),
+                BigDecimal::class.java
+            )
+        } catch (e: SQLException) {
+            logger.error("Erro ao atualizar o valor do pedido numero: ${pedido.NumPedidoPalm} ")
+        }
+    }
     companion object{
         private val mapperDadosPedido = RowMapper<DadosPedido>{ rs: ResultSet, rowNum: Int ->
             DadosPedido(
