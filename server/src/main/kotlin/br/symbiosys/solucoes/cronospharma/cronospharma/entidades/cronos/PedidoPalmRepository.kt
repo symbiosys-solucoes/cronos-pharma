@@ -54,7 +54,7 @@ class PedidoPalmRepository(
         pedido.itens = pedidoPalm.itens
 
         pedido.itens.map { itemPedidoPalmRepository.save(it,pedido) }
-
+        insereTotalPedido(pedido)
         return pedido
     }
 
@@ -77,7 +77,7 @@ class PedidoPalmRepository(
         if(pedido.IdPedidoPalm == null || pedido.SituacaoPedido != "P" ){
             return "0"
         }
-        insereTotalPedido(pedido)
+
         return jdbcTemplate.query(sqlToMovimento, MapSqlParameterSource().addValue("idPedidoPalm", pedido.IdPedidoPalm), mapperString).first()
 
     }
@@ -96,7 +96,8 @@ class PedidoPalmRepository(
             jdbcTemplate.queryForObject(
                 "UPDATE PedidoPalm set TotalPedido = (select TotalPedido = SUM( (ISNULL(Qtd,0)  *  ISNULL(PrecoUnit, 0)) * (1 - (ISNULL(PercDescontoItem,0) * 0.01))  * (1 - (ISNULL(PercDesconto,0) * 0.01)) )\n" +
                         "from ItemPedidoPalm Inner Join PedidoPalm on PedidoPalm.IdPedidoPalm = ItemPedidoPalm.IdPedidoPalm \n" +
-                        "where PedidoPalm.IdPedidoPalm=:id) WHERE IdPedidoPalm = :id",
+                        "where PedidoPalm.IdPedidoPalm=:id) WHERE IdPedidoPalm = :id \n" +
+                        "SELECT TotalPedido FROM PedidoPalm WHERE IdPedidoPalm = :id",
                 MapSqlParameterSource("id", pedido.IdPedidoPalm),
                 BigDecimal::class.java
             )
