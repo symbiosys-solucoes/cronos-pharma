@@ -1,10 +1,17 @@
+version: '3'
+services:
+  srvcronos:
+    image: 'mcr.microsoft.com/mssql/server:2019-latest'
+    volumes:
+      - mssql-volume:/var/lib/mssql/meirelles
+    ports:
+      - 1433:1433
+    environment:
+      MSSQL_COLLATION: SQL_Latin1_General_CP1_CI_AI
+      MSSQL_PID: Developer
+      ACCEPT_EULA: Y
+      SA_PASSWORD: "@nfs32xpt#"
 
-srvcronos:
-  image: 'mcr.microsoft.com/mssql/server:2019-latest'
-  ports:
-    - 1433:1433
-  environment:
-    MSSQL_COLLATION: SQL_Latin1_General_CP1_CI_AI
-    MSSQL_PID: Developer
-    ACCEPT_EULA: Y
-    SA_PASSWORD: "@nfs32xpt#"
+volumes:
+  mssql-volume:
+
