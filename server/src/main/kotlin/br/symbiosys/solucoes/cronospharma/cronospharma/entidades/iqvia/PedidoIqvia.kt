@@ -1,6 +1,8 @@
 package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.iqvia
 
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.TipoIntegracao
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.ItemPedidoPalm
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.PedidoPalm
 import java.time.LocalDateTime
 
 class PedidoIqvia (
@@ -20,5 +22,22 @@ class PedidoIqvia (
     val dataPedido: LocalDateTime?,
     val itensPedidoIqvia: List<ItemPedidoIqvia>,
     val quatidadeItems: Int?,
-
     )
+
+{
+    fun toPedidoPalm(): PedidoPalm {
+        return PedidoPalm(
+            Origem = "REDEFTB",
+            NumPedidoPalm = numeroPedidoIqvia ?: "",
+            CnpjCpfCliFor = cnpjCliente,
+            DataPedido = dataPedido,
+            NumPedidoPalmAux = numeroPedidoCliente,
+            itens = itensPedidoIqvia.map { ItemPedidoPalm(
+                CodProdutoArq = it.codigoEAN ?: "",
+                Qtd = it.quantidade,
+                PercDescontoItem = it.descontoItem,
+                Item = itensPedidoIqvia.indexOf(it) + 1
+            ) }
+        )
+    }
+}

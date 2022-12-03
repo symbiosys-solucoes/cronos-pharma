@@ -170,6 +170,9 @@ class Agendamento (
                 TipoIntegracao.CONSYS -> {
                     TipoIntegracao.toConsys(arq).forEach { pedidos.add(it.toPedidoPalm()) }
                 }
+                TipoIntegracao.IQVIA -> {
+                    pedidos.add(TipoIntegracao.toIqvia(arq).toPedidoPalm())
+                }
             }
             this.arquivo.moverArquivo(arq, diretorio.diretorioImportadosLocal + arq.replace(diretorio.diretorioPedidoLocal,""))
         }

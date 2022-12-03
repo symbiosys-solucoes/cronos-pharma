@@ -7,3 +7,5 @@ class ItemPedidoIqvia (
     val campoControleIqvia: String?,
     val descontoItem: Double?,
         )
+
+
