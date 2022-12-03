@@ -3,14 +3,13 @@ package br.symbiosys.solucoes.cronospharma.cronospharma.entidades
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.ItemPedidoPalm
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.PedidoPalm
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.diretorios.Diretorio
-import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.EMS
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.PedidoEMS
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.ItemEMS
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.core.StringContains.containsString
 
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
-import java.nio.file.Paths
 import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.io.path.Path
@@ -104,8 +103,8 @@ internal class RetornoTest {
         )
     }
 
-    private fun generateEms(): EMS{
-        return EMS(
+    private fun generateEms(): PedidoEMS{
+        return PedidoEMS(
             codigoCliente = "12754107000104",
             numeroPedido = "19875141",
             dataPedido = LocalDate.of(2020, 9, 8),

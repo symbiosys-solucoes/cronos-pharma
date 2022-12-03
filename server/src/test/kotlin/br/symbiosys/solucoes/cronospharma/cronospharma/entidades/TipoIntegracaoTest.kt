@@ -1,7 +1,7 @@
 package br.symbiosys.solucoes.cronospharma.cronospharma.entidades
 
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.consys.PedidoCONSYS
-import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.EMS
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.PedidoEMS
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.*
 import org.junit.jupiter.api.Test
@@ -21,19 +21,19 @@ internal class TipoIntegracaoTest {
         val fileReader = FileReader(arquivo.path)
         val bufferedReader = BufferedReader(fileReader)
 
-        val ems: EMS = TipoIntegracao.toEms(arquivo.path)
+        val pedidoEms: PedidoEMS = TipoIntegracao.toEms(arquivo.path)
 
 
-        assertThat(ems.codigoCliente, equalTo("13197261000357"))
-        assertThat(ems.numeroPedido, equalTo("19873499"))
-        assertThat(ems.dataPedido, equalTo(LocalDate.of(2020,9,8)))
-        assertThat(ems.numeroPedidoCliente, equalTo("LEG585786"))
-        assertThat(ems.codigoRepresentante, equalTo("3009"))
-        assertThat(ems.produtos, hasSize(31))
-        assertThat(ems.produtos?.first()?.codigoProduto ?: "Produto Nulo", equalTo("7894916142632"))
-        assertThat(ems.produtos?.first()?.quantidade ?: "Produto Nulo", equalTo(1.0))
-        assertThat(ems.produtos?.first()?.desconto ?: "Produto Nulo", equalTo(57.72))
-        assertThat(ems.produtos?.first()?.prazo ?: "Produto Nulo", equalTo("000"))
+        assertThat(pedidoEms.codigoCliente, equalTo("13197261000357"))
+        assertThat(pedidoEms.numeroPedido, equalTo("19873499"))
+        assertThat(pedidoEms.dataPedido, equalTo(LocalDate.of(2020,9,8)))
+        assertThat(pedidoEms.numeroPedidoCliente, equalTo("LEG585786"))
+        assertThat(pedidoEms.codigoRepresentante, equalTo("3009"))
+        assertThat(pedidoEms.produtos, hasSize(31))
+        assertThat(pedidoEms.produtos?.first()?.codigoProduto ?: "Produto Nulo", equalTo("7894916142632"))
+        assertThat(pedidoEms.produtos?.first()?.quantidade ?: "Produto Nulo", equalTo(1.0))
+        assertThat(pedidoEms.produtos?.first()?.desconto ?: "Produto Nulo", equalTo(57.72))
+        assertThat(pedidoEms.produtos?.first()?.prazo ?: "Produto Nulo", equalTo("000"))
 
     }
 

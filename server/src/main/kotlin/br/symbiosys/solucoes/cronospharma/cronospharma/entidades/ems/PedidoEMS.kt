@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 
-class EMS(
+class PedidoEMS(
     val tipoIntegracao: TipoIntegracao = TipoIntegracao.EMS,
     val codigoCliente: String?,
     val numeroPedido: String?,

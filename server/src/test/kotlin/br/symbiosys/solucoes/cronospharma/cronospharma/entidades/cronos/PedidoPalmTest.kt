@@ -2,13 +2,12 @@ package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos
 
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.consys.ItemCONSYS
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.consys.PedidoCONSYS
-import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.EMS
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.PedidoEMS
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.ItemEMS
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.*
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.jdbc.Sql
@@ -113,8 +112,8 @@ internal class PedidoPalmTest {
 
         )
     }
-    private fun generatePedidoEMS(): EMS{
-        return EMS(
+    private fun generatePedidoEMS(): PedidoEMS{
+        return PedidoEMS(
             codigoCliente = "13197261000357",
             numeroPedido = "99999999",
             dataPedido = LocalDate.now(),

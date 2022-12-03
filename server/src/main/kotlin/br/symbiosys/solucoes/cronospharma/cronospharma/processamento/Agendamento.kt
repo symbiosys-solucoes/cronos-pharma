@@ -8,7 +8,7 @@ import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.PedidoPa
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.PedidoPalmRepository
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.diretorios.Diretorio
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.diretorios.DiretoriosRepository
-import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.EMS
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.PedidoEMS
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.EMSRepository
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.geraEstoqueEMS
 import br.symbiosys.solucoes.cronospharma.cronospharma.ftp.ClienteFTP
@@ -216,8 +216,8 @@ class Agendamento (
         pedidos.forEach {
             when(it.Origem){
                 "EMS" -> {
-                    val ems = EMS(it)
-                    val retorno = ems.gerarRetorno(cnpj, it, diretorio)
+                    val pedidoEms = PedidoEMS(it)
+                    val retorno = pedidoEms.gerarRetorno(cnpj, it, diretorio)
                     arquivo.criaArquivo(retorno)
                     pedidoPalmRepository.updateNomeArquivoRetorno(retorno.name, it.IdPedidoPalm!!)
                 }

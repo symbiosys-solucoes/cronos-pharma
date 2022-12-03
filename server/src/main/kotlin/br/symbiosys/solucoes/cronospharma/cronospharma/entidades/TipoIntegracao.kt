@@ -2,20 +2,25 @@ package br.symbiosys.solucoes.cronospharma.cronospharma.entidades
 
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.consys.ItemCONSYS
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.consys.PedidoCONSYS
-import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.EMS
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.PedidoEMS
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.ItemEMS
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.iqvia.ItemPedidoIqvia
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.iqvia.PedidoIqvia
 import org.slf4j.LoggerFactory
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
 import java.io.IOException
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 
 enum class TipoIntegracao {
 
 
     CONSYS,
-    EMS;
+    EMS,
+    IQVIA;
 
     companion object {
         val logger = LoggerFactory.getLogger(TipoIntegracao::class.java)
@@ -100,7 +105,7 @@ enum class TipoIntegracao {
             return pedidosCONSYS
         }
 
-        fun toEms(origem: String): br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.EMS {
+        fun toEms(origem: String): PedidoEMS {
             var cnpj:String? = null
             var numero: String? = null
             var dataPedido: LocalDate? = null
@@ -149,7 +154,7 @@ enum class TipoIntegracao {
             } catch (e: Exception){
                 e.printStackTrace()
             }
-            return EMS(
+            return PedidoEMS(
                 codigoCliente = cnpj,
                 numeroPedido = numero,
                 dataPedido = dataPedido,
@@ -159,6 +164,114 @@ enum class TipoIntegracao {
 
             )
         }
+
+        fun toIqvia(origem: String): PedidoIqvia {
+            // Cabecalho
+            var cnpjCliente:String? = null
+            var tipoFaturamento: Int? = null
+            var apontadorPromocao: String? = null
+            var descontoDistribuidor: String? = null
+
+            // Dados do pedido 1
+            var codigoProjeto: String? = null
+            var numeroPedido: String? = null
+            var cnpjCD: String? = null
+
+            // Faturamento
+            var tipoPagamento: String? = null
+            var codigoDeterminado: String? = null
+            var numeroDias: String? = null
+            var numeroPedidoPrincipal: String? = null
+
+            // Dados Pedido 2
+            var numeroPedidoCliente: String? = null
+
+            // Data/Hora Pedido
+            var dataPedido: LocalDate? = null
+            var horaPedido: LocalTime? = null
+
+            // Itens do Pedido
+            var itens: MutableList<ItemPedidoIqvia> = mutableListOf()
+
+            // Rodape
+            var quantidadeItems: Int? = null
+
+            val arquivo = File(origem)
+            try {
+                val fileReader = FileReader(arquivo)
+
+                val bufferedReader = BufferedReader(fileReader)
+
+                bufferedReader.forEachLine {
+                    when(it.substring(0,1)) {
+                        "1" -> {
+                            cnpjCliente = it.substring(2,16).trim()
+                            tipoFaturamento = it.substring(16, 17).trim().toInt()
+                            apontadorPromocao = it.substring(17, 30).trim()
+                            descontoDistribuidor = it.substring(30, 32).trim()
+                        }
+                        "2" -> {
+                            codigoProjeto = it.substring(2, 3).trim()
+                            numeroPedido = it.substring(3, 18).trim()
+                            cnpjCD = it.substring(18,32).trim()
+                        }
+                        "3" -> {
+                            tipoPagamento = it.substring(2,3).trim()
+                            codigoDeterminado = it.substring(3,7).trim()
+                            numeroDias = it.substring(7, 10).trim()
+                            numeroPedidoPrincipal = it.substring(10,25).trim()
+                        }
+                        "4" -> {
+                            numeroPedidoCliente = it.substring(2,17).trim()
+                        }
+                        "5" -> {
+                            dataPedido = LocalDate.of(it.substring(2,6).trim().toInt(), it.substring(6,8).trim().toInt(), it.substring(8,10).trim().toInt())
+                        }
+                        "6" -> {
+                            horaPedido = LocalTime.of(it.substring(2,4).trim().toInt(), it.substring(4, 6).trim().toInt(), it.substring(6,8).trim().toInt())
+                        }
+                        "7" -> {
+                            itens.add(
+                                ItemPedidoIqvia(
+                                    codigoEAN = it.substring(2,15).trim(),
+                                    quantidade = it.substring(15,8).trim().toDouble(),
+                                    tipoOcorrencia = it.substring(23,25). trim(),
+                                    campoControleIqvia = it.substring(25,32).trim(),
+                                    descontoItem = it.substring(32,36).trim().toDouble()
+                                )
+                            )
+                        }
+                        "8" -> {
+                            quantidadeItems = it.substring(2,4).trim().toInt()
+                        }
+                    }
+                }
+
+                fileReader.close()
+                bufferedReader.close()
+
+            } catch (e: Exception){
+                e.printStackTrace()
+            }
+            return PedidoIqvia(
+                cnpjCliente = cnpjCliente,
+                tipoFaturamento = tipoFaturamento,
+                apontadorPromocao = apontadorPromocao,
+                descontoDistribuidorOuVan = descontoDistribuidor,
+                codigoProjeto = codigoProjeto,
+                numeroPedidoIqvia = numeroPedido,
+                cnpjCD = cnpjCD,
+                tipoPagamento = tipoPagamento,
+                codigoPrazoDeterminado = codigoDeterminado,
+                numeroDiasPrazoDeterminado = numeroDias,
+                numeroPedidoPrincipal = numeroPedidoPrincipal,
+                numeroPedidoCliente = numeroPedidoCliente,
+                dataPedido = LocalDateTime.of(dataPedido, horaPedido),
+                itensPedidoIqvia = itens,
+                quatidadeItems = quantidadeItems
+            )
+        }
+
     }
 
 
