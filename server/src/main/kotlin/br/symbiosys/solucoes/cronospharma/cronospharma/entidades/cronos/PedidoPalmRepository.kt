@@ -160,7 +160,7 @@ class PedidoPalmRepository(
                 "  DECLARE @CNPJ VARCHAR(14), @ORIGEM VARCHAR(20)\n" +
                 "  SET @CNPJ = :cnpj\n" +
                 "  SET @ORIGEM = :origem\n" +
-                "            IF (@ORIGEM = 'EMS')\n" +
+                "            IF (@ORIGEM IN ('EMS', 'REDEFTB'))\n" +
                 "\t\t\t  BEGIN\n" +
                 "              SELECT\n" +
                 "              CODVENDEDOR = ISNULL(Codfunc,'00001'),\n" +
