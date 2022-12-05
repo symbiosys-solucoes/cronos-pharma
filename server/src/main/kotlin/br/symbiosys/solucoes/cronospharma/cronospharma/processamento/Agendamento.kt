@@ -11,6 +11,7 @@ import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.diretorios.Dire
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.PedidoEMS
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.EMSRepository
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.geraEstoqueEMS
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.iqvia.PedidoIqvia
 import br.symbiosys.solucoes.cronospharma.cronospharma.ftp.ClienteFTP
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -221,6 +222,11 @@ class Agendamento (
                 "EMS" -> {
                     val pedidoEms = PedidoEMS(it)
                     val retorno = pedidoEms.gerarRetorno(cnpj, it, diretorio)
+                    arquivo.criaArquivo(retorno)
+                    pedidoPalmRepository.updateNomeArquivoRetorno(retorno.name, it.IdPedidoPalm!!)
+                }
+                "REDEFTB" -> {
+                    val retorno = PedidoIqvia().gerarRetorno(cnpj, it, diretorio)
                     arquivo.criaArquivo(retorno)
                     pedidoPalmRepository.updateNomeArquivoRetorno(retorno.name, it.IdPedidoPalm!!)
                 }
