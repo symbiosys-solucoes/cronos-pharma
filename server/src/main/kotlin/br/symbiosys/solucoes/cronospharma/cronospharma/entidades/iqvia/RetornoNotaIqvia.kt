@@ -16,7 +16,7 @@ class RetornoNotaIqvia {
     var cnpjCliente: String? = null
     var numeroNotaFiscal: String? = null
     var serieNF: String? = null
-    var vencimentoFatura: String? = null
+    var vencimentoFatura: LocalDate? = null
 
     // totais nota fiscal
     var valorFrete: Double = 0.0

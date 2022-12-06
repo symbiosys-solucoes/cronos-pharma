@@ -15,6 +15,15 @@ class PedidoPalmRepository(
     private val itemPedidoPalmRepository: ItemPedidoPalmRepository
 ) {
     val logger = LoggerFactory.getLogger(PedidoPalmRepository::class.java)
+
+    fun findPedidosSemRetornoNF(origem: String): List<Long> {
+        return  jdbcTemplate.query("SELECT IdPedidoPalm FROM PedidoPalm WHERE ArqRetPed IS NOT NULL AND ArqRetNF IS NULL AND Origem IN (:origem)",
+            MapSqlParameterSource("origem", origem)
+        ) { rs, _ -> rs.getLong("IdPedidoPalm") }
+    }
+
+
+
     fun save(pedidoPalm: PedidoPalm): PedidoPalm{
 
         when(pedidoPalm.Origem) {
