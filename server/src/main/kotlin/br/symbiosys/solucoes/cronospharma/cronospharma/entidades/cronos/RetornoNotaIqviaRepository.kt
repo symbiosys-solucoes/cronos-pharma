@@ -4,8 +4,10 @@ import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.iqvia.RetornoNo
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.stereotype.Repository
 import java.sql.ResultSet
 
+@Repository
 class RetornoNotaIqviaRepository (private val jdbcTemplate: NamedParameterJdbcTemplate, private val itensMovRepository: ItensMovRepository) {
 
     fun findRetornos(ids: List<Long>): List<RetornoNotaIqvia> {

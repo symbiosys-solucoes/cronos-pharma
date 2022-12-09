@@ -100,6 +100,15 @@ class PedidoPalmRepository(
         )
     }
 
+    fun updateNomeArquivoRetornoNF(nomeArquivo: String, id: Long) {
+        jdbcTemplate.queryForObject(
+            "UPDATE PedidoPalm set ArqRetNF = :nomeArquivo where IdPedidoPalm = :id " +
+                    "SELECT ArqRetNF FROM PedidoPalm WHERE IdPedidoPalm = :id",
+            MapSqlParameterSource("nomeArquivo", nomeArquivo).addValue("id", id),
+            String::class.java,
+        )
+    }
+
     fun insereTotalPedido(pedido: PedidoPalm) {
         try {
             jdbcTemplate.queryForObject(

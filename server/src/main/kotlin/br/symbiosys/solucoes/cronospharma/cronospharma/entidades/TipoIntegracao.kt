@@ -20,7 +20,7 @@ enum class TipoIntegracao {
 
     CONSYS,
     EMS,
-    IQVIA;
+    REDEFTB;
 
     companion object {
         val logger = LoggerFactory.getLogger(TipoIntegracao::class.java)
@@ -165,7 +165,7 @@ enum class TipoIntegracao {
             )
         }
 
-        fun toIqvia(origem: String): PedidoIqvia {
+        fun toRedeFTB(origem: String): PedidoIqvia {
             // Cabecalho
             var cnpjCliente:String? = null
             var tipoFaturamento: Int? = null

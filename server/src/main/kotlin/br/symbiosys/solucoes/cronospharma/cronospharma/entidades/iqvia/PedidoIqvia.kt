@@ -10,7 +10,7 @@ import java.io.File
 import java.time.LocalDateTime
 
 class PedidoIqvia (
-    val tipoIntegracao: TipoIntegracao = TipoIntegracao.IQVIA,
+    val tipoIntegracao: TipoIntegracao = TipoIntegracao.REDEFTB,
     val cnpjCliente: String? = null,
     val tipoFaturamento: Int? = null,
     val apontadorPromocao: String? = null,
@@ -30,7 +30,7 @@ class PedidoIqvia (
 
 {
     constructor() : this(
-        TipoIntegracao.IQVIA
+        TipoIntegracao.REDEFTB
     )
 
 
