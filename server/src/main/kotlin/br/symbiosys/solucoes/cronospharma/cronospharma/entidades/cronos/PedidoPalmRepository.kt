@@ -17,7 +17,9 @@ class PedidoPalmRepository(
     val logger = LoggerFactory.getLogger(PedidoPalmRepository::class.java)
 
     fun findPedidosSemRetornoNF(origem: String): List<Long> {
-        return  jdbcTemplate.query("SELECT IdPedidoPalm FROM PedidoPalm WHERE ArqRetPed IS NOT NULL AND ArqRetNF IS NULL AND Origem IN (:origem)",
+        return  jdbcTemplate.query("SELECT IdPedidoPalm FROM PedidoPalm INNER JOIN Movimento ON PedidoPalm.IdPedidoPalm = Movimento.IdPedidoPalm \n" +
+                "WHERE ArqRetPed IS NOT NULL AND ArqRetNF IS NULL AND Origem IN (:origem)\n" +
+                "AND Movimento.NfeStatus = 'U' AND PedidoPalm.DataOperacao >= '2022-01-01'",
             MapSqlParameterSource("origem", origem)
         ) { rs, _ -> rs.getLong("IdPedidoPalm") }
     }

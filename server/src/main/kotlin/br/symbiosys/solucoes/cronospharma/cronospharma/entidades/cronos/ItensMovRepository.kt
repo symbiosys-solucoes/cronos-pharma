@@ -4,9 +4,10 @@ import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.iqvia.ItemRetor
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.stereotype.Repository
 import java.sql.ResultSet
 
-
+@Repository
 class ItensMovRepository
     (private val jdbcTemplate: NamedParameterJdbcTemplate)
 {
