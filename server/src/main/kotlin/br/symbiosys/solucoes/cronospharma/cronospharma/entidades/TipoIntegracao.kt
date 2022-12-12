@@ -201,48 +201,52 @@ enum class TipoIntegracao {
                 val fileReader = FileReader(arquivo)
 
                 val bufferedReader = BufferedReader(fileReader)
+                //println(bufferedReader.readText())
 
                 bufferedReader.forEachLine {
+                    if (it.isNullOrEmpty()) {
+                        return@forEachLine
+                    }
                     when(it.substring(0,1)) {
                         "1" -> {
-                            cnpjCliente = it.substring(2,16).trim()
-                            tipoFaturamento = it.substring(16, 17).trim().toInt()
-                            apontadorPromocao = it.substring(17, 30).trim()
-                            descontoDistribuidor = it.substring(30, 32).trim()
+                            cnpjCliente = it.substring(1,15).trim()
+                            tipoFaturamento = it.substring(15, 16).trim().toInt()
+                            apontadorPromocao = it.substring(16, 29).trim()
+                            descontoDistribuidor = it.substring(29, 31).trim()
                         }
                         "2" -> {
-                            codigoProjeto = it.substring(2, 3).trim()
-                            numeroPedido = it.substring(3, 18).trim()
-                            cnpjCD = it.substring(18,32).trim()
+                            codigoProjeto = it.substring(1, 2).trim()
+                            numeroPedido = it.substring(2, 17).trim()
+                            cnpjCD = it.substring(17,31).trim()
                         }
                         "3" -> {
-                            tipoPagamento = it.substring(2,3).trim()
-                            codigoDeterminado = it.substring(3,7).trim()
-                            numeroDias = it.substring(7, 10).trim()
-                            numeroPedidoPrincipal = it.substring(10,25).trim()
+                            tipoPagamento = it.substring(1,2).trim()
+                            codigoDeterminado = it.substring(2,6).trim()
+                            numeroDias = it.substring(6, 9).trim()
+                            numeroPedidoPrincipal = it.substring(9,24).trim()
                         }
                         "4" -> {
-                            numeroPedidoCliente = it.substring(2,17).trim()
+                            numeroPedidoCliente = it.substring(1,16).trim()
                         }
                         "5" -> {
-                            dataPedido = LocalDate.of(it.substring(2,6).trim().toInt(), it.substring(6,8).trim().toInt(), it.substring(8,10).trim().toInt())
+                            dataPedido = LocalDate.of(it.substring(1,5).trim().toInt(), it.substring(5,7).trim().toInt(), it.substring(7,9).trim().toInt())
                         }
                         "6" -> {
-                            horaPedido = LocalTime.of(it.substring(2,4).trim().toInt(), it.substring(4, 6).trim().toInt(), it.substring(6,8).trim().toInt())
+                            horaPedido = LocalTime.of(it.substring(1,3).trim().toInt(), it.substring(3, 5).trim().toInt(), it.substring(5,7).trim().toInt())
                         }
                         "7" -> {
                             itens.add(
                                 ItemPedidoIqvia(
-                                    codigoEAN = it.substring(2,15).trim(),
-                                    quantidade = it.substring(15,8).trim().toDouble(),
-                                    tipoOcorrencia = it.substring(23,25). trim(),
-                                    campoControleIqvia = it.substring(25,32).trim(),
-                                    descontoItem = it.substring(32,36).trim().toDouble()
+                                    codigoEAN = it.substring(1,14).trim(),
+                                    quantidade = it.substring(14,22).trim().toDouble(),
+                                    tipoOcorrencia = it.substring(22,24). trim(),
+                                    campoControleIqvia = it.substring(24,31).trim(),
+                                    descontoItem = it.substring(31,35).trim().toDouble()
                                 )
                             )
                         }
                         "8" -> {
-                            quantidadeItems = it.substring(2,4).trim().toInt()
+                            quantidadeItems = it.substring(1,3).trim().toInt()
                         }
                     }
                 }
@@ -253,6 +257,7 @@ enum class TipoIntegracao {
             } catch (e: Exception){
                 e.printStackTrace()
             }
+
             return PedidoIqvia(
                 cnpjCliente = cnpjCliente,
                 tipoFaturamento = tipoFaturamento,
