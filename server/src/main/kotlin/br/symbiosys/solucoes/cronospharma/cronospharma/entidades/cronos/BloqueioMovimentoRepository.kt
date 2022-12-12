@@ -30,7 +30,7 @@ class BloqueioMovimentoRepository(
 
     fun executaRegrasTipoGravarRetornos(pedido: PedidoPalm) {
 
-        if(pedido.IdPedidoPalm != null && pedido.NumPedidoCRONOS != null && pedido.SituacaoPedido != "P"){
+        if(pedido.IdPedidoPalm != null){
 
             val regras = findByTipoBloqueio("023")
 

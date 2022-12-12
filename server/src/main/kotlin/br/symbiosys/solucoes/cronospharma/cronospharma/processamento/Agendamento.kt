@@ -5,8 +5,8 @@ import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.TipoIntegracao
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.*
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.diretorios.Diretorio
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.diretorios.DiretoriosRepository
-import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.PedidoEMS
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.EMSRepository
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.PedidoEMS
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.geraEstoqueEMS
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.iqvia.PedidoIqvia
 import br.symbiosys.solucoes.cronospharma.cronospharma.ftp.ClienteFTP
@@ -62,7 +62,8 @@ class Agendamento (
             val arquivos = baixarArquivos(diretorio)
             val pedidos = inserePedidos(diretorio)
             val pedidosFinalizados = inserePreVenda(pedidos)
-            val pedidosComStatusRetorno = atualizaStatusRetorno(pedidosFinalizados)
+            val pedidosComStatusRetorno = atualizaStatusRetorno(pedidos)
+
 
             gerarArquivoDeRetorno(pedidosComStatusRetorno, diretorio)
 
@@ -72,11 +73,11 @@ class Agendamento (
             //pedidosComStatusRetorno.forEach { println(it.IdPedidoPalm) }
             processamento.add(
                 ProcessamentoDto(
-                arquivos = arquivos,
-                pedidosGerados = pedidos.map { it.NumPedidoPalm },
-                preVendasGeradas = pedidos.map { it.NumPedidoCRONOS },
-                tipoIntegracao = diretorio.tipoIntegracao,
-            ))
+                    arquivos = arquivos,
+                    pedidosGerados = pedidos.map { it.NumPedidoPalm },
+                    preVendasGeradas = pedidos.map { it.NumPedidoCRONOS },
+                    tipoIntegracao = diretorio.tipoIntegracao,
+                ))
         }
     }
 
@@ -185,17 +186,24 @@ class Agendamento (
         var convertidos = mutableListOf<PedidoPalm>()
 
         pedidos.forEach {
-            logger.info("Gerando Pre-Venda do pedido numero: ${it.NumPedidoPalm}")
-            var result = pedidoPalmRepository.toMovimento(it) ?: ""
-            if (result == ""){
-                logger.warn("erro ao gerar Pre-Venda do pedido de numero: ${it.NumPedidoPalm}")
-            }else{
-                it.SituacaoPedido = "C"
-            }
-            //var resultFim =
-            finalizaMovimento.finaliza(it)
+            if (!it.CodCliFor.isNullOrBlank()) {
+                logger.info("Gerando Pre-Venda do pedido numero: ${it.NumPedidoPalm}")
+                var result = pedidoPalmRepository.toMovimento(it) ?: ""
+                if (result == ""){
+                    logger.warn("erro ao gerar Pre-Venda do pedido de numero: ${it.NumPedidoPalm}")
+                }else{
+                    it.SituacaoPedido = "C"
+                }
 
-            convertidos.add(pedidoPalmRepository.findById(it.IdPedidoPalm!!)!!)
+                //var resultFim =
+                finalizaMovimento.finaliza(it)
+
+                convertidos.add(pedidoPalmRepository.findById(it.IdPedidoPalm!!)!!)
+
+            } else {
+                logger.info("Cliente nao cadastrado na base, sistema nao ira gerar pre-venda")
+            }
+
 
         }
         convertidos.forEach { logger.info("O pedido de numero: ${it.NumPedidoPalm}, Gerou a Pre-Venda numero: ${it.NumPedidoCRONOS}") }
@@ -262,7 +270,7 @@ class Agendamento (
         }
         when(diretorio.tipoIntegracao){
             TipoIntegracao.EMS -> {
-               val estoque = geraEstoqueEMS(cnpj, emsRepository, diretorio)
+                val estoque = geraEstoqueEMS(cnpj, emsRepository, diretorio)
                 arquivo.criaArquivo(estoque)
             }
             else -> { logger.info("Nao existe layout de estoque configuradao para essa OL")}

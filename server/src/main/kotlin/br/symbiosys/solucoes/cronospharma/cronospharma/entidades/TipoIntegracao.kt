@@ -201,7 +201,7 @@ enum class TipoIntegracao {
                 val fileReader = FileReader(arquivo)
 
                 val bufferedReader = BufferedReader(fileReader)
-                //println(bufferedReader.readText())
+
 
                 bufferedReader.forEachLine {
                     if (it.isNullOrEmpty()) {

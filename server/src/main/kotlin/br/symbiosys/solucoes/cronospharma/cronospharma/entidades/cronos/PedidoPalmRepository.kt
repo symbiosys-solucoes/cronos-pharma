@@ -73,7 +73,14 @@ class PedidoPalmRepository(
         val params = MapSqlParameterSource()
             .addValue("cnpj", pedido.CnpjCpfCliFor)
             .addValue("origem", pedido.Origem)
-        return jdbcTemplate.query(sqlDadosItem, params, mapperDadosPedido).first() ?: null
+
+        val result =  jdbcTemplate.query(sqlDadosItem, params, mapperDadosPedido)
+        if (result.isEmpty()) {
+            return  null
+        } else {
+            return result.first()
+        }
+
     }
 
     fun findById(id: Long):PedidoPalm?{
