@@ -17,9 +17,10 @@ class AgendamentoController
     lateinit var agendamento: Agendamento
     @PostMapping
     fun executa(): ResponseEntity<Any>{
-
-        agendamento.executeWithoutSchedule()
+        agendamento.execute()
+        //agendamento.executeWithoutSchedule()
         return ResponseEntity.ok().build()
 
     }
+
 }
