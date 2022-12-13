@@ -50,8 +50,8 @@ class RetornoNotaIqvia {
         conteudo.append("1${dataGeracao.substring(8,10)}${dataGeracao.substring(5,7)}${dataGeracao.substring(0,4)}")
         conteudo.append("${dataGeracao.substring(11,13)}${dataGeracao.substring(14,16)}${dataGeracao.substring(17,19)}")
         conteudo.append("$cnpj ${StringUtils.leftPad(numeroPedidoOl, 15, "0")}")
-        conteudo.append(StringUtils.leftPad(numeroPedidoCliente, 15, "0"))
-        conteudo.append("${StringUtils.leftPad(null, 20, " ")}\n")
+        conteudo.append(StringUtils.leftPad(numeroPedidoCliente ?: "", 15, "0"))
+        conteudo.append("${StringUtils.leftPad("", 20, " ")}\n")
 
         // dados nota fiscal
         conteudo.append("2${dataSaidaMercadoria.toString().substring(8,10)}${dataSaidaMercadoria.toString().substring(5,7)}${dataSaidaMercadoria.toString().substring(0,4)}")
@@ -89,18 +89,18 @@ class RetornoNotaIqvia {
             conteudo.append(StringUtils.leftPad(it.tipoEmbalagem, 3 , " "))
             conteudo.append(StringUtils.leftPad(it.preco.toString().replace(".", ""),8,"0"))
             conteudo.append(StringUtils.leftPad(it.descontoComercial.toString().replace(".", ""),4,"0"))
-            conteudo.append(StringUtils.leftPad(null,8,"0"))
+            conteudo.append(StringUtils.leftPad("",8,"0"))
             conteudo.append(StringUtils.leftPad(it.valorRepasse.toString().replace(".", ""),8,"0"))
             conteudo.append(StringUtils.leftPad(it.repasse.toString().replace(".", ""),4,"0"))
             conteudo.append(StringUtils.leftPad(it.valorUnitario.toString().replace(".", ""),8,"0"))
             conteudo.append(StringUtils.leftPad(it.fracionamento.toString().replace(".", ""),4,"0"))
-            conteudo.append(StringUtils.leftPad(null, 4, "0") + "\n")
+            conteudo.append(StringUtils.leftPad("", 4, "0") + "\n")
         }
 
         // fim do arquivo
         conteudo.append("5")
         conteudo.append(StringUtils.leftPad(itens.size.toString(), 4, "0"))
-        conteudo.append(StringUtils.leftPad(null, 75, "0"))
+        conteudo.append(StringUtils.leftPad("", 75, "0"))
 
 
         val nomeArquivo = "NOTGEO_${cnpj}_${numeroPedidoOl}.NOT"
