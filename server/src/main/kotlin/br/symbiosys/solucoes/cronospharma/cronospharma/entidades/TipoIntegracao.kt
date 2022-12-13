@@ -241,7 +241,7 @@ enum class TipoIntegracao {
                                     quantidade = it.substring(14,22).trim().toDouble(),
                                     tipoOcorrencia = it.substring(22,24). trim(),
                                     campoControleIqvia = it.substring(24,31).trim(),
-                                    descontoItem = it.substring(31,35).trim().toDouble()
+                                    descontoItem = (it.substring(31,33).trim() + "." +it.substring(33,35).trim()).toDouble()
                                 )
                             )
                         }

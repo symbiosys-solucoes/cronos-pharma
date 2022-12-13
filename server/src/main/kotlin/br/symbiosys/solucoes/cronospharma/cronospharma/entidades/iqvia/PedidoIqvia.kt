@@ -65,17 +65,22 @@ class PedidoIqvia (
         //itens do pedido
         pedidoPalm.itens.forEach {
             val quantidadeNaoAtendida = it.Qtd.minus(it.QtdConfirmada!!).toInt()
-            conteudo.append("3${it.CodProdutoArq}${StringUtils.leftPad(it.QtdConfirmada?.toInt().toString(), 8, "0")}${StringUtils.leftPad(quantidadeNaoAtendida.toString(), 8, "0")}" +
-                    "${it.CodRetornoItem}")
+            conteudo.append("3")
+            conteudo.append(it.CodProdutoArq)
+            conteudo.append(StringUtils.leftPad(it.QtdConfirmada?.toInt().toString(), 8, "0"))
+            conteudo.append(StringUtils.leftPad(quantidadeNaoAtendida.toString(), 8, "0"))
+            conteudo.append(it.CodRetornoItem)
+
             if(quantidadeNaoAtendida > 0 && it.SituacaoItemPedido == "C") {
-                conteudo.append("2\n")
+                conteudo.append("2")
             }
             if(it.SituacaoItemPedido == "I") {
-                conteudo.append("3\n")
+                conteudo.append("3")
             }
             if(quantidadeNaoAtendida <= 0 && it.SituacaoItemPedido == "C") {
-                conteudo.append("1\n")
+                conteudo.append("1")
             }
+            conteudo.append("\n")
         }
 
         // fim do arquivo
