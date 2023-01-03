@@ -28,6 +28,7 @@ class Agendamento (
     val bloqueioMovimentoRepository: BloqueioMovimentoRepository,
     val emsRepository: EMSRepository,
     val retornoNotaIqviaRepository: RetornoNotaIqviaRepository,
+    val retornoNotaEMSRepository: RetornoNotaEMSRepository,
 ) {
     val logger: Logger = LoggerFactory.getLogger(Agendamento::class.java)
     @Value("\${app.filial.cnpj}")
@@ -255,6 +256,19 @@ class Agendamento (
                         pedidoPalmRepository.updateNomeArquivoRetornoNF(file.name, it)
 
                     }
+                }
+            }
+
+            val idsEMS = pedidoPalmRepository.findPedidosSemRetornoNF("EMS")
+            idsEMS.forEach {
+                val retornos = retornoNotaEMSRepository.findRetornos(listOf(it))
+                if(retornos.isNotEmpty()){
+                  retornos.forEach { ret ->
+                      val file = ret.gerarRetorno(cnpj, diretorio)
+                      arquivo.criaArquivo(file)
+                      pedidoPalmRepository.updateNomeArquivoRetornoNF(file.name, it)
+
+                  }
                 }
             }
 
