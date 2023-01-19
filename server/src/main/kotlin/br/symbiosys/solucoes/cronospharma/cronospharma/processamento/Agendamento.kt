@@ -67,7 +67,7 @@ class Agendamento (
 
 
             gerarArquivoDeRetorno(pedidosComStatusRetorno, diretorio)
-
+            gerarArquivoDeRetornoNF(diretorio)
             uploadArquivos(diretorio, "RETORNO")
 
             logger.info("Concluido o Processo para o: ${diretorio.login}")
