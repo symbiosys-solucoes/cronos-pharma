@@ -98,7 +98,7 @@ class RetornoNotaIqvia {
         }
 
         // fim do arquivo
-        conteudo.append("5")
+        conteudo.append("6")
         conteudo.append(StringUtils.leftPad(itens.size.toString(), 4, "0"))
         conteudo.append(StringUtils.leftPad("", 75, "0"))
 
