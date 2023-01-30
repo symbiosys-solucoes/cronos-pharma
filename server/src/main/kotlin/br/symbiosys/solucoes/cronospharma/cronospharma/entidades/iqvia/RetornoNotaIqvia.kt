@@ -85,7 +85,7 @@ class RetornoNotaIqvia {
             conteudo.append("5")
             conteudo.append(StringUtils.leftPad(it.codigoEAN, 13, " "))
             conteudo.append(StringUtils.leftPad(it.codigoProdutoDistribuidor, 7, " "))
-            conteudo.append(StringUtils.leftPad(it.quantidade.toString().replace(".", ""),8,"0"))
+            conteudo.append(StringUtils.leftPad(it.quantidade?.toInt().toString(),8,"0"))
             conteudo.append(StringUtils.leftPad(it.tipoEmbalagem, 3 , " "))
             conteudo.append(StringUtils.leftPad(it.preco.toString().replace(".", ""),8,"0"))
             conteudo.append(StringUtils.leftPad(it.descontoComercial.toString().replace(".", ""),4,"0"))
