@@ -2,14 +2,11 @@ package br.symbiosys.solucoes.cronospharma.cronospharma.processamento
 
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.TipoIntegracao
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.*
-import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.diretorios.Diretorio
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.diretorios.DiretoriosRepository
-import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.PedidoEMS
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.iqvia.PedidoIqvia
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 
 @Service
 class IqviaService (private val pedidoPalmRepository: PedidoPalmRepository,
@@ -64,45 +61,42 @@ class IqviaService (private val pedidoPalmRepository: PedidoPalmRepository,
 
 
     fun gerarArquivoDeRetornoPedido(id: Long) {
-        if (LocalDate.now() <= LocalDate.of(2023, 1, 31)){
-            val pedidoPalm = findPedidoPalm(id)
-            val diretorio = diretoriosRepository.findAll().filter { dir -> dir.tipoIntegracao.equals(TipoIntegracao.REDEFTB)}.firstOrNull()
-            if (diretorio == null) {
-                logger.error("Nao foi encontrado configuracao para a integracao ${TipoIntegracao.REDEFTB.name}")
-                throw DiretorioNotFoundException("Nao foi encontrado configuracao para a integracao ${TipoIntegracao.REDEFTB.name}")
-            }
 
-            val retorno = PedidoIqvia().gerarRetorno(cnpj, pedidoPalm, diretorio)
-            val arquivo = Arquivo()
-            arquivo.criaArquivo(retorno)
-            pedidoPalmRepository.updateNomeArquivoRetorno(retorno.name, pedidoPalm.IdPedidoPalm!!)
-            logger.info("Gerado o arquivo de retorno do pedido numero: ${pedidoPalm.NumPedidoPalm}")
+        val pedidoPalm = findPedidoPalm(id)
+        val diretorio = diretoriosRepository.findAll().filter { dir -> dir.tipoIntegracao.equals(TipoIntegracao.REDEFTB)}.firstOrNull()
+        if (diretorio == null) {
+            logger.error("Nao foi encontrado configuracao para a integracao ${TipoIntegracao.REDEFTB.name}")
+            throw DiretorioNotFoundException("Nao foi encontrado configuracao para a integracao ${TipoIntegracao.REDEFTB.name}")
         }
+
+        val retorno = PedidoIqvia().gerarRetorno(cnpj, pedidoPalm, diretorio)
+        val arquivo = Arquivo()
+        arquivo.criaArquivo(retorno)
+        pedidoPalmRepository.updateNomeArquivoRetorno(retorno.name, pedidoPalm.IdPedidoPalm!!)
+        logger.info("Gerado o arquivo de retorno do pedido numero: ${pedidoPalm.NumPedidoPalm}")
+
     }
 
     fun gerarArquivoRetornoNF(id: Long) {
 
-        if (LocalDate.now() <= LocalDate.of(2023, 1, 31)){
-            val pedidoPalm = findPedidoPalm(id)
-            val diretorio = diretoriosRepository.findAll().filter { dir -> dir.tipoIntegracao.equals(TipoIntegracao.REDEFTB)}.firstOrNull()
-            if (diretorio == null) {
-                logger.error("Nao foi encontrado configuracao para a integracao ${TipoIntegracao.REDEFTB.name}")
-                throw DiretorioNotFoundException("Nao foi encontrado configuracao para a integracao ${TipoIntegracao.REDEFTB.name}")
-            }
-
-            val retornos = retornoNotaIqviaRepository.findRetornos(listOf(pedidoPalm.IdPedidoPalm!!), force = true)
-            val arquivo = Arquivo()
-            if(!retornos.isNullOrEmpty()) {
-                retornos.forEach { ret ->
-                    val file = ret.gerarRetorno(cnpj, diretorio)
-                    arquivo.criaArquivo(file)
-                    pedidoPalmRepository.updateNomeArquivoRetornoNF(file.name, pedidoPalm.IdPedidoPalm)
-                    logger.info("Gerado o arquivo de retorno NF do pedido numero: ${pedidoPalm.NumPedidoPalm}")
-                }
-            }
-
-
+        val pedidoPalm = findPedidoPalm(id)
+        val diretorio = diretoriosRepository.findAll().filter { dir -> dir.tipoIntegracao.equals(TipoIntegracao.REDEFTB)}.firstOrNull()
+        if (diretorio == null) {
+            logger.error("Nao foi encontrado configuracao para a integracao ${TipoIntegracao.REDEFTB.name}")
+            throw DiretorioNotFoundException("Nao foi encontrado configuracao para a integracao ${TipoIntegracao.REDEFTB.name}")
         }
+
+        val retornos = retornoNotaIqviaRepository.findRetornos(listOf(pedidoPalm.IdPedidoPalm!!), force = true)
+        val arquivo = Arquivo()
+        if(!retornos.isNullOrEmpty()) {
+            retornos.forEach { ret ->
+                val file = ret.gerarRetorno(cnpj, diretorio)
+                arquivo.criaArquivo(file)
+                pedidoPalmRepository.updateNomeArquivoRetornoNF(file.name, pedidoPalm.IdPedidoPalm)
+                logger.info("Gerado o arquivo de retorno NF do pedido numero: ${pedidoPalm.NumPedidoPalm}")
+            }
+        }
+
 
     }
 

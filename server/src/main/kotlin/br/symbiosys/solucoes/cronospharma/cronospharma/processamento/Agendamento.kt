@@ -17,7 +17,6 @@ import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.sql.SQLException
-import java.time.LocalDate
 
 @Component
 @EnableScheduling
@@ -224,45 +223,45 @@ class Agendamento (
     }
 
     private fun gerarArquivoDeRetornoNF(diretorio: Diretorio) {
-        if (LocalDate.now() <= LocalDate.of(2023, 1, 31)){
 
-            when(diretorio.tipoIntegracao){
-                TipoIntegracao.EMS -> {
-                    val idsEMS = pedidoPalmRepository.findPedidosSemRetornoNF("EMS")
-                    idsEMS.forEach {
-                        val retornos = retornoNotaEMSRepository.findRetornos(listOf(it))
-                        if(retornos.isNotEmpty()){
-                            retornos.forEach { ret ->
-                                val file = ret.gerarRetorno(cnpj, diretorio)
-                                arquivo.criaArquivo(file)
-                                pedidoPalmRepository.updateNomeArquivoRetornoNF(file.name, it)
-                                logger.info("Gerado o arquivo de retorno da NF numero: ${ret.numeroNotaFiscal}")
-                            }
-                        }
-
-                    }
-                }
-
-                TipoIntegracao.REDEFTB -> {
-                    // retorno de notas
-                    val ids = pedidoPalmRepository.findPedidosSemRetornoNF("REDEFTB")
-                    ids.forEach {
-                        val retornos = retornoNotaIqviaRepository.findRetornos(listOf(it))
-                        if (!retornos.isNullOrEmpty()) {
-                            retornos.forEach { ret ->
-                                val file = ret.gerarRetorno(cnpj, diretorio)
-                                arquivo.criaArquivo(file)
-                                pedidoPalmRepository.updateNomeArquivoRetornoNF(file.name, it)
-                                logger.info("Gerado o arquivo de retorno da NF numero: ${ret.numeroNotaFiscal}")
-                            }
+        when(diretorio.tipoIntegracao){
+            TipoIntegracao.EMS -> {
+                val idsEMS = pedidoPalmRepository.findPedidosSemRetornoNF("EMS")
+                idsEMS.forEach {
+                    bloqueioMovimentoRepository.executaRegrasTipoGravarRetornos(it)
+                    val retornos = retornoNotaEMSRepository.findRetornos(listOf(it))
+                    if(retornos.isNotEmpty()){
+                        retornos.forEach { ret ->
+                            val file = ret.gerarRetorno(cnpj, diretorio)
+                            arquivo.criaArquivo(file)
+                            pedidoPalmRepository.updateNomeArquivoRetornoNF(file.name, it)
+                            logger.info("Gerado o arquivo de retorno da NF numero: ${ret.numeroNotaFiscal}")
                         }
                     }
-                }
 
-                else -> return
+                }
             }
 
+            TipoIntegracao.REDEFTB -> {
+                // retorno de notas
+                val ids = pedidoPalmRepository.findPedidosSemRetornoNF("REDEFTB")
+                ids.forEach {
+                    val retornos = retornoNotaIqviaRepository.findRetornos(listOf(it))
+                    if (!retornos.isNullOrEmpty()) {
+                        retornos.forEach { ret ->
+                            val file = ret.gerarRetorno(cnpj, diretorio)
+                            arquivo.criaArquivo(file)
+                            pedidoPalmRepository.updateNomeArquivoRetornoNF(file.name, it)
+                            logger.info("Gerado o arquivo de retorno da NF numero: ${ret.numeroNotaFiscal}")
+                        }
+                    }
+                }
+            }
+
+            else -> return
         }
+
+
 
     }
     private fun gerarArquivoDeRetorno(pedidos: List<PedidoPalm>, diretorio: Diretorio) {

@@ -47,6 +47,23 @@ class BloqueioMovimentoRepository(
 
         }
 
+    }
+    fun executaRegrasTipoGravarRetornos(id: Long) {
+
+            val regras = findByTipoBloqueio("023")
+
+            regras.forEach {
+                if(it.ExpressaoSQL != null && it.Inativo != "S"){
+
+                    jdbcTemplate.query(it.ExpressaoSQL!!.uppercase(),
+                        MapSqlParameterSource().addValue("PINT1",id),
+                        { rs: ResultSet, rowNum: Int -> rs.getString(1) }
+                    )
+                }
+
+            }
+
+
 
     }
 
