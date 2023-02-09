@@ -306,7 +306,9 @@ class Agendamento (
 
     private fun uploadArquivos(diretorio: Diretorio, tipoEnvio: String){
         when (tipoEnvio){
+
             "RETORNO" -> {
+                arquivo.criaDiretorio(diretorio.diretorioRetornoLocal + "enviado")
                 val listaArquivos = arquivo.listaArquivos(diretorio.diretorioRetornoLocal ?: throw Exception("Nao existe diretorio de retorno configurado"))
                 if (listaArquivos.isEmpty()){
                     logger.info("nao existe arquivos para enviar")
@@ -319,7 +321,8 @@ class Agendamento (
                     client.uploadArquivo(it,
                         diretorio.diretorioRetornoFTP + it.replace(diretorio.diretorioRetornoLocal,"")
                     )
-                    arquivo.removeArquivo( it)
+                    arquivo.moverArquivo(it, it + "\\enviado")
+                    //arquivo.removeArquivo( it)
                 }
                 client.fechaConexaoFTP()
             }

@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "br.symbiosys.solucoes.cronos-pharma"
-version = "1.4.3"
+version = "1.4.4"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 repositories {
