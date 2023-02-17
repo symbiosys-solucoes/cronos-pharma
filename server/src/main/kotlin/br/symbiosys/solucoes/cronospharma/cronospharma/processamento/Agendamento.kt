@@ -321,7 +321,19 @@ class Agendamento (
                     client.uploadArquivo(it,
                         diretorio.diretorioRetornoFTP + it.replace(diretorio.diretorioRetornoLocal,"")
                     )
-                    arquivo.moverArquivo(it, it + "\\enviado")
+
+                    try {
+                        val nomeArquivo = it.replace(diretorio.diretorioRetornoLocal,"")
+                        logger.info("Tentando mover arquivo de retorno: ${nomeArquivo} ...")
+                        val destinoDoArquivo = diretorio.diretorioRetornoLocal + "enviado\\" + nomeArquivo
+                        arquivo.moverArquivo(it, destinoDoArquivo)
+                        logger.info("Arquivo de retorno: ${nomeArquivo} movido com sucesso...")
+                    } catch (e: Exception) {
+                        logger.error(e.message)
+                        e.printStackTrace()
+                    }
+
+
                     //arquivo.removeArquivo( it)
                 }
                 client.fechaConexaoFTP()

@@ -39,7 +39,7 @@ class RetornoNotaEMS {
         conteudo.append(StringUtils.leftPad(cnpj, 15, "0"))
         conteudo.append(StringUtils.leftPad(numeroNotaFiscal, 8, "0"))
         conteudo.append(StringUtils.leftPad(numeroSerieNotaFiscal, 3, "0"))
-        conteudo.append(StringUtils.leftPad(numeroPedidoIndustria, 12, " "))
+        conteudo.append(StringUtils.rightPad(numeroPedidoIndustria, 12, " "))
         conteudo.append("${dataFaturamento.toString().substring(8,10)}${dataFaturamento.toString().substring(5,7)}${dataFaturamento.toString().substring(0,4)}")
         conteudo.append("${dataFaturamento.toString().substring(11,13)}${dataFaturamento.toString().substring(14,16)}${dataFaturamento.toString().substring(17,19)}00")
         conteudo.append(StringUtils.leftPad(numeroPedidoOL, 12, " "))
@@ -52,11 +52,11 @@ class RetornoNotaEMS {
             conteudo.append(StringUtils.leftPad(numeroNotaFiscal, 8, "0"))
             conteudo.append(StringUtils.leftPad(numeroSerieNotaFiscal, 3, "0"))
             conteudo.append(StringUtils.leftPad(it.codigoEANProduto, 14, "0"))
-            conteudo.append(StringUtils.leftPad(numeroPedidoIndustria, 12, " "))
+            conteudo.append(StringUtils.rightPad(numeroPedidoIndustria, 12, " "))
             conteudo.append("0")
             conteudo.append(StringUtils.leftPad(it.quantidadeAtendida.toString().replace(".", ""), 5, "0"))
             conteudo.append(StringUtils.leftPad(it.descontoAplicado.toString().replace(".", ""), 5, "0"))
-            conteudo.append("10\n") // prazo medio
+            conteudo.append("30\n") // prazo medio
         }
 
         // rodape
@@ -67,7 +67,7 @@ class RetornoNotaEMS {
         conteudo.append(StringUtils.leftPad(itens.size.toString(), 5, "0"))
         conteudo.append(StringUtils.leftPad(itens.size.toString(), 5, "0"))
 
-        val nomeArquivo = "NOTEMS_${cnpj}${dataGeracao.substring(0,10).replace("-","")}${dataGeracao.substring(11,19).replace(":","")}"
+        val nomeArquivo = "NOTEMS_${cnpj}_${dataGeracao.substring(0,10).replace("-","")}${dataGeracao.substring(11,19).replace(":","")}.txt"
         val file = File(diretorio.diretorioRetornoLocal + nomeArquivo)
         file.writeText(conteudo.toString())
         return file

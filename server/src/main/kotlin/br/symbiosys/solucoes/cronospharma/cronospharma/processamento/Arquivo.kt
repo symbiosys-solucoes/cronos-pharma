@@ -69,7 +69,14 @@ class Arquivo {
         if(!file.exists() && !file.isDirectory){
             throw IOException("Caminho não existe ou não é uma pasta")
         }
-        return file.listFiles().map { file -> file.absolutePath }
+        val files: MutableList<String> = mutableListOf()
+
+        file.listFiles().forEach {
+            if (it.isFile) {
+                files.add(it.absolutePath)
+            }
+        }
+        return files
     }
 
     fun moverArquivo(origem: String, destino: String){
