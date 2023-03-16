@@ -236,6 +236,7 @@ class Agendamento (
                             arquivo.criaArquivo(file)
                             pedidoPalmRepository.updateNomeArquivoRetornoNF(file.name, it)
                             logger.info("Gerado o arquivo de retorno da NF numero: ${ret.numeroNotaFiscal}")
+                            Thread.sleep(5000L)
                         }
                     }
 
@@ -253,6 +254,7 @@ class Agendamento (
                             arquivo.criaArquivo(file)
                             pedidoPalmRepository.updateNomeArquivoRetornoNF(file.name, it)
                             logger.info("Gerado o arquivo de retorno da NF numero: ${ret.numeroNotaFiscal}")
+                            Thread.sleep(5000L)
                         }
                     }
                 }
