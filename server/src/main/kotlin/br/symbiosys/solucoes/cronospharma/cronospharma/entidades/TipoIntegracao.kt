@@ -20,7 +20,8 @@ enum class TipoIntegracao {
 
     CONSYS,
     EMS,
-    REDEFTB;
+    REDEFTB,
+    MEDQUIMICA;
 
     companion object {
         val logger = LoggerFactory.getLogger(TipoIntegracao::class.java)
@@ -276,6 +277,8 @@ enum class TipoIntegracao {
                 quatidadeItems = quantidadeItems
             )
         }
+
+
 
     }
 
