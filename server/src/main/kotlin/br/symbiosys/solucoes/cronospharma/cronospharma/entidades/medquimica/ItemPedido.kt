@@ -10,7 +10,7 @@ class ItemPedido {
     var quantidade: Int = 0
     var condicacaoComercial: String? = null
     var desconto: String? = null
-    var prazo: Int = 0
+    var prazo: String? = null
     var condicaoDesconto: String? = null
     var condicaoPrazo : String? = null
     var codigoPrazo : String? = null

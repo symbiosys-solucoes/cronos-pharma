@@ -155,7 +155,7 @@ class ItemPedidoPalmRepository (
                 "SET @CNPJ = :cnpj\n" +
                 "\n" +
                 "\n" +
-                "iF @ORIGEM IN ('EMS', 'REDEFTB')\n" +
+                "iF @ORIGEM IN ('EMS', 'REDEFTB', 'CLOSEUP')\n" +
                 "BEGIN\n" +
                 "  SELECT \n" +
                 "  IDPRODUTO = (SELECT IDPRODUTO FROM CodigoBarras WHERE CodigoBarras = @CODIGOBARRAS),\n" +

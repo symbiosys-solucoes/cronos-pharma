@@ -175,6 +175,9 @@ class Agendamento (
                 TipoIntegracao.REDEFTB -> {
                     pedidos.add(TipoIntegracao.toRedeFTB(arq).toPedidoPalm())
                 }
+                TipoIntegracao.MEDQUIMICA -> {
+                    pedidos.add(TipoIntegracao.toMedquimica(arq).toPedidoPalm())
+                }
             }
             this.arquivo.moverArquivo(arq, diretorio.diretorioImportadosLocal + arq.replace(diretorio.diretorioPedidoLocal,""))
         }

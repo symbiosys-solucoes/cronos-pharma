@@ -56,6 +56,7 @@ class PedidoPalmRepository(
             .addValue("idUsuario", pedidoPalm.IdUsuario)
             .addValue("dataOperacao",pedidoPalm.DataOperacao)
             .addValue("cnpj", pedidoPalm.CnpjCpfCliFor)
+            .addValue("numaux", pedidoPalm.NumPedidoPalmAux)
             .addValue("codFilial", pedidoPalm.CodFilial)
 
         val pedido = jdbcTemplate.query(sqlInsertPedidoPalm, params, mapperPedidoPalm).first() ?: null
@@ -187,7 +188,7 @@ class PedidoPalmRepository(
                 "  DECLARE @CNPJ VARCHAR(14), @ORIGEM VARCHAR(20)\n" +
                 "  SET @CNPJ = :cnpj\n" +
                 "  SET @ORIGEM = :origem\n" +
-                "            IF (@ORIGEM IN ('EMS', 'REDEFTB'))\n" +
+                "            IF (@ORIGEM IN ('EMS', 'REDEFTB', 'CLOSEUP'))\n" +
                 "\t\t\t  BEGIN\n" +
                 "              SELECT\n" +
                 "              CODVENDEDOR = ISNULL(Codfunc,'00001'),\n" +
@@ -209,7 +210,7 @@ class PedidoPalmRepository(
         private const val sqlInsertPedidoPalm =
             "BEGIN TRANSACTION \n" +
                     "\n" +
-                    " INSERT INTO  PedidoPalm ( Origem, IdEmpresa, NumPedidoPalm, CodVendedor, CodCliFor, DataPedido, CodCondPag, CodPortador, TotalPedido, SituacaoPedido, IdUsuario, DataOperacao, CnpjCpfCliFor, CodFilial)\n" +
+                    " INSERT INTO  PedidoPalm ( Origem, IdEmpresa, NumPedidoPalm, CodVendedor, CodCliFor, DataPedido, CodCondPag, CodPortador, TotalPedido, SituacaoPedido, IdUsuario, DataOperacao, CnpjCpfCliFor, NumPedidoPalmAux, CodFilial )\n" +
                     "\tOUTPUT INSERTED.*\n" +
                     "\t\tSELECT \t\n" +
                     "\t\tORIGEM = :origem ,\n" +
@@ -225,7 +226,9 @@ class PedidoPalmRepository(
                     "\t\tIDUSUARIO = :idUsuario,\n" +
                     "\t\tDATAOPERACAO = :dataOperacao,\n" +
                     "\t\tCNPJ = :cnpj,\n" +
+                    "\t\tNumPedidoPalmAux = :numaux,\n" +
                     "\t\tFILIAL = :codFilial\n" +
+
                     "\n" +
                     "IF @@ERROR = 0\n" +
                     "COMMIT\n" +

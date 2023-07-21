@@ -6,11 +6,15 @@ import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.PedidoEMS
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.ItemEMS
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.iqvia.ItemPedidoIqvia
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.iqvia.PedidoIqvia
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.medquimica.ItemPedido
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.medquimica.Pedido
 import org.slf4j.LoggerFactory
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
 import java.io.IOException
+import java.lang.NumberFormatException
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -276,6 +280,73 @@ enum class TipoIntegracao {
                 itensPedidoIqvia = itens,
                 quatidadeItems = quantidadeItems
             )
+        }
+
+        fun toMedquimica(origem: String): Pedido {
+            val pedido = Pedido()
+            val arquivo = File(origem)
+            try {
+                val fileReader = FileReader(arquivo)
+
+                val bufferedReader = BufferedReader(fileReader)
+
+
+                bufferedReader.forEachLine {
+
+                    if (it.isNullOrEmpty()) {
+                        return@forEachLine
+                    }
+                    when(it.substring(0,1)) {
+                        "1" -> {
+                            pedido.cnpjFarmacia = it.substring(1,15).trim()
+                            pedido.numeroPedidoMedquimica = it.substring(15, 35).trim()
+                            pedido.dataPedido = LocalDate.of(it.substring(40,44).trim().toInt(), it.substring(38,40).trim().toInt(), it.substring(36,38).trim().toInt())
+                            pedido.linhaProduto = it.substring(49,50).trim()
+                            pedido.cnpjDistribuidor = it.substring(51, 66).trim()
+                            pedido.numeroOS = it.substring(66, 86).trim()
+                            pedido.observacao = it.substring(86, 186).trim()
+                            pedido.codigoRepresentante = it.substring(186,196).trim()
+                            try {
+                                pedido.codigoCampanha = it.substring(196, 202).trim()
+                                pedido.faturamentoIntegral = it.substring(202,203).trim()
+                                pedido.prazo = it.substring(203, 206).trim()
+                                pedido.condicaoPrazo = it.substring(206,207).trim()
+                                pedido.codigoPrazo = it.substring(207,247).trim()
+                            } catch (e: StringIndexOutOfBoundsException){
+                                logger.warn("Nao foi possivel carregar o codigo da campanha, faturamento integral e prazo")
+                            }
+                        }
+                        "2" -> {
+                           val item = ItemPedido()
+                            item.numeroPedidoFornecedor = pedido.numeroPedidoMedquimica
+                            item.codigoBarras = it.substring(21,34).trim()
+                            item.quantidade = it.substring(34,39).trim().toInt()
+                            item.condicacaoComercial = it.substring(39,40).trim()
+                            item.desconto = "${it.substring(43,46).trim()}.${it.substring(46,48).trim()}"
+                            item.prazo = it.substring(48,51).trim()
+                            item.condicaoDesconto = it.substring(51,52).trim()
+                            item.condicaoPrazo = it.substring(52,53).trim()
+                            item.codigoPrazo = it.substring(53, 93).trim()
+                            try {
+                            item.codigoOferta = it.substring(93, 113).trim()
+
+                            item.preco = BigDecimal("${it.substring(113,118).trim()}.${it.substring(118,120).trim()}")
+                            } catch (e: NumberFormatException){
+                                logger.warn("Nao foi informado preco para o produto")
+                            }
+                            pedido.items.add(item)
+                        }
+                    }
+                }
+
+                fileReader.close()
+                bufferedReader.close()
+
+            } catch (e: Exception){
+                e.printStackTrace()
+            }
+
+            return pedido
         }
 
 
