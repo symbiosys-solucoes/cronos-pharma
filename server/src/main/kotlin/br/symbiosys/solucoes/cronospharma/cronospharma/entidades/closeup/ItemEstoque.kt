@@ -1,4 +1,4 @@
-package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.medquimica
+package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.closeup
 
 class ItemEstoque {
 

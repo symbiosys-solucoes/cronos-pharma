@@ -6,8 +6,8 @@ import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.PedidoEMS
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.ems.ItemEMS
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.iqvia.ItemPedidoIqvia
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.iqvia.PedidoIqvia
-import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.medquimica.ItemPedido
-import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.medquimica.Pedido
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.closeup.ItemPedido
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.closeup.Pedido
 import org.slf4j.LoggerFactory
 import java.io.BufferedReader
 import java.io.File
@@ -25,7 +25,7 @@ enum class TipoIntegracao {
     CONSYS,
     EMS,
     REDEFTB,
-    MEDQUIMICA;
+    CLOSEUP;
 
     companion object {
         val logger = LoggerFactory.getLogger(TipoIntegracao::class.java)
@@ -282,7 +282,7 @@ enum class TipoIntegracao {
             )
         }
 
-        fun toMedquimica(origem: String): Pedido {
+        fun toCloseUP(origem: String): Pedido {
             val pedido = Pedido()
             val arquivo = File(origem)
             try {

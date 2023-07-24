@@ -2,6 +2,7 @@ package br.symbiosys.solucoes.cronospharma.cronospharma.processamento
 
 import br.symbiosys.solucoes.cronospharma.cronospharma.controllers.processamento.ProcessamentoDto
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.TipoIntegracao
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.closeup.Pedido
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.*
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.diretorios.Diretorio
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.diretorios.DiretoriosRepository
@@ -28,6 +29,7 @@ class Agendamento (
     val emsRepository: EMSRepository,
     val retornoNotaIqviaRepository: RetornoNotaIqviaRepository,
     val retornoNotaEMSRepository: RetornoNotaEMSRepository,
+    val retornoNotaCLOSEUPRepository: RetornoNotaCLOSEUPRepository,
 ) {
     val logger: Logger = LoggerFactory.getLogger(Agendamento::class.java)
     @Value("\${app.filial.cnpj}")
@@ -175,8 +177,8 @@ class Agendamento (
                 TipoIntegracao.REDEFTB -> {
                     pedidos.add(TipoIntegracao.toRedeFTB(arq).toPedidoPalm())
                 }
-                TipoIntegracao.MEDQUIMICA -> {
-                    pedidos.add(TipoIntegracao.toMedquimica(arq).toPedidoPalm())
+                TipoIntegracao.CLOSEUP -> {
+                    pedidos.add(TipoIntegracao.toCloseUP(arq).toPedidoPalm())
                 }
             }
             this.arquivo.moverArquivo(arq, diretorio.diretorioImportadosLocal + arq.replace(diretorio.diretorioPedidoLocal,""))
@@ -263,6 +265,22 @@ class Agendamento (
                 }
             }
 
+            TipoIntegracao.CLOSEUP -> {
+                val ids = pedidoPalmRepository.findPedidosSemRetornoNF("CLOSEUP")
+                ids.forEach {
+                    val retornos = retornoNotaCLOSEUPRepository.findRetornos(listOf(it))
+                    if (!retornos.isNullOrEmpty()) {
+                        retornos.forEach { ret ->
+                            val file = ret.gerarRetorno(cnpj, diretorio)
+                            arquivo.criaArquivo(file)
+                            pedidoPalmRepository.updateNomeArquivoRetornoNF(file.name, it)
+                            logger.info("Gerado o arquivo de retorno da NF numero: ${ret.numeroPedido}")
+                            Thread.sleep(5000L)
+                        }
+                    }
+                }
+            }
+
             else -> return
         }
 
@@ -281,6 +299,12 @@ class Agendamento (
                 }
                 "REDEFTB" -> {
                     val retorno = PedidoIqvia().gerarRetorno(cnpj, it, diretorio)
+                    arquivo.criaArquivo(retorno)
+                    pedidoPalmRepository.updateNomeArquivoRetorno(retorno.name, it.IdPedidoPalm!!)
+
+                }
+                "CLOSEUP" -> {
+                    val retorno = Pedido().gerarRetorno(cnpj, it, diretorio)
                     arquivo.criaArquivo(retorno)
                     pedidoPalmRepository.updateNomeArquivoRetorno(retorno.name, it.IdPedidoPalm!!)
 

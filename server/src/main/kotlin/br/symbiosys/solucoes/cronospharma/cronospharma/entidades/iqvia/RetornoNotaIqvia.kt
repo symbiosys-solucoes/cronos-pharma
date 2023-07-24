@@ -30,7 +30,7 @@ class RetornoNotaIqvia {
     var valorTotalNF: Double = 0.0
     var valorIPI: Double = 0.0
 
-    //Impostos da nota fical
+    //Impostos da nota fiscal
     var baseCalculoIcms: Double = 0.0
     var valorIcms: Double = 0.0
     var baseCalculoSubstituicaoTributaria: Double = 0.0
