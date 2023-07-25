@@ -6,7 +6,7 @@ class Estoque {
 
     val tipoRegistro = "1"
     var cnpjDistribuidor : String? = null
-    var dataPosicaoEstoque : LocalDateTime? = null
+    var dataPosicaoEstoque : String? = null
 
     var items : MutableList<ItemEstoque> = mutableListOf()
 }

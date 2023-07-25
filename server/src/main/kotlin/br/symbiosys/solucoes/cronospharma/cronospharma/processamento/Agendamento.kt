@@ -2,7 +2,10 @@ package br.symbiosys.solucoes.cronospharma.cronospharma.processamento
 
 import br.symbiosys.solucoes.cronospharma.cronospharma.controllers.processamento.ProcessamentoDto
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.TipoIntegracao
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.closeup.CloseUpRepository
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.closeup.Pedido
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.closeup.geraEstoqueCloseUp
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.closeup.geraPrecoCloseUp
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.*
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.diretorios.Diretorio
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.diretorios.DiretoriosRepository
@@ -30,6 +33,7 @@ class Agendamento (
     val retornoNotaIqviaRepository: RetornoNotaIqviaRepository,
     val retornoNotaEMSRepository: RetornoNotaEMSRepository,
     val retornoNotaCLOSEUPRepository: RetornoNotaCLOSEUPRepository,
+    val closeupRepository: CloseUpRepository
 ) {
     val logger: Logger = LoggerFactory.getLogger(Agendamento::class.java)
     @Value("\${app.filial.cnpj}")
@@ -326,10 +330,30 @@ class Agendamento (
                 val estoque = geraEstoqueEMS(cnpj, emsRepository, diretorio)
                 arquivo.criaArquivo(estoque)
             }
+            TipoIntegracao.CLOSEUP -> {
+                val estoque = geraEstoqueCloseUp(cnpj, closeupRepository, diretorio)
+                arquivo.criaArquivo(estoque)
+            }
             else -> { logger.info("Nao existe layout de estoque configuradao para essa OL")}
         }
         logger.info("Gerado o arquivo de estoque da: ${diretorio.tipoIntegracao.name}")
     }
+
+    private fun gerarArquivoDePreco(diretorio: Diretorio){
+
+        if(diretorio.diretorioPrecoLocal == null){
+            return
+        }
+        when(diretorio.tipoIntegracao){
+            TipoIntegracao.CLOSEUP -> {
+                val preco = geraPrecoCloseUp(cnpj, closeupRepository, diretorio)
+                arquivo.criaArquivo(preco)
+            }
+            else -> { logger.info("Nao existe layout de preco configuradao para essa OL")}
+        }
+        logger.info("Gerado o arquivo de preco da: ${diretorio.tipoIntegracao.name}")
+    }
+
 
 
 

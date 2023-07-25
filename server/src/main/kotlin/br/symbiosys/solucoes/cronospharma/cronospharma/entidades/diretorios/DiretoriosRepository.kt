@@ -44,7 +44,10 @@ class DiretoriosRepository (
             diretorioEstoqueLocal = rs.getString("sym_dir_est_local"),
             idDiretorio = rs.getLong("IdProduto")
 
-        )
+        ).apply {
+            diretorioPrecoLocal = rs.getString("sym_dir_preco_local")
+            diretorioPrecoFTP = rs.getString("sym_dir_preco_ftp")
+        }
     }
     private val sqlDiretorios: String = "SELECT \n" +
             "sym_ativo,\n" +
@@ -60,6 +63,8 @@ class DiretoriosRepository (
             "CodTd_sym_tipo,\n" +
             "sym_dir_est_ftp,\n" +
             "sym_dir_est_local,\n" +
+            "sym_dir_preco_ftp,\n" +
+            "sym_dir_preco_local,\n" +
             "IdProduto\n" +
             "FROM ZProdutosCompl WHERE sym_ativo = 'S'"
     private val sqlDiretoriosPorId: String = "SELECT \n" +
@@ -76,6 +81,8 @@ class DiretoriosRepository (
             "CodTd_sym_tipo,\n" +
             "sym_dir_est_ftp,\n" +
             "sym_dir_est_local,\n" +
+            "sym_dir_preco_ftp,\n" +
+            "sym_dir_preco_local,\n" +
             "IdProduto\n" +
             "FROM ZProdutosCompl WHERE sym_ativo = 'S' AND IdProduto = :id"
 }

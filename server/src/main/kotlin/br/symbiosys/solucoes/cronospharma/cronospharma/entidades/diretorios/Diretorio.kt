@@ -31,6 +31,10 @@ class Diretorio
     @JsonProperty("idProduto")
     val idDiretorio: Long? = null
             ) {
+    @JsonProperty("caminho_de_arquivos_de_preco_ftp")
+    var diretorioPrecoLocal: String? = null
+    @JsonProperty("caminho_de_arquivos_de_preco_ftp")
+    var diretorioPrecoFTP: String? = null
     override fun toString(): String {
         return "Diretorio(tipoIntegracao=$tipoIntegracao, usaFTP=$usaFTP, ativo=$ativo, url='$url', login='$login', senha='$senha', diretorioPedidoFTP=$diretorioPedidoFTP, diretorioRetornoFTP=$diretorioRetornoFTP, diretorioPedidoLocal=$diretorioPedidoLocal, diretorioRetornoLocal=$diretorioRetornoLocal, diretorioImportadosLocal=$diretorioImportadosLocal, diretorioEstoqueLocal=$diretorioEstoqueLocal, diretorioEstoqueFTP=$diretorioEstoqueFTP, idDiretorio=$idDiretorio)"
     }

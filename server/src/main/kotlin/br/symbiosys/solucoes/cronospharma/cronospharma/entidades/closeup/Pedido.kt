@@ -102,7 +102,7 @@ class Pedido: Integrador {
         conteudo.append(StringUtils.leftPad(quantidadeNaoAtendida.toString(), 5, " "))
 
         //nome do arquivo
-        val nomeArquivo = "RETORNO_${pedidoPalm.NumPedidoPalm}_XX_${pedidoPalm.CnpjCpfCliFor}.txt"
+        val nomeArquivo = "RETORNO_${pedidoPalm.NumPedidoPalm}_4M_${pedidoPalm.CnpjCpfCliFor}.txt"
         val file = File(diretorio.diretorioRetornoLocal + nomeArquivo)
 
         file.writeText(conteudo.toString())

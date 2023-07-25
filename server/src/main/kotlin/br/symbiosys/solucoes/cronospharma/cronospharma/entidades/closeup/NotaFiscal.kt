@@ -85,7 +85,7 @@ class NotaFiscal {
         conteudo.append("00000")
 
 
-        val nomeArquivo = "ESPELHO${numeroPedidoMedquimica}_XX_${cnpjFarmacia}.txt"
+        val nomeArquivo = "ESPELHO${numeroPedidoMedquimica}_4M_${cnpjFarmacia}.txt"
         val file = File(diretorio.diretorioRetornoLocal + nomeArquivo)
 
         file.writeText(conteudo.toString())
