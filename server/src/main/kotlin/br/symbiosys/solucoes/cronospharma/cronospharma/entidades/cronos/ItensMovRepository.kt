@@ -62,7 +62,7 @@ class ItensMovRepository
                 "DECLARE @IDPEDIDOPALM INT\n" +
                 "SET @IDPEDIDOPALM = :id\n" +
                 "\n" +
-                "SELECT im.ValorSubICMS, CodProdutoArq, CodProduto, im.Qtd, im.UnidItemMov,\n" +
+                "SELECT im.ValorItemSubICMS, CodProdutoArq, CodProduto, im.Qtd, im.UnidItemMov,\n" +
                 "PrecoUnitLiq = dbo.fn_ValorItemMov4('U', im.IdMov, im.IdItemMov, im.IdProduto, im.PrecoUnit, im.PercDescontoItem, im.Qtd, im.PercICMS, im.PercIPI, im.PercISS, im.MVAitem, TipoMov, Mov.CodCliFor, Mov.CodFilial, CodFilialDest, CodLocalDest, Mov.PercDesconto, CalculaICMSsubstituto,  DescNaoIncideICMS, im.IdNaturezaOperacao, SitTributariaItem,ValorIPIincideICMS,ValorFreteIncideICMS,PercReducaoBICMS,PercSubICMS, ValorItemFrete, ValorItemOutDespesas),\n" +
                 "im.PercDescontoItem, ValorDesconto = 0, ValorRepasse = 0, Repasse = 0, ValorUnitario = im.PrecoUnit, Fracionamento = (im.Qtd / im.FatorConvUnid) / im.Qtd\n" +
                 "FROM ItemPedidoPalm \n" +
