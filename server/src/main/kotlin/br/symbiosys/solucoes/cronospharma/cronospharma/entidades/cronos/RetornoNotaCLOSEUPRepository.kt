@@ -46,7 +46,7 @@ class RetornoNotaCLOSEUPRepository (private val jdbcTemplate: NamedParameterJdbc
             retorno.valorIcms = rs.getDouble("ValorICMS")
             retorno.baseCalculoSubstituicaoTributaria = rs.getDouble("BaseSubICMS")
             retorno.valorIcmsSubstituicaoTributaria = rs.getDouble("ValorSubICMS")
-            retorno.chaveNotaFiscal = rs.getString("ChaveNFe,")
+            retorno.chaveNotaFiscal = rs.getString("ChaveNFe")
 
             return retorno
         }
