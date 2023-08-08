@@ -32,7 +32,7 @@ class ItensMovRepository
             item.quantidadeAtendida = rs.getDouble("Qtd").toInt()
             item.valorLiquidoNotaFiscal = rs.getDouble("PrecoUnitLiq")
             item.descontoAplicado = rs.getDouble("ValorDesconto")
-            item.valorSubstituicaoTributaria = rs.getDouble("ValorSubICMS")
+            item.valorSubstituicaoTributaria = rs.getDouble("ValorItemSubICMS")
 
             return item
         }
