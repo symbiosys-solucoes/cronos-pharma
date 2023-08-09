@@ -121,28 +121,34 @@ class Agendamento (
     }
 
     private fun baixarArquivos(diretorio: Diretorio): List<String>? {
-        val listaArquivos = mutableListOf<String>()
-        logger.info("Procurando arquivos ${diretorio.tipoIntegracao.name}")
-        val clienteFTP = ClienteFTP( server = diretorio.url, user = diretorio.login, password = diretorio.senha)
-        clienteFTP.abreConexaoFTP()
-        val arquivos = clienteFTP.listaArquivos(diretorio.diretorioPedidoFTP ?: throw SQLException("Caminho FTP não pode estar nulo ou em branco"))
+        try {
+            val listaArquivos = mutableListOf<String>()
+            logger.info("Procurando arquivos ${diretorio.tipoIntegracao.name}")
+            val clienteFTP = ClienteFTP( server = diretorio.url, user = diretorio.login, password = diretorio.senha)
+            clienteFTP.abreConexaoFTP()
+            val arquivos = clienteFTP.listaArquivos(diretorio.diretorioPedidoFTP ?: throw SQLException("Caminho FTP não pode estar nulo ou em branco"))
 
-        if(arquivos.isEmpty()) {
-            logger.info("Não Existe arquivos para baixar!")
-            return null
+            if(arquivos.isEmpty()) {
+                logger.info("Não Existe arquivos para baixar!")
+                return null
+            }
+
+            arquivos.forEach { arq ->
+                logger.info(arq)
+                clienteFTP.downloadArquivo(
+                    arq,
+                    diretorio.diretorioPedidoLocal + arq.replace(diretorio.diretorioPedidoFTP,""),
+                )
+                listaArquivos.add(arq)
+            }
+            clienteFTP.fechaConexaoFTP()
+
+            return listaArquivos
+        } catch (e: Exception) {
+            logger.error(e.message, e)
         }
+        return listOf()
 
-        arquivos.forEach { arq ->
-            logger.info(arq)
-            clienteFTP.downloadArquivo(
-                arq,
-                diretorio.diretorioPedidoLocal + arq.replace(diretorio.diretorioPedidoFTP,""),
-            )
-            listaArquivos.add(arq)
-        }
-        clienteFTP.fechaConexaoFTP()
-
-        return listaArquivos
     }
 
     private fun inserePedidos(diretorio: Diretorio): List<PedidoPalm> {

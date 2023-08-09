@@ -1,6 +1,7 @@
 package br.symbiosys.solucoes.cronospharma.cronospharma.processamento
 
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Component
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter

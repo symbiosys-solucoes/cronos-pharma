@@ -46,7 +46,13 @@ class NotaFiscal {
         val ano = dataEmissaoNotaFiscal.toString().substring(0,4)
         val hora = dataEmissaoNotaFiscal.toString().substring(11,13)
         val minuto = dataEmissaoNotaFiscal.toString().substring(14,16)
-        val segundos = dataEmissaoNotaFiscal.toString().substring(17,19) + "00"
+        var segundos = ""
+        try {
+            segundos = dataEmissaoNotaFiscal.toString().substring(17,19) + "00"
+        } catch (e: Exception) {
+           segundos = "0000"
+        }
+
 
         //cabecalho
         conteudo.append(tipoRegistro)
