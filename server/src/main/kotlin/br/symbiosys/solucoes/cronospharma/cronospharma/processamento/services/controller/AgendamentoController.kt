@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 
 @Component
 @EnableScheduling
-class AgendamentoController
+class AgendamentoService
     (private val diretorioService: DiretorioService,
             private val downloadUploadService: DownloadUploadService,
             private val arquivoService: ArquivoService)
