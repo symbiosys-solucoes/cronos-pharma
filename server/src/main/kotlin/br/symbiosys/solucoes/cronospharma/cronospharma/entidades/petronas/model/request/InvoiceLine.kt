@@ -1,4 +1,4 @@
-package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model
+package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.request
 
 import com.fasterxml.jackson.annotation.JsonProperty
 

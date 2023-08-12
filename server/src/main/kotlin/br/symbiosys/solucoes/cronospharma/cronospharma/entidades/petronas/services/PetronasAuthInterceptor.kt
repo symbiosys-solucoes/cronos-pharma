@@ -1,5 +1,6 @@
-package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas
+package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.services
 
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.PetronasAuthUtility
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.api.ApiPetronasAuth
 import feign.RequestInterceptor
 import feign.RequestTemplate
