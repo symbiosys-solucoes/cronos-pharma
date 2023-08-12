@@ -1,5 +1,6 @@
-package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas
+package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.api
 
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.response.AuthResponse
 import feign.Headers
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.http.ResponseEntity

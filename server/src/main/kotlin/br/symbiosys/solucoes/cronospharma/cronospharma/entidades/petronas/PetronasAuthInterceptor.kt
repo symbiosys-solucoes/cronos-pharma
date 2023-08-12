@@ -1,5 +1,6 @@
 package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas
 
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.api.ApiPetronasAuth
 import feign.RequestInterceptor
 import feign.RequestTemplate
 import org.springframework.beans.factory.annotation.Autowired

@@ -4,7 +4,7 @@ import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.TipoIntegracao
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.BloqueioMovimentoRepository
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.FinalizaMovimento
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.PedidoPalmRepository
-import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.ApiPetronasAuth
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.api.ApiPetronasAuth
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.bind.annotation.GetMapping
