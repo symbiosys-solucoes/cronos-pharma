@@ -10,7 +10,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.web.bind.annotation.*
 
 
-@RestController()
+@RestController
 @RequestMapping("/api/petronas/token")
 class AuthController {
 

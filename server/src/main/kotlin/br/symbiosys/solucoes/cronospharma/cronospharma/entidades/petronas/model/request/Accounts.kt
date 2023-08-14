@@ -1,5 +1,6 @@
 package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.request
 
+import br.symbiosys.solucoes.cronospharma.cronospharma.sym.model.SymCustomer
 import com.fasterxml.jackson.annotation.JsonProperty
 
 class Accounts {
@@ -26,7 +27,8 @@ class Accounts {
     var customerType: String? = null
 
     @JsonProperty("BusinessType__c")
-    var status: String? = null
+    var bussinessType: String? = null
+
 
     @JsonProperty("AccountSource")
     var accountSource: String? = null
@@ -56,7 +58,7 @@ class Accounts {
     var neighborhood: String? = null
 
     @JsonProperty("ebMobile__State__c")
-    var uf: String? = null
+    var state: String? = null
 
     @JsonProperty("PaymentMethod__c")
     var paymentMethod: String? = null
@@ -67,4 +69,30 @@ class Accounts {
     @JsonProperty("ebMobile__IsActive__c")
     var active: Boolean = true
 
+
+    fun toSymCustomer(): SymCustomer {
+        return SymCustomer().apply {
+            idIntegrador = salesForceId
+            cpfCnpj = cnpj
+            codigoIntegrador = accountNumber
+            razaoSocial = accountName
+            nomeFantasia = fantasyName
+            tipoIntegrador = accountSource
+            dadosAdicionais = "Customer Type: $customerType"
+            tipoNegocio = bussinessType
+            cep = zipCode
+            telefone = phone
+            telefone2 = phone1
+            website = webSite
+            endereco = address1
+            endereco2 = address2
+            cidade = city
+            bairro = neighborhood
+            uf = state
+            condicaoPagamento = paymentMethod
+            metodoPagamento = paymentCondition
+            ativo = active
+        }
+
+    }
 }

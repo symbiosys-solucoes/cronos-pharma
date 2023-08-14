@@ -1,14 +1,13 @@
 package br.symbiosys.solucoes.cronospharma.cronospharma.sym.model
 
-import javax.persistence.Entity
-import javax.persistence.Id
-import javax.persistence.Table
+import javax.persistence.*
 
 @Entity
 @Table(name = "Zsym_clientes")
 class SymCustomer {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
 
     var idIntegrador: String? = null
@@ -48,6 +47,10 @@ class SymCustomer {
     var metodoPagamento : String? = null
 
     var ativo: Boolean = true
+
+    var codigoCronos: String? = null
+
+    var dadosAdicionais: String? = null
 
 
 }

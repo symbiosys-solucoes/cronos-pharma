@@ -11,18 +11,17 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/petronas/Sfa/BR/Cust")
-class SFACustomers {
+class SFACustomersController {
 
+    @Autowired
     lateinit var accountsService: AccountsService
 
     @Autowired
     lateinit var authService: AuthorizationTokenService
     @PostMapping
-    fun createAccounts( @RequestBody request: List<Accounts>, @RequestHeader(HttpHeaders.AUTHORIZATION) token: String ) {
+    fun createAccounts( @RequestBody request: List<Accounts>, @RequestHeader(HttpHeaders.AUTHORIZATION) token: String ): List<UpsertResponse> {
         authService.validate(token)
-        val accounts = accountsService.createAccounts(request)
-
-      //  return accounts.map { account -> UpsertResponse().apply { isSuccess } }
+      return accountsService.createAccounts(request)
     }
 
 }
