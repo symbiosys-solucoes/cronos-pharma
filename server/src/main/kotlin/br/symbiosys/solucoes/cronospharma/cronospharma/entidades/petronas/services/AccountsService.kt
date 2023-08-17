@@ -16,7 +16,7 @@ class AccountsService {
     @Autowired
     lateinit var cliForRepository: CliForRepository
 
-    fun createAccounts(request: List<Accounts>): MutableList<UpsertResponse> {
+    fun createAccounts(request: List<Accounts>): List<UpsertResponse> {
 
         val response = mutableListOf<UpsertResponse>()
         request.forEach { account ->
@@ -31,7 +31,7 @@ class AccountsService {
                         isSuccess = true
                         sfdcId = customer.idIntegrador ?: ""
                         isCreated = true
-                        externalId = customer.codigoCronos ?: ""
+                        externalId =  "${account.dtCode}-${customer.codigoCronos}"
                         errors = ""
                     })
                 } else {
@@ -39,7 +39,7 @@ class AccountsService {
                         isSuccess = false
                         sfdcId = account.salesForceId?: ""
                         isCreated = true
-                        externalId =  exists.get().codigoCronos ?: ""
+                        externalId =  "${account.dtCode}-${exists.get().codigoCronos}"
                         errors = "cliente ja cadastrado na base de dados"
                     })
                 }

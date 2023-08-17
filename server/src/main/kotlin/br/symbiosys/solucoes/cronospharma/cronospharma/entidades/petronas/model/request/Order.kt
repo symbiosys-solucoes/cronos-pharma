@@ -7,6 +7,9 @@ import java.time.LocalDateTime
 
 class Order {
 
+    @JsonProperty("Id")
+    var salesForceId: String? = null
+
     @JsonProperty("SFAOrderNumber__c")
     var orderNumberSfa: String? = null
 
@@ -29,7 +32,7 @@ class Order {
     var status: String? = null
 
     @JsonProperty("ebMobile__OrderDate__c")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-ddTHH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     var orderDate: LocalDate? = null
 
     @JsonProperty("ebMobile__TotalQuantity__c")
@@ -48,7 +51,7 @@ class Order {
     var totalAmount: Double = 0.0
 
     @JsonProperty("PaymentMethod__c")
-    var paymentMethod: Double = 0.0
+    var paymentMethod: String? = null
 
     @JsonProperty("ebMobile__PaymentKeyTerms__c")
     var paymentKeyTerms: String? = null
@@ -60,6 +63,7 @@ class Order {
     var deliveryType: String? = null
 
     @JsonProperty("ExpectedDeliveryDate__c")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     var expectedDeliveryDate: LocalDateTime? = null
 
     @JsonProperty("ebMobile__DriverMessage__c")
@@ -78,6 +82,6 @@ class Order {
     var active: Boolean = true
 
     @JsonProperty("ShipToAccountNumber__c")
-    var shipToCode: Boolean = true
+    var shipToAccountNumber: String? = null
 
 }

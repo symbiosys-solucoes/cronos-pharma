@@ -17,20 +17,28 @@ class PedidoPalmRepository(
     val logger = LoggerFactory.getLogger(PedidoPalmRepository::class.java)
 
     fun findPedidosSemRetornoNF(origem: String): List<Long> {
-        return  jdbcTemplate.query("SELECT PedidoPalm.IdPedidoPalm FROM PedidoPalm INNER JOIN Movimento ON PedidoPalm.IdPedidoPalm = Movimento.IdPedidoPalm \n" +
-                "WHERE ArqRetPed IS NOT NULL AND ArqRetNF IS NULL AND Origem IN (:origem)\n" +
-                "AND Movimento.NfeStatus = 'U' AND PedidoPalm.DataOperacao >= '2022-01-01'",
+        return jdbcTemplate.query(
+            "SELECT PedidoPalm.IdPedidoPalm FROM PedidoPalm INNER JOIN Movimento ON PedidoPalm.IdPedidoPalm = Movimento.IdPedidoPalm \n" +
+                    "WHERE ArqRetPed IS NOT NULL AND ArqRetNF IS NULL AND Origem IN (:origem)\n" +
+                    "AND Movimento.NfeStatus = 'U' AND PedidoPalm.DataOperacao >= '2022-01-01'",
             MapSqlParameterSource("origem", origem)
         ) { rs, _ -> rs.getLong("IdPedidoPalm") }
     }
 
 
+    fun save(pedidoPalm: PedidoPalm): PedidoPalm {
 
-    fun save(pedidoPalm: PedidoPalm): PedidoPalm{
-
-        when(pedidoPalm.Origem) {
-            "" -> {//to-do
+        when (pedidoPalm.Origem) {
+            "PETRONAS" -> {
+                val dadosPedido = getDadosPedido(pedidoPalm)
+                if (dadosPedido != null) {
+                    pedidoPalm.CodCliFor = dadosPedido.codClifor
+                    pedidoPalm.CodVendedor = dadosPedido.codVendedor
+                    pedidoPalm.CodPortador = dadosPedido.codPortador
+                    pedidoPalm.CodCondPag = dadosPedido.codCondPag
+                }
             }
+
             else -> {
                 val dadosPedido = getDadosPedido(pedidoPalm)
                 if (dadosPedido != null) {
@@ -50,11 +58,11 @@ class PedidoPalmRepository(
             .addValue("codCliFor", pedidoPalm.CodCliFor)
             .addValue("dataPedido", pedidoPalm.DataPedido)
             .addValue("codCondPag", pedidoPalm.CodCondPag)
-            .addValue("codPortador",pedidoPalm.CodPortador)
+            .addValue("codPortador", pedidoPalm.CodPortador)
             .addValue("valorTotal", pedidoPalm.TotalPedido)
             .addValue("situacao", pedidoPalm.SituacaoPedido)
             .addValue("idUsuario", pedidoPalm.IdUsuario)
-            .addValue("dataOperacao",pedidoPalm.DataOperacao)
+            .addValue("dataOperacao", pedidoPalm.DataOperacao)
             .addValue("cnpj", pedidoPalm.CnpjCpfCliFor)
             .addValue("numaux", pedidoPalm.NumPedidoPalmAux)
             .addValue("codFilial", pedidoPalm.CodFilial)
@@ -65,39 +73,67 @@ class PedidoPalmRepository(
         }
         pedido.itens = pedidoPalm.itens
 
-        pedido.itens.map { itemPedidoPalmRepository.save(it,pedido) }
+        pedido.itens.map { itemPedidoPalmRepository.save(it, pedido) }
         insereTotalPedido(pedido)
         return pedido
     }
 
-    private fun getDadosPedido(pedido: PedidoPalm): DadosPedido?{
-        val params = MapSqlParameterSource()
-            .addValue("cnpj", pedido.CnpjCpfCliFor)
-            .addValue("origem", pedido.Origem)
+    private fun getDadosPedido(pedido: PedidoPalm): DadosPedido? {
+        when (pedido.Origem) {
+            "PETRONAS" -> {
+                val params = MapSqlParameterSource()
+                    .addValue("nomeportador", pedido.CodPortador)
+                    .addValue("codusuarioweb", pedido.CodVendedor)
+                    .addValue("codcli", pedido.CodCliFor)
+                    .addValue("nomecond", pedido.CodCondPag)
 
-        val result =  jdbcTemplate.query(sqlDadosItem, params, mapperDadosPedido)
-        if (result.isEmpty()) {
-            return  null
-        } else {
-            return result.first()
+                val result = jdbcTemplate.query(petronasDadosItem, params, mapperDadosPedido)
+                if (result.isEmpty()) {
+                    return null
+                } else {
+                    return result.first()
+                }
+            }
+
+            else -> {
+                val params = MapSqlParameterSource()
+                    .addValue("cnpj", pedido.CnpjCpfCliFor)
+                    .addValue("origem", pedido.Origem)
+
+                val result = jdbcTemplate.query(sqlDadosItem, params, mapperDadosPedido)
+                if (result.isEmpty()) {
+                    return null
+                } else {
+                    return result.first()
+                }
+            }
         }
+
 
     }
 
-    fun findById(id: Long):PedidoPalm?{
+    fun findById(id: Long): PedidoPalm? {
 
-        val pedido = jdbcTemplate.query("select * from PedidoPalm where IdPedidoPalm = :id", MapSqlParameterSource().addValue("id", id), mapperPedidoPalm).first()
-        pedido.itens = itemPedidoPalmRepository.findAllByIdPedido(pedido?.IdPedidoPalm ?:0 )
+        val pedido = jdbcTemplate.query(
+            "select * from PedidoPalm where IdPedidoPalm = :id",
+            MapSqlParameterSource().addValue("id", id),
+            mapperPedidoPalm
+        ).first()
+        pedido.itens = itemPedidoPalmRepository.findAllByIdPedido(pedido?.IdPedidoPalm ?: 0)
 
         return pedido
     }
 
     fun toMovimento(pedido: PedidoPalm): String? {
-        if(pedido.IdPedidoPalm == null || pedido.SituacaoPedido != "P" ){
+        if (pedido.IdPedidoPalm == null || pedido.SituacaoPedido != "P") {
             return "0"
         }
 
-        return jdbcTemplate.query(sqlToMovimento, MapSqlParameterSource().addValue("idPedidoPalm", pedido.IdPedidoPalm), mapperString).first()
+        return jdbcTemplate.query(
+            sqlToMovimento,
+            MapSqlParameterSource().addValue("idPedidoPalm", pedido.IdPedidoPalm),
+            mapperString
+        ).first()
 
     }
 
@@ -133,8 +169,9 @@ class PedidoPalmRepository(
             logger.error("Erro ao atualizar o valor do pedido numero: ${pedido.NumPedidoPalm} ")
         }
     }
-    companion object{
-        private val mapperDadosPedido = RowMapper<DadosPedido>{ rs: ResultSet, rowNum: Int ->
+
+    companion object {
+        private val mapperDadosPedido = RowMapper<DadosPedido> { rs: ResultSet, rowNum: Int ->
             DadosPedido(
                 codClifor = rs.getString("CODCLIFOR"),
                 codPortador = rs.getString("CODPORTADOR"),
@@ -183,6 +220,19 @@ class PedidoPalmRepository(
         private val mapperString = RowMapper<String> { rs: ResultSet, rowNum: Int ->
             rs.getString("VALOR")
         }
+        private val petronasDadosItem =
+            "DECLARE @CODPORTADOR VARCHAR(2), @CODVENDEDOR VARCHAR(5), @CODCONDPAG VARCHAR(2)\n" +
+                    "SET @CODPORTADOR = ISNULL((select CodPortador  from Portador p WHERE NomePortador = :nomeportador),'01')\n" +
+                    "SET @CODVENDEDOR = ISNULL((select CodVendedor from Vendedores v WHERE UsuarioWeb = :codusuarioweb),'00001')\n" +
+                    "SET @CODCONDPAG = ISNULL((select CodCondPag  from CondPag cp WHERE CondPag = :nomecond),'01')\n" +
+                    "\n" +
+                    "\n" +
+                    "SELECT \n" +
+                    "CODVENDEDOR = @CODVENDEDOR, \n" +
+                    "CODCLIFOR = ISNULL(:codcli,'0'),\n" +
+                    "CODCONDPAG = @CODCONDPAG,\n" +
+                    "CODPORTADOR = @CODPORTADOR\n"
+
         private val sqlDadosItem = "" +
                 "\n" +
                 "  DECLARE @CNPJ VARCHAR(14), @ORIGEM VARCHAR(20)\n" +
