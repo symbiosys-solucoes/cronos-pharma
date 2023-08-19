@@ -10,29 +10,32 @@ import java.sql.ResultSet
 import java.sql.SQLException
 
 @Repository
-class ItemPedidoPalmRepository (
+class ItemPedidoPalmRepository(
     private val jdbcTemplate: NamedParameterJdbcTemplate
 ) {
     private val logger = LoggerFactory.getLogger(ItemPedidoPalmRepository::class.java)
 
     fun save(item: ItemPedidoPalm, pedido: PedidoPalm): ItemPedidoPalm {
 
-        if (pedido.IdPedidoPalm == null){
+        if (pedido.IdPedidoPalm == null) {
             logger.error("PedidoPalm não foi gravado no banco de dados antes de gravar o item")
             throw SQLException("IdPedidoPalm não pode ser nulo")
         }
         when (pedido.Origem) {
             "" -> { // to-do: implement
-                 }
+            }
+
             else -> {
                 val dadosItem = findDadosItem(pedido, item)
-                //if (dadosItem != null) {
-                    item.IdPedidoPalm = pedido.IdPedidoPalm
-                    item.IdProduto = dadosItem?.idProduto?.toInt() ?: 0
-                    item.CodProduto = dadosItem?.codProduto ?: "00000"
-                    item.PrecoUnit = dadosItem?.precoUnit ?: BigDecimal("0.0")
-                    item.IdPrecoTabela = dadosItem?.idPrecoTabela ?: "0"
-                //}
+
+                item.IdPedidoPalm = pedido.IdPedidoPalm
+                item.IdProduto = dadosItem?.idProduto?.toInt() ?: 0
+                item.CodProduto = dadosItem?.codProduto ?: "00000"
+                item.PrecoUnit =
+                    if (pedido.Origem == "PETRONAS") item.PrecoUnit ?: BigDecimal("0.0") else dadosItem?.precoUnit
+                        ?: BigDecimal("0.0")
+                item.IdPrecoTabela = dadosItem?.idPrecoTabela ?: "0"
+
             }
         }
         val params = MapSqlParameterSource()
@@ -54,34 +57,38 @@ class ItemPedidoPalmRepository (
             .addValue("codRetorno", item.CodRetornoItem)
             .addValue("dscRetorno", item.DscRetornoItem)
             .addValue("codProdutoArq", item.CodProdutoArq)
-        if(item.IdPedidoPalm == null){
-            println(item)
-            println(pedido)
+        if (item.IdPedidoPalm == null) {
             throw SQLException("Objeto esta sem Pedido inserido")
         }
         return jdbcTemplate.query(sqlInsertItemPedidoPalm, params, mapperItemPedidoPalm).first()
 
     }
-    fun findDadosItem(pedido: PedidoPalm, item: ItemPedidoPalm): DadosItem?{
+
+    fun findDadosItem(pedido: PedidoPalm, item: ItemPedidoPalm): DadosItem? {
         val paramsDadosItem = MapSqlParameterSource()
-            .addValue("codigoBarras",item.CodProdutoArq)
+            .addValue("codigoBarras", item.CodProdutoArq)
             .addValue("origem", pedido.Origem)
             .addValue("codCond", pedido.CodCondPag)
             .addValue("cnpj", pedido.CnpjCpfCliFor)
         val dados = jdbcTemplate.query(sqlDadosItem, paramsDadosItem, mapperDadosItem)
-        if(dados.isEmpty()){
+        if (dados.isEmpty()) {
             return null
         }
         return dados.first()
     }
 
-    fun findAllByIdPedido(idPedido: Long): List<ItemPedidoPalm>{
+    fun findAllByIdPedido(idPedido: Long): List<ItemPedidoPalm> {
 
-        return jdbcTemplate.query("SELECT * FROM ItemPedidoPalm WHERE IdPedidoPalm = :id", MapSqlParameterSource().addValue("id", idPedido), mapperItemPedidoPalm)
+        return jdbcTemplate.query(
+            "SELECT * FROM ItemPedidoPalm WHERE IdPedidoPalm = :id",
+            MapSqlParameterSource().addValue("id", idPedido),
+            mapperItemPedidoPalm
+        )
     }
-    companion object{
 
-        private  val mapperItemPedidoPalm = RowMapper<ItemPedidoPalm> { rs: ResultSet, _: Int ->
+    companion object {
+
+        private val mapperItemPedidoPalm = RowMapper<ItemPedidoPalm> { rs: ResultSet, _: Int ->
             ItemPedidoPalm(
                 IdPedidoPalm = rs.getLong("IdPedidoPalm"),
                 Item = rs.getInt("Item"),
@@ -139,7 +146,7 @@ class ItemPedidoPalmRepository (
                 "ROLLBACK\n" +
                 "RAISERROR('Nao foi possivel inserir os dados',1,1)\n" +
                 "SELECT * FROM ItemPedidoPalm where IdItemPedidoPalm = (SELECT id FROM @ItemPedido)"
-        private  val mapperDadosItem = RowMapper<DadosItem> { rs: ResultSet, _: Int ->
+        private val mapperDadosItem = RowMapper<DadosItem> { rs: ResultSet, _: Int ->
             DadosItem(
                 idProduto = rs.getString("IDPRODUTO"),
                 codProduto = rs.getString("CODPRODUTO"),
@@ -187,15 +194,26 @@ class ItemPedidoPalmRepository (
                 "                    WHEN @IDPRECO = 6 THEN (SELECT MAX(PrecoVenda6) FROM Produtos WHERE IDPRODUTO=@IDPRODUTO ) ELSE \n" +
                 "                    (SELECT MAX(PRECOVENDA1) FROM Produtos WHERE IDPRODUTO=@IDPRODUTO ) END END\n" +
                 "\tFROM PRODUTOS where IdProduto = @IDPRODUTO \n" +
-                "END"
+                "END \n" +
+                "                IF @ORIGEM IN ('PETRONAS')\n" +
+                "                BEGIN\n" +
+                "                  SELECT \n" +
+                "                  IDPRODUTO = ISNULL((SELECT IDPRODUTO FROM Produtos WHERE CODPRODUTO  = @CODIGOBARRAS),0),\n" +
+                "                  CODPRODUTO = @CODIGOBARRAS,        \n" +
+                "                  IDPRECOTABELA = 1,\n" +
+                "                  PRECOUNIT = ISNULL((SELECT PrecoVenda1 FROM Produtos WHERE CODPRODUTO  = @CODIGOBARRAS), 0 )\n" +
+                "                  \n" +
+                "                  FROM Produtos\n" +
+                "                  WHERE CODPRODUTO  = @CODIGOBARRAS\n" +
+                "                END"
     }
 
 }
 
 
 data class DadosItem(
-    var idProduto:String?,
-    var codProduto:String?,
+    var idProduto: String?,
+    var codProduto: String?,
     var idPrecoTabela: String?,
     var precoUnit: BigDecimal?
 )

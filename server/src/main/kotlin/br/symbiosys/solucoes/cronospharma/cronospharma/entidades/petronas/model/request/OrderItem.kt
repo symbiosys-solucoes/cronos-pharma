@@ -1,9 +1,13 @@
 package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.request
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDate
 
 class OrderItem {
+
+    @JsonProperty("Id")
+    var sfaOrderItemId: String? = null
 
     @JsonProperty("SFAOrderNumber__c")
     var orderNumberSfa: String? = null
@@ -30,6 +34,7 @@ class OrderItem {
     var confirmedQuantity: Double = 0.0
 
     @JsonProperty("ebMobile__ConfirmedDate__c")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     var confirmedDate: LocalDate? = null
 
     @JsonProperty("TotalVol__c")
@@ -48,6 +53,7 @@ class OrderItem {
     var discountPercentage: Double = 0.0
 
     @JsonProperty("ebMobile__OrderDate__c")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     var orderDate: LocalDate? = null
 
     @JsonProperty("ebMobile__ItemSequence__c")
@@ -64,4 +70,5 @@ class OrderItem {
 
     @JsonProperty("DTCode__c")
     var dtCode: String? = null
+
 }

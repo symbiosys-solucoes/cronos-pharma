@@ -170,6 +170,16 @@ class PedidoPalmRepository(
         }
     }
 
+    fun findByOrigemAndNumPedidoPalm(origem: String, numPedidoPalm: String): PedidoPalm? {
+        val params = MapSqlParameterSource()
+            .addValue("origem", origem)
+            .addValue("numpedido", numPedidoPalm)
+
+        val query = "SELECT * FROM PedidoPalm WHERE Origem = :origem AND NumPedidoPalm = :numpedido"
+
+        return jdbcTemplate.query(query, params, mapperPedidoPalm).getOrNull(0)
+    }
+
     companion object {
         private val mapperDadosPedido = RowMapper<DadosPedido> { rs: ResultSet, rowNum: Int ->
             DadosPedido(
