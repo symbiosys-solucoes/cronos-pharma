@@ -1,3 +1,55 @@
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'ZFiliaisCompl') AND type in (N'U'))
+BEGIN
+CREATE TABLE ZFiliaisCompl (
+                               CodFilial varchar(2) COLLATE SQL_Latin1_General_CP1_CI_AI NOT NULL,
+                               CONSTRAINT PK_ZFiliaisCompl PRIMARY KEY (CodFilial))
+END
+
+IF NOT EXISTS (SELECT 1 FROM ConfigCompl WHERE Tabela = 'ZFiliaisCompl' AND NomeColuna = 'sym_nextNumMov' )
+BEGIN
+INSERT INTO ConfigCompl (NomeColuna, Tabela, Descricao, Tipo, Tamanho, Inativo, DataOperacao, IdUsuario, SoLeitura) VALUES
+    ('sym_nextNumMov', 'ZFiliaisCompl', 'Numero Pedido', 'A', 15, 'N', GETDATE(), 'SYM', 'S')
+ALTER TABLE ZFiliaisCompl ADD sym_nextNumMov VARCHAR(15)
+END
+
+IF NOT EXISTS (SELECT 1 FROM ConfigCompl WHERE Tabela = 'ZFiliaisCompl' AND NomeColuna = 'sym_parametros' )
+BEGIN
+INSERT INTO ConfigCompl (NomeColuna, Tabela, Descricao, Tipo, Tamanho, Inativo, DataOperacao, IdUsuario, SoLeitura) VALUES
+    ('sym_parametros', 'ZFiliaisCompl', 'Numero Pedido', 'M', 800, 'N', GETDATE(), 'SYM', 'S')
+ALTER TABLE ZFiliaisCompl ADD sym_parametros TEXT
+END
+
+IF (SELECT sym_nextNumMov FROM ZFiliaisCompl zc WHERE CodFilial = '01') IS NULL
+BEGIN
+UPDATE ZFiliaisCompl SET sym_nextNumMov = '5000000000' WHERE CODFILIAL = '01'
+END
+
+
+BEGIN
+  DECLARE @FILIAL VARCHAR(2)
+  DECLARE FILIAL CURSOR FOR
+SELECT f.CODFILIAL FROM Filiais f LEFT JOIN ZFiliaisCompl zc ON f.CodFilial = zc.CodFilial WHERE zc.sym_parametros IS NULL
+    OPEN FILIAL
+	 FETCH NEXT FROM FILIAL INTO @FILIAL
+    WHILE @@FETCH_STATUS = 0
+BEGIN
+		IF NOT EXISTS (SELECT 1 FROM ZFiliaisCompl zc2 where CodFilial = @FILIAL)
+BEGIN
+INSERT INTO ZFiliaisCompl (CodFilial, sym_parametros) VALUES (@FILIAL, '{"codigoFilial":"'+@FILIAL+'","codigoDistribuidorPetronas":"00", "active":false}')
+END
+ELSE
+BEGIN
+UPDATE ZFiliaisCompl set sym_parametros = '{"codigoFilial":"'+@FILIAL+'","codigoDistribuidorPetronas":"00", "active":false}' WHERE CodFilial = @FILIAL
+END
+FETCH NEXT FROM FILIAL INTO @FILIAL
+END
+CLOSE FILIAL
+    DEALLOCATE FILIAL
+END
+
+
+
+
 
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'ZProdutosCompl') AND type in (N'U'))
 BEGIN
@@ -215,7 +267,6 @@ EXEC dbo.sp_executesql @statement = N'
 	            SET @Operation = ''INSERT'';
 			SELECT @CODCLI = CodCliFor FROM deleted
 	        DECLARE @OldRecord NVARCHAR(MAX) = (SELECT     CodCliFor,
-	    IdEmpresa,
 	    NomeCliFor,
 	    RazaoSocial,
 	    TipoPessoa,
@@ -237,66 +288,13 @@ EXEC dbo.sp_executesql @statement = N'
 	    IntinerarioVisita,
 	    Correspondencia,
 	    UfCliFor,
-	    RegimeTributario,
 	    FoneCliFor,
 	    FaxCliFor,
 	    CelCliFor,
-	    CargoCli,
-	    Conjuge,
-	    CpfConjuge,
-	    ProfissaoConjuge,
-	    EstadoCivil,
-	    Ctps,
 	    DtNascCli,
 	    Sexo,
-	    Naturalidade,
-	    Nacionalidade,
-	    TrabalhoCli,
-	    EnderecoTrab,
-	    FoneTrabalho,
-	    RendaMensal,
-	    TempoServico,
-	    NomePessoaRef,
-	    EnderecoPessoaRef,
-	    FonePessoaRef,
-	    NomeMae,
-	    NomePai,
 	    ListaNegra,
-	    NomeFiador,
-	    EnderecoFiador,
-	    CidadeFiador,
-	    UfFiador,
-	    FoneFiador,
-	    DtNascFiador,
-	    RgFiador,
-	    CpfFiador,
-	    NomePaiFiador,
-	    NomeMaeFiador,
-	    BensImoveis,
 	    LimiteCredito,
-	    RefBancoNome,
-	    RefBancoAgencia,
-	    RefBancoConta,
-	    RefBancoTitular,
-	    RefBancoData,
-	    RefBancoCpfTitular,
-	    RefBancoRgTitular,
-	    RefBancoEnderecoTitular,
-	    RefBancoTelefoneTitular,
-	    RefBancoObservacoes,
-	    RefComNome,
-	    RefComTelefone,
-	    RefComNome2,
-	    RefComTelefone2,
-	    RefComNome3,
-	    RefComTelefone3,
-	    AvDataConsulta,
-	    AvSistema,
-	    AvNumConsulta,
-	    AvSituacao,
-	    AvNumChequeDev,
-	    AvDtChequeDev,
-	    AvAnotacoes,
 	    CfMargemLucroBruto,
 	    CfMargemLucroBruto2,
 	    CfMargemLucroBruto3,
@@ -314,14 +312,7 @@ EXEC dbo.sp_executesql @statement = N'
 	    CodFunc,
 	    CodFunc2,
 	    IdCategoriaCliFor,
-	    NomeContato,
-	    TelefoneContato,
-	    EmailContato,
-	    RgContato,
-	    CpfContato,
-	    DtNascContato,
 	    DataInicioAtividades,
-	    MsgPadraoMovimento,
 	    IdTabCliFor1,
 	    IdTabCliFor2,
 	    IdTabCliFor3,
@@ -369,28 +360,15 @@ EXEC dbo.sp_executesql @statement = N'
 	    CodContrapartida,
 	    PercDescFinanc,
 	    PercDescFinancFixo,
-	    ChaveSeguranca,
 	    PosLatitudeCad,
 	    PosLongitudeCad,
 	    Cnae,
 	    ProdutorRural,
 	    CodSUFRAMA,
-	    SyncDate,
 	    DataOperacao,
 	    IdUsuario,
-	    WebSite,
-	    RefBancoId,
-	    RefBancoAgenciaDV,
-	    RefBancoContaDV,
-	    RefBancoContaTp,
-	    FormaPag,
-	    ChavePix,
-	    RamoAtividade,
-	    OrgaoPublico,
-	    ContribISS,
-	    PorteEmpresa FROM deleted FOR JSON AUTO, WITHOUT_ARRAY_WRAPPER);
+	    WebSite FROM deleted FOR JSON AUTO, WITHOUT_ARRAY_WRAPPER);
 	        DECLARE @NewRecord NVARCHAR(MAX) = (SELECT     CodCliFor,
-	    IdEmpresa,
 	    NomeCliFor,
 	    RazaoSocial,
 	    TipoPessoa,
@@ -412,66 +390,13 @@ EXEC dbo.sp_executesql @statement = N'
 	    IntinerarioVisita,
 	    Correspondencia,
 	    UfCliFor,
-	    RegimeTributario,
 	    FoneCliFor,
 	    FaxCliFor,
 	    CelCliFor,
-	    CargoCli,
-	    Conjuge,
-	    CpfConjuge,
-	    ProfissaoConjuge,
-	    EstadoCivil,
-	    Ctps,
 	    DtNascCli,
 	    Sexo,
-	    Naturalidade,
-	    Nacionalidade,
-	    TrabalhoCli,
-	    EnderecoTrab,
-	    FoneTrabalho,
-	    RendaMensal,
-	    TempoServico,
-	    NomePessoaRef,
-	    EnderecoPessoaRef,
-	    FonePessoaRef,
-	    NomeMae,
-	    NomePai,
 	    ListaNegra,
-	    NomeFiador,
-	    EnderecoFiador,
-	    CidadeFiador,
-	    UfFiador,
-	    FoneFiador,
-	    DtNascFiador,
-	    RgFiador,
-	    CpfFiador,
-	    NomePaiFiador,
-	    NomeMaeFiador,
-	    BensImoveis,
 	    LimiteCredito,
-	    RefBancoNome,
-	    RefBancoAgencia,
-	    RefBancoConta,
-	    RefBancoTitular,
-	    RefBancoData,
-	    RefBancoCpfTitular,
-	    RefBancoRgTitular,
-	    RefBancoEnderecoTitular,
-	    RefBancoTelefoneTitular,
-	    RefBancoObservacoes,
-	    RefComNome,
-	    RefComTelefone,
-	    RefComNome2,
-	    RefComTelefone2,
-	    RefComNome3,
-	    RefComTelefone3,
-	    AvDataConsulta,
-	    AvSistema,
-	    AvNumConsulta,
-	    AvSituacao,
-	    AvNumChequeDev,
-	    AvDtChequeDev,
-	    AvAnotacoes,
 	    CfMargemLucroBruto,
 	    CfMargemLucroBruto2,
 	    CfMargemLucroBruto3,
@@ -489,14 +414,7 @@ EXEC dbo.sp_executesql @statement = N'
 	    CodFunc,
 	    CodFunc2,
 	    IdCategoriaCliFor,
-	    NomeContato,
-	    TelefoneContato,
-	    EmailContato,
-	    RgContato,
-	    CpfContato,
-	    DtNascContato,
 	    DataInicioAtividades,
-	    MsgPadraoMovimento,
 	    IdTabCliFor1,
 	    IdTabCliFor2,
 	    IdTabCliFor3,
@@ -544,26 +462,14 @@ EXEC dbo.sp_executesql @statement = N'
 	    CodContrapartida,
 	    PercDescFinanc,
 	    PercDescFinancFixo,
-	    ChaveSeguranca,
 	    PosLatitudeCad,
 	    PosLongitudeCad,
 	    Cnae,
 	    ProdutorRural,
 	    CodSUFRAMA,
-	    SyncDate,
 	    DataOperacao,
 	    IdUsuario,
-	    WebSite,
-	    RefBancoId,
-	    RefBancoAgenciaDV,
-	    RefBancoContaDV,
-	    RefBancoContaTp,
-	    FormaPag,
-	    ChavePix,
-	    RamoAtividade,
-	    OrgaoPublico,
-	    ContribISS,
-	    PorteEmpresa FROM inserted FOR JSON AUTO, WITHOUT_ARRAY_WRAPPER);
+	    WebSite FROM inserted FOR JSON AUTO, WITHOUT_ARRAY_WRAPPER);
 	
 	        INSERT INTO dbo.zsym_eventos (data_evento, id_registro, new_register_as_json, old_register_as_json, tabela, tipo, usuario)
 	        VALUES (GETDATE(), @CODCLI, @NewRecord, @OldRecord, ''Cli_For'', @Operation,CURRENT_USER);

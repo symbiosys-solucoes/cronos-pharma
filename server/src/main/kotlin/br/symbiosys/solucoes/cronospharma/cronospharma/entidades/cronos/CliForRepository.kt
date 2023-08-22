@@ -265,7 +265,8 @@ class CliForRepository(
                 "Condicao = c.CondPag, Portador = p.NomePortador  \n"+
                 "FROM Cli_For cli LEFT JOIN Cidade cid ON cli.IdCidade = cid.IdCidade\n" +
                 "LEFT JOIN Portador p ON cli.CodPortador = p.CodPortador\n" +
-                "LEFT JOIN CondPag c ON cli.CodCondPag = c.CodCondPag;\n"
+                "LEFT JOIN CondPag c ON cli.CodCondPag = c.CodCondPag\n" +
+                "WHERE cli.CodClifor LIKE 'C%'"
     }
 
 }
