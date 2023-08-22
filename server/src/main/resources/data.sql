@@ -19,9 +19,8 @@ CREATE TABLE ZProdutosCompl
     sym_dir_preco_ftp VARCHAR(255),
     sym_dir_preco_local VARCHAR(255),
     IdProduto INT
-);
-
-END;
+)
+END
 
 IF NOT EXISTS (
     SELECT *
@@ -31,9 +30,9 @@ IF NOT EXISTS (
 )
 BEGIN
 ALTER TABLE ZProdutosCompl
-    ADD sym_ativo VARCHAR(1);
+    ADD sym_ativo VARCHAR(1)
 
-END;
+END
 IF NOT EXISTS (
     SELECT *
     FROM INFORMATION_SCHEMA.COLUMNS
@@ -42,9 +41,9 @@ IF NOT EXISTS (
 )
 BEGIN
 ALTER TABLE ZProdutosCompl
-    ADD sym_usaFTP VARCHAR(1);
+    ADD sym_usaFTP VARCHAR(1)
 
-END;
+END
 IF NOT EXISTS (
     SELECT *
     FROM INFORMATION_SCHEMA.COLUMNS
@@ -53,9 +52,9 @@ IF NOT EXISTS (
 )
 BEGIN
 ALTER TABLE ZProdutosCompl
-    ADD sym_url VARCHAR(255);
+    ADD sym_url VARCHAR(255)
 
-END;
+END
 IF NOT EXISTS (
     SELECT *
     FROM INFORMATION_SCHEMA.COLUMNS
@@ -64,9 +63,9 @@ IF NOT EXISTS (
 )
 BEGIN
 ALTER TABLE ZProdutosCompl
-    ADD sym_login VARCHAR(255);
+    ADD sym_login VARCHAR(255)
 
-END;
+END
 IF NOT EXISTS (
     SELECT *
     FROM INFORMATION_SCHEMA.COLUMNS
@@ -75,9 +74,9 @@ IF NOT EXISTS (
 )
 BEGIN
 ALTER TABLE ZProdutosCompl
-    ADD sym_senha VARCHAR(255);
+    ADD sym_senha VARCHAR(255)
 
-END;
+END
 IF NOT EXISTS (
     SELECT *
     FROM INFORMATION_SCHEMA.COLUMNS
@@ -86,9 +85,9 @@ IF NOT EXISTS (
 )
 BEGIN
 ALTER TABLE ZProdutosCompl
-    ADD sym_dir_ped_ftp VARCHAR(255);
+    ADD sym_dir_ped_ftp VARCHAR(255)
 
-END;
+END
 IF NOT EXISTS (
     SELECT *
     FROM INFORMATION_SCHEMA.COLUMNS
@@ -97,9 +96,9 @@ IF NOT EXISTS (
 )
 BEGIN
 ALTER TABLE ZProdutosCompl
-    ADD sym_dir_ret_ftp VARCHAR(255);
+    ADD sym_dir_ret_ftp VARCHAR(255)
 
-END;
+END
 IF NOT EXISTS (
     SELECT *
     FROM INFORMATION_SCHEMA.COLUMNS
@@ -108,9 +107,9 @@ IF NOT EXISTS (
 )
 BEGIN
 ALTER TABLE ZProdutosCompl
-    ADD sym_dir_ped_local VARCHAR(255);
+    ADD sym_dir_ped_local VARCHAR(255)
 
-END;
+END
 IF NOT EXISTS (
     SELECT *
     FROM INFORMATION_SCHEMA.COLUMNS
@@ -119,9 +118,9 @@ IF NOT EXISTS (
 )
 BEGIN
 ALTER TABLE ZProdutosCompl
-    ADD sym_dir_ret_local VARCHAR(255);
+    ADD sym_dir_ret_local VARCHAR(255)
 
-END;
+END
 IF NOT EXISTS (
     SELECT *
     FROM INFORMATION_SCHEMA.COLUMNS
@@ -130,9 +129,9 @@ IF NOT EXISTS (
 )
 BEGIN
 ALTER TABLE ZProdutosCompl
-    ADD sym_dir_imp_local VARCHAR(255);
+    ADD sym_dir_imp_local VARCHAR(255)
 
-END;
+END
 IF NOT EXISTS (
     SELECT *
     FROM INFORMATION_SCHEMA.COLUMNS
@@ -141,9 +140,9 @@ IF NOT EXISTS (
 )
 BEGIN
 ALTER TABLE ZProdutosCompl
-    ADD CodTd_sym_tipo VARCHAR(255);
+    ADD CodTd_sym_tipo VARCHAR(255)
 
-END;
+END
 IF NOT EXISTS (
     SELECT *
     FROM INFORMATION_SCHEMA.COLUMNS
@@ -152,9 +151,9 @@ IF NOT EXISTS (
 )
 BEGIN
 ALTER TABLE ZProdutosCompl
-    ADD sym_dir_est_ftp VARCHAR(255);
+    ADD sym_dir_est_ftp VARCHAR(255)
 
-END;
+END
 IF NOT EXISTS (
     SELECT *
     FROM INFORMATION_SCHEMA.COLUMNS
@@ -163,9 +162,9 @@ IF NOT EXISTS (
 )
 BEGIN
 ALTER TABLE ZProdutosCompl
-    ADD sym_dir_est_local VARCHAR(255);
+    ADD sym_dir_est_local VARCHAR(255)
 
-END;
+END
 IF NOT EXISTS (
     SELECT *
     FROM INFORMATION_SCHEMA.COLUMNS
@@ -174,9 +173,9 @@ IF NOT EXISTS (
 )
 BEGIN
 ALTER TABLE ZProdutosCompl
-    ADD sym_dir_preco_ftp VARCHAR(255);
+    ADD sym_dir_preco_ftp VARCHAR(255)
 
-END;
+END
 IF NOT EXISTS (
     SELECT *
     FROM INFORMATION_SCHEMA.COLUMNS
@@ -185,20 +184,9 @@ IF NOT EXISTS (
 )
 BEGIN
 ALTER TABLE ZProdutosCompl
-    ADD sym_dir_preco_local VARCHAR(255);
+    ADD sym_dir_preco_local VARCHAR(255)
 
-END;
-
-
-
-
-
-
-
-
-
-
-
+END
 
 
 
@@ -624,7 +612,11 @@ END;
 
 -- TRIGGER Movimento
 
-IF  OBJECT_ID('AuditTrigger_Movimento', 'TR') IS  NULL
+IF  OBJECT_ID('AuditTrigger_Movimento', 'TR') IS NOT NULL
+BEGIN
+    DROP TRIGGER dbo.AuditTrigger_Movimento
+END
+ELSE
 BEGIN
 EXEC dbo.sp_executesql @statement = N'	CREATE TRIGGER dbo.AuditTrigger_Movimento
 	ON dbo.Movimento
@@ -647,7 +639,10 @@ EXEC dbo.sp_executesql @statement = N'	CREATE TRIGGER dbo.AuditTrigger_Movimento
 		            SET @Operation = ''INSERT'';
 				SELECT @ID = ISNULL((SELECT IdMov FROM deleted), (SELECT IdMov FROM inserted) )
 		        DECLARE @OldRecord NVARCHAR(MAX) = (SELECT  *   FROM deleted FOR JSON AUTO, WITHOUT_ARRAY_WRAPPER);
-		        DECLARE @NewRecord NVARCHAR(MAX) = (SELECT   *  FROM inserted FOR JSON AUTO, WITHOUT_ARRAY_WRAPPER);
+		        DECLARE @NewRecord NVARCHAR(MAX) = (SELECT   *,
+                    Portador = ISNULL((SELECT MAX(Portador.NomePortador) FROM CPR INNER JOIN Portador ON CPR.Codportador = Portador.CodPortador WHERE IdMov = inserted.IdMov), ''BOLETO''),
+                    CondPag = ISNULL((SELECT CondPag FROM CondPag WHERE CodCondPag = inserted.CodCondPag),''DINHEIRO'')  FROM inserted
+                    FOR JSON AUTO, WITHOUT_ARRAY_WRAPPER);
 
 		        INSERT INTO dbo.zsym_eventos (data_evento, id_registro, new_register_as_json, old_register_as_json, tabela, tipo, usuario)
 		        VALUES (GETDATE(), @ID, @NewRecord, @OldRecord, ''Movimento'', @Operation, CURRENT_USER);

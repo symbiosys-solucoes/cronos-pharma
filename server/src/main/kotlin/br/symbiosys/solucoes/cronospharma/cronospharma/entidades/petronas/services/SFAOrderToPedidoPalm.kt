@@ -14,7 +14,7 @@ class SFAOrderToPedidoPalm {
                 NumPedidoPalm = order.orderNumberSfa?:"",
                 CodCliFor = order.accountNumber,
                 CnpjCpfCliFor = order.accountNumber,
-                DataPedido = order.orderDate?.atStartOfDay(),
+                DataPedido = order.orderDate,
                 CodPortador = order.paymentMethod?:"",
                 CodCondPag = order.paymentKeyTerms?:"",
                 DataEntrega = order.expectedDeliveryDate,

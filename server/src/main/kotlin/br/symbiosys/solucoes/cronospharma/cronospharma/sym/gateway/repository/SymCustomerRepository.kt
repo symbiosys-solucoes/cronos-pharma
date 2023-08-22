@@ -9,4 +9,6 @@ import java.util.*
 interface SymCustomerRepository : JpaRepository<SymCustomer, Long>{
 
     fun findBycpfCnpjAndTipoIntegrador(cpfCnpj: String, tipoIntegrador: String): Optional<SymCustomer>
+
+    fun findByCodigoCronos(codigoCronos: String): Optional<SymCustomer>
 }

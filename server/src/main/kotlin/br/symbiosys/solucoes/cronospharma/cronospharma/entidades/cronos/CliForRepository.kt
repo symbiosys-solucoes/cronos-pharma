@@ -216,7 +216,7 @@ class CliForRepository(
                 "IdRegiao, UfCliFor, FoneCliFor,  CelCliFor, Inativo, CodPortador, BuscarPreco, CodCondPag, IdCategoriaCliFor, \n" +
                 "DataOperacao, IdUsuario, WebSite)\n" +
                 "\n" +
-                "SELECT CODCLIFOR = 'C' + @NEWCODCLIFOR, IDEMPRESA = 1 , FANTASIA = nome_fantasia, RAZAO = razao_social, TIPO = CASE WHEN LEN(cpf_cnpj) > 11 THEN 'J' ELSE 'F' END,\n" +
+                "SELECT CODCLIFOR = 'C' + dbo.fn_PreencherZeros(@NEWCODCLIFOR,5), IDEMPRESA = 1 , FANTASIA = nome_fantasia, RAZAO = razao_social, TIPO = CASE WHEN LEN(cpf_cnpj) > 11 THEN 'J' ELSE 'F' END,\n" +
                 "TIPOCLIENTE= 'C', CPFCNPJ = CASE WHEN LEN(cpf_cnpj) > 11 THEN STUFF(STUFF(STUFF(STUFF(cpf_cnpj, 3, 0, '.'), 7, 0, '.'), 11, 0, '/'), 16, 0, '-') ELSE \n" +
                 "STUFF(STUFF(STUFF(cpf_cnpj, 4, 0, '.'), 8, 0, '.'), 12, 0, '-') END, IE = '', ICMS = 'N', endereco, endereco2, bairro,  cep,\n" +
                 "IDCIDADE = (SELECT IdCidade  FROM Cidade c WHERE Cidade LIKE '%'+ zsym_clientes.cidade +'%' AND UF = zsym_clientes.uf  ), IDREGIAO = 1,\n" +

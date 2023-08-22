@@ -6,7 +6,7 @@ class UpsertResponse {
 
 
         @JsonProperty("SFDCId")
-        lateinit var sfdcId: String
+        var sfdcId: String? = null
 
         @JsonProperty("isSuccess")
         var isSuccess: Boolean = false
@@ -15,11 +15,10 @@ class UpsertResponse {
         var isCreated: Boolean = false
 
         @JsonProperty("ExternalId")
-        lateinit var externalId: String
+        var externalId: String? = null
 
         @JsonProperty("Errors")
-        lateinit var errors: String
-
+        var errors: String? = null
 
 
 }

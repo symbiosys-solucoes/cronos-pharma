@@ -12,8 +12,7 @@ class SymEventos {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
 
-    @Enumerated(EnumType.STRING)
-    lateinit var tipo: TipoEvento
+    lateinit var tipo: String
 
     lateinit var tabela: String
 
@@ -21,9 +20,13 @@ class SymEventos {
 
     lateinit var usuario: String
 
+    @Column(columnDefinition = "TEXT")
     lateinit var oldRegisterAsJson: String
 
+    @Column(columnDefinition = "TEXT")
     lateinit var newRegisterAsJson: String
 
     lateinit var dataEvento: LocalDateTime
+
+    var processado: Boolean? = false
 }

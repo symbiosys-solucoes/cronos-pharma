@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class Order {
+open class Order {
 
     @JsonProperty("Id")
     var salesForceId: String? = null
@@ -33,7 +33,7 @@ class Order {
 
     @JsonProperty("ebMobile__OrderDate__c")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-    var orderDate: LocalDate? = null
+    open var orderDate: LocalDateTime? = null
 
     @JsonProperty("ebMobile__TotalQuantity__c")
     var totalQuantity: Double = 0.0
@@ -64,7 +64,7 @@ class Order {
 
     @JsonProperty("ExpectedDeliveryDate__c")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-    var expectedDeliveryDate: LocalDateTime? = null
+    open var expectedDeliveryDate: LocalDateTime? = null
 
     @JsonProperty("ebMobile__DriverMessage__c")
     var driverMessage: String? = null
@@ -84,4 +84,12 @@ class Order {
     @JsonProperty("ShipToAccountNumber__c")
     var shipToAccountNumber: String? = null
 
+}
+
+class OrderRequest : Order() {
+    @JsonProperty("ExpectedDeliveryDate__c")
+    override var expectedDeliveryDate: LocalDateTime? = null
+
+    @JsonProperty("ebMobile__OrderDate__c")
+    override var orderDate: LocalDateTime? = null
 }
