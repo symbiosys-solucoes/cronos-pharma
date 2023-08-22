@@ -5,6 +5,7 @@ import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.Bloqueio
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.FinalizaMovimento
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.PedidoPalmRepository
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.api.ApiPetronasAuth
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.services.AccountsService
 import br.symbiosys.solucoes.cronospharma.cronospharma.sym.service.SymEventosService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -33,6 +34,9 @@ class TestesController {
 
     @Autowired
     private lateinit var symEventosService: SymEventosService
+
+    @Autowired
+    private lateinit var accountsService: AccountsService
 
     @Value("\${app.filial.cnpj}")
     private lateinit var cnpj: String
@@ -63,5 +67,10 @@ class TestesController {
     @GetMapping("/movimento")
     fun analisarEventos(): Any {
        return symEventosService.analisarEventos()
+    }
+
+    @GetMapping("/account")
+    fun analisaraccount(): Any {
+        return accountsService.sendAccountsToSfa("FAALRN")
     }
 }

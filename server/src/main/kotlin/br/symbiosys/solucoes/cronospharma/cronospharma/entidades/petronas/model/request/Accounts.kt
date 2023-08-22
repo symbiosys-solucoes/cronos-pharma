@@ -1,5 +1,6 @@
 package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.request
 
+import CliFor
 import br.symbiosys.solucoes.cronospharma.cronospharma.sym.model.SymCustomer
 import com.fasterxml.jackson.annotation.JsonProperty
 
@@ -69,6 +70,13 @@ class Accounts {
     @JsonProperty("ebMobile__IsActive__c")
     var active: Boolean = true
 
+    @JsonProperty("UserCode__c")
+    var userCode: String? = null
+
+    @JsonProperty("ebMobile__CreditLimit__c")
+    var creditLimit: Double = 0.0
+
+
 
     fun toSymCustomer(): SymCustomer {
         return SymCustomer().apply {
@@ -94,5 +102,35 @@ class Accounts {
             ativo = active
         }
 
+    }
+
+    companion object {
+        fun fromCliFor(cliFor: CliFor, codigoDistribuidor: String, salesId: String? = null): Accounts {
+            return Accounts().apply {
+                accountNumber = cliFor.codCliFor
+                salesForceId = salesId
+                cnpj = cliFor.cpfcgcCliFor
+                dtCode = codigoDistribuidor
+                accountName = cliFor.razaoSocial
+                fantasyName = cliFor.nomeCliFor
+                customerType = "Onboarded"
+                bussinessType = "B2B"
+                accountSource = "DT ERP"
+                zipCode = cliFor.cepCliFor
+                phone = cliFor.foneCliFor
+                phone1 = cliFor.celCliFor
+                webSite = cliFor.webSite
+                address1 = cliFor.enderecoCliFor
+                address2 = cliFor.numeroLogradouro
+                city = cliFor.cidade
+                neighborhood = cliFor.bairroCliFor
+                state = cliFor.ufCliFor
+                userCode = cliFor.codFunc
+                creditLimit = cliFor.limiteCredito ?: 0.0
+                paymentMethod = cliFor.portadorPadrao
+                paymentCondition = cliFor.condicaoPagamentoPadrao
+                active = if (cliFor.inativo == "S") false else true
+            }
+        }
     }
 }

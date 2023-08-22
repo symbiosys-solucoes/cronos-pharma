@@ -1,20 +1,26 @@
 package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.services
 
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.CliForRepository
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.api.ApiPetronasUpsertAccounts
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.request.Accounts
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.response.UpsertResponse
 import br.symbiosys.solucoes.cronospharma.cronospharma.sym.gateway.repository.SymCustomerRepository
+import br.symbiosys.solucoes.cronospharma.cronospharma.sym.model.SymCustomer
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 
 @Service
 class AccountsService {
 
     @Autowired
-    lateinit var symCustomerRepository: SymCustomerRepository
+    private lateinit var symCustomerRepository: SymCustomerRepository
 
     @Autowired
-    lateinit var cliForRepository: CliForRepository
+    private lateinit var cliForRepository: CliForRepository
+
+    @Autowired
+    private lateinit var apiPetronasUpsertAccounts: ApiPetronasUpsertAccounts
 
     fun createAccounts(request: List<Accounts>): List<UpsertResponse> {
 
@@ -48,5 +54,29 @@ class AccountsService {
         }
 
         return response
+    }
+
+    fun sendAccountsToSfa(codigoDistribuidor: String) {
+        val clientesCronos = cliForRepository.findAll()
+        val clientesSales = symCustomerRepository.findAll().map { it.codigoCronos }
+        val clientesNovosCronos = clientesCronos.filter { !clientesSales.contains(it.codCliFor) }
+
+        val accounts = clientesNovosCronos.map { Accounts.fromCliFor(it, codigoDistribuidor) }.chunked(50).toList()
+        for (request in accounts) {
+            val response = apiPetronasUpsertAccounts.upsertAccounts(request)
+            if (response.statusCode == HttpStatus.OK) {
+                val body = response.body!!
+                body.filter { it.isSuccess && it.isCreated }.forEach {
+                    val customer = SymCustomer().apply {
+                        idIntegrador = it.sfdcId
+                        codigoCronos = it.externalId?.replace("$codigoDistribuidor-", "")
+                        codigoIntegrador = it.externalId
+                        tipoIntegrador = "PETRONAS"
+                    }
+                    symCustomerRepository.save(customer)
+                }
+
+            }
+        }
     }
 }

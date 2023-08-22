@@ -177,4 +177,8 @@ class CliFor {
     var orgaoPublico: String? = null
     var contribISS: String? = null
     var porteEmpresa: String? = null
+    var cidade: String? = null
+    var condicaoPagamentoPadrao: String? = null
+    var portadorPadrao: String? = null
+
 }

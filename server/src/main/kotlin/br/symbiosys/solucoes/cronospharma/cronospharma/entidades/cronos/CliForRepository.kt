@@ -23,11 +23,16 @@ class CliForRepository(
         }
         return null
     }
+
+    fun findAll(): List<CliFor> {
+        return jdbcTemplate.query(selectCliFor, mapperCliFor)
+    }
+
+
     companion object{
         private val mapperCliFor = RowMapper<CliFor> {rs: ResultSet, rowNum: Int ->
             CliFor().apply {
                 codCliFor = rs.getString("CodCliFor")
-                idEmpresa = rs.getInt("IdEmpresa")
                 nomeCliFor = rs.getString("NomeCliFor")
                 razaoSocial = rs.getString("RazaoSocial")
                 tipoPessoa = rs.getString("TipoPessoa")
@@ -201,14 +206,18 @@ class CliForRepository(
                 orgaoPublico = rs.getString("OrgaoPublico")
                 contribISS = rs.getString("ContribISS")
                 porteEmpresa = rs.getString("PorteEmpresa")
+                cidade = rs.getString("Cidade")
+                condicaoPagamentoPadrao = rs.getString("Condicao")
+                portadorPadrao = rs.getString("Portador")
 
 
 
             }
         }
         val createCliforFromSymCustomer = "" +
-                "DECLARE @NEWCODCLIFOR VARCHAR(20)\n" +
+                "DECLARE @NEWCODCLIFOR VARCHAR(20), @DIGITOS VARCHAR(1)\n" +
                 "SET NOCOUNT ON\n" +
+                "SET @DIGITOS = (select CliFor7d  from Parametros p )\n" +
                 "EXEC @NEWCODCLIFOR = dbo.sp_NextId 'Clientes'\n" +
                 "INSERT INTO Cli_For\n" +
                 "(CodCliFor, IdEmpresa, NomeCliFor, RazaoSocial, TipoPessoa, TipoCliente, CPFCGCCLIFOR, RGIECLIFOR,\n" +
@@ -216,7 +225,7 @@ class CliForRepository(
                 "IdRegiao, UfCliFor, FoneCliFor,  CelCliFor, Inativo, CodPortador, BuscarPreco, CodCondPag, IdCategoriaCliFor, \n" +
                 "DataOperacao, IdUsuario, WebSite)\n" +
                 "\n" +
-                "SELECT CODCLIFOR = 'C' + dbo.fn_PreencherZeros(@NEWCODCLIFOR,5), IDEMPRESA = 1 , FANTASIA = nome_fantasia, RAZAO = razao_social, TIPO = CASE WHEN LEN(cpf_cnpj) > 11 THEN 'J' ELSE 'F' END,\n" +
+                "SELECT CODCLIFOR = 'C' + dbo.fn_PreencherZeros(@NEWCODCLIFOR,CASE WHEN ISNULL(@DIGITOS,'N') = 'S' THEN 6 ELSE 5 END), IDEMPRESA = 1 , FANTASIA = nome_fantasia, RAZAO = razao_social, TIPO = CASE WHEN LEN(cpf_cnpj) > 11 THEN 'J' ELSE 'F' END,\n" +
                 "TIPOCLIENTE= 'C', CPFCNPJ = CASE WHEN LEN(cpf_cnpj) > 11 THEN STUFF(STUFF(STUFF(STUFF(cpf_cnpj, 3, 0, '.'), 7, 0, '.'), 11, 0, '/'), 16, 0, '-') ELSE \n" +
                 "STUFF(STUFF(STUFF(cpf_cnpj, 4, 0, '.'), 8, 0, '.'), 12, 0, '-') END, IE = '', ICMS = 'N', endereco, endereco2, bairro,  cep,\n" +
                 "IDCIDADE = (SELECT IdCidade  FROM Cidade c WHERE Cidade LIKE '%'+ zsym_clientes.cidade +'%' AND UF = zsym_clientes.uf  ), IDREGIAO = 1,\n" +
@@ -231,9 +240,9 @@ class CliForRepository(
                 "select * from Cli_For cf where CodCliFor = 'C' + @NEWCODCLIFOR"
 
         val selectCliFor = "" +
-                "SELECT CodCliFor, IdEmpresa, NomeCliFor, RazaoSocial, TipoPessoa, TipoCliente, CPFCGCCLIFOR, RGIECLIFOR, ContribICMS," +
+                "SELECT CodCliFor,  NomeCliFor, RazaoSocial, TipoPessoa, TipoCliente, CPFCGCCLIFOR, RGIECLIFOR, ContribICMS," +
                 " InscricaoMunicipal, TipoLogradouro, EnderecoCliFor, NumeroLogradouro, BairroCliFor, Complemento, PontoReferencia," +
-                " email, CepCliFor, IdCidade, IdRegiao, IntinerarioVisita, Correspondencia, UfCliFor, RegimeTributario, FoneCliFor," +
+                " email, CepCliFor, cli.IdCidade, IdRegiao, IntinerarioVisita, Correspondencia, UfCliFor, RegimeTributario, FoneCliFor," +
                 " FaxCliFor, CelCliFor, CARGOCLI, CONJUGE, CpfConjuge, ProfissaoConjuge, ESTADOCIVIL, CTPS, DTNASCCLI, Sexo, " +
                 "Naturalidade, Nacionalidade, TrabalhoCli, EnderecoTrab, FoneTrabalho, RendaMensal, TempoServico, NOMEPESSOAREF, " +
                 "ENDERECOPESSOAREF, FONEPESSOAREF, NOMEMAE, NOMEPAI, OBSERVACAO, LISTANEGRA, NomeFiador, EnderecoFiador, CidadeFiador," +
@@ -242,7 +251,7 @@ class CliForRepository(
                 " RefBancoEnderecoTitular, RefBancoTelefoneTitular, RefBancoObservacoes, RefComNome, RefComTelefone, RefComNome2, " +
                 "RefComTelefone2, RefComNome3, RefComTelefone3, AvDataConsulta, AvSistema, AvNumConsulta, AvSituacao, AvNumChequeDev, " +
                 "AvDtChequeDev, AvAnotacoes, cfMargemLucroBruto, cfMargemLucroBruto2, cfMargemLucroBruto3, DataRenovacao, CampoAlfaOp1, " +
-                "CampoAlfaOp2, ValorOp1, DataOp1, DataUltMovimento, Inativo, IdPlanoConta, CodPortador, BuscarPreco, CodCondPag, CodFunc, " +
+                "CampoAlfaOp2, ValorOp1, DataOp1, DataUltMovimento, cli.Inativo, IdPlanoConta, cli.CodPortador, cli.BuscarPreco, cli.CodCondPag, CodFunc, " +
                 "CodFunc2, IdCategoriaCliFor, NomeContato, TelefoneContato, EmailContato, RGContato, CPFContato, DtNascContato, " +
                 "DataInicioAtividades, MsgPadraoMovimento, IdTabCliFor1, IdTabCliFor2, IdTabCliFor3, EnderecoCliForPagAtivo, TipoLogradouroPag, " +
                 "EnderecoCliForPag, NumeroLogradouroPag, BairroCliForPag, ComplementoPag, EmailPag, CepCliForPag, IdCidadePag, NomeCidadePag, " +
@@ -251,9 +260,12 @@ class CliForRepository(
                 "FoneCliForEnt, PercComissaoVendedor, FaxCliForEnt, CelCliForEnt, UsuarioWeb, SenhaWeb, UsuarioWebAtivo, AnvisaNumero, " +
                 "AnvisaVencimento, AnvisaDtVencimento, CovisaNumero, CovisaVencimento, CovisaDtVencimento, Farmaceutico, CompraPsicotropicos, " +
                 "CodContabil, CodContrapartida, PercDescFinanc, PercDescFinancFixo, ChaveSeguranca, PosLatitudeCad, PosLongitudeCad, CNAE, " +
-                "ProdutorRural, CodSUFRAMA, SyncDate, DataOperacao, IdUsuario, WebSite, RefBancoId, RefBancoAgenciaDV, RefBancoContaDV, " +
-                "RefBancoContaTp, FormaPag, ChavePix, RamoAtividade, OrgaoPublico, ContribISS, PorteEmpresa\n" +
-                "FROM Cli_For;\n"
+                "ProdutorRural, CodSUFRAMA, SyncDate, cli.DataOperacao, cli.IdUsuario, WebSite, RefBancoId, RefBancoAgenciaDV, RefBancoContaDV, " +
+                "RefBancoContaTp, FormaPag, ChavePix, RamoAtividade, OrgaoPublico, ContribISS, PorteEmpresa, Cidade = cid.Cidade, \n" +
+                "Condicao = c.CondPag, Portador = p.NomePortador  \n"+
+                "FROM Cli_For cli LEFT JOIN Cidade cid ON cli.IdCidade = cid.IdCidade\n" +
+                "LEFT JOIN Portador p ON cli.CodPortador = p.CodPortador\n" +
+                "LEFT JOIN CondPag c ON cli.CodCondPag = c.CodCondPag;\n"
     }
 
 }

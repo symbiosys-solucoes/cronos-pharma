@@ -51,3 +51,8 @@ Criar os seguintes campos complementares, no módulo gestor, do sistema Cronos.
    6. app.filial=01
    7. app.cron.busca.ftp= 0 0/10 * * * *
    8. app.cron.gera.estoque= 0 * * * * *
+
+
+# Petronas
+codigos de integracao(dtcode) da faal FAALRN
+FAALPB
