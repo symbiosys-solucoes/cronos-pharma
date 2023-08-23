@@ -6,6 +6,8 @@ import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.Finaliza
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.PedidoPalmRepository
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.api.ApiPetronasAuth
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.services.AccountsService
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.services.ProductsService
+import br.symbiosys.solucoes.cronospharma.cronospharma.sym.model.SymParametros
 import br.symbiosys.solucoes.cronospharma.cronospharma.sym.service.SymEventosService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -37,6 +39,9 @@ class TestesController {
 
     @Autowired
     private lateinit var accountsService: AccountsService
+
+    @Autowired
+    private lateinit var productsService: ProductsService
 
     @Value("\${app.filial.cnpj}")
     private lateinit var cnpj: String
@@ -72,5 +77,19 @@ class TestesController {
     @GetMapping("/account")
     fun analisaraccount(): Any {
         return accountsService.sendAccountsToSfa("FAALRN")
+    }
+
+    @GetMapping("/product")
+    fun sendProduct(): Any {
+//        return productsService.sendProductsToSFA(SymParametros().apply {
+//            codigoFilial = "01"
+//            codigoDistribuidorPetronas = "FAALRN"
+//        })
+        productsService.sendKeyProductsToSFA(SymParametros().apply {
+            codigoFilial = "01"
+            codigoDistribuidorPetronas = "FAALRN"
+        })
+
+        return "OK"
     }
 }

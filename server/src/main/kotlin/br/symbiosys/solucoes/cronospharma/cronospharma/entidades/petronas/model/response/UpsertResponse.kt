@@ -19,6 +19,9 @@ class UpsertResponse {
 
         @JsonProperty("Errors")
         var errors: String? = null
+        override fun toString(): String {
+                return "UpsertResponse(sfdcId=$sfdcId, isSuccess=$isSuccess, isCreated=$isCreated, externalId=$externalId, errors=$errors)"
+        }
 
 
 }

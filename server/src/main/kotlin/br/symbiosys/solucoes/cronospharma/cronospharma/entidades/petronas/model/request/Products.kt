@@ -20,7 +20,7 @@ class Products {
     var unid: String? = null
 
     @JsonProperty("Pack_Vol__c")
-    var unidQuantity: Double? = 0.0
+    var unidQuantity: String? = null
 
     @JsonProperty("ebMobile__Category__c")
     var category: String? = null
