@@ -2,6 +2,7 @@ package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.servi
 
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.ProdutosRepository
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.api.ApiPetronasUpsertProducts
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.KeyProductsInventory
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.request.KeyProducts
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.request.Products
 import br.symbiosys.solucoes.cronospharma.cronospharma.sym.model.SymParametros
@@ -73,6 +74,22 @@ class ProductsService  {
 
         for (request in tabelas) {
             val response = apiPetronasUpsertProducts.upsertKeyProducts(request)
+            logger.info(response.body!!.get(0).toString())
+        }
+    }
+
+    fun sendKeyProductsInventoryToSFA(parametros: SymParametros) {
+        val estoques = produtosRepository.findEstoqueByCodFilialAndCodLocal(parametros.codigoFilial?: "01", parametros.codigoLocal ?: "01").map {
+            KeyProductsInventory().apply {
+                productCode = it.codigoProduto
+                inventoryQuantity = it.sdoAtual
+                dtCode = parametros.codigoDistribuidorPetronas
+                active = true
+            }
+        }.chunked(50).toList()
+
+        for (request in estoques) {
+            val response = apiPetronasUpsertProducts.upsertKeyProductsInventory(request)
             logger.info(response.body!!.get(0).toString())
         }
     }

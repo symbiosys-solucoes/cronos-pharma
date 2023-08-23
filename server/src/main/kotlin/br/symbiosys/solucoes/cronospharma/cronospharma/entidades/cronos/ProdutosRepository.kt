@@ -37,6 +37,14 @@ class ProdutosRepository(
         )
     }
 
+    fun findEstoqueByCodFilialAndCodLocal(codFilial: String, codLocal: String): List<Estoque> {
+        return jdbcTemplate.query(
+            selectEstoque,
+            MapSqlParameterSource().addValue("codfilial", codFilial).addValue("codlocal", codLocal),
+            mapperEstoque
+        )
+    }
+
     fun findPrecos(): MutableList<TabelaPreco> {
         val parametrosPreco = jdbcTemplate.query(selectParametrosPreco, mapperParametrosPreco).first()
         val tabelaPreco = jdbcTemplate.query(selectTabelaPreco, mapperTabeloPreco)
@@ -197,8 +205,26 @@ class ProdutosRepository(
                 "\n" +
                 "FROM Produtos p \n" +
                 "WHERE MedicReferencia IS NOT NULL"
+
+
+        val selectEstoque = "" +
+                "SELECT Produtos.CODPRODUTO, Estoque.SdoAtual FROM Estoque " +
+                "LEFT JOIN Produtos ON Estoque.IdProduto = Produtos.IdProduto\n" +
+                " WHERE Codfilial = :codfilial AND CodLocal = :codlocal"
+
+        private val mapperEstoque = RowMapper<Estoque> { rs: ResultSet, rowNum: Int ->
+            Estoque().apply {
+                codigoProduto = rs.getString("CODPRODUTO")
+                sdoAtual = rs.getDouble("SdoAtual")
+            }
+        }
     }
 
+}
+
+class Estoque {
+    var codigoProduto: String? = null
+    var sdoAtual = 0.0
 }
 
 class TabelaPreco {

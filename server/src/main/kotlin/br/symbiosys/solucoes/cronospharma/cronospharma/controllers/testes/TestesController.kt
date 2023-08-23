@@ -81,12 +81,20 @@ class TestesController {
 
     @GetMapping("/product")
     fun sendProduct(): Any {
-//        return productsService.sendProductsToSFA(SymParametros().apply {
-//            codigoFilial = "01"
-//            codigoDistribuidorPetronas = "FAALRN"
-//        })
+
         productsService.sendKeyProductsToSFA(SymParametros().apply {
             codigoFilial = "01"
+            codigoDistribuidorPetronas = "FAALRN"
+        })
+
+        return "OK"
+    }
+    @GetMapping("/inventory")
+    fun sendEstoque(): Any {
+
+        productsService.sendKeyProductsInventoryToSFA(SymParametros().apply {
+            codigoFilial = "01"
+            codigoLocal = "01"
             codigoDistribuidorPetronas = "FAALRN"
         })
 

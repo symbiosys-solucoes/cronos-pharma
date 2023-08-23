@@ -1,5 +1,6 @@
 package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.api
 
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.KeyProductsInventory
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.request.KeyProducts
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.request.Products
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.response.UpsertResponse
@@ -15,6 +16,9 @@ interface ApiPetronasUpsertProducts {
 
     @PutMapping(value = ["/services/apexrest/ebMobile/erp2?functionName=UpsertKeyProducts"])
     fun upsertKeyProducts(accounts: List<KeyProducts>): ResponseEntity<List<UpsertResponse>>
+
+    @PutMapping(value = ["/services/apexrest/ebMobile/erp2?functionName=UpsertKeyProductsInventory"])
+    fun upsertKeyProductsInventory(accounts: List<KeyProductsInventory>): ResponseEntity<List<UpsertResponse>>
 
 
 }
