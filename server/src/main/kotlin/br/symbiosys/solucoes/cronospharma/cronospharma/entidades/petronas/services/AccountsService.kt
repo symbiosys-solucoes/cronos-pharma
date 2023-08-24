@@ -5,10 +5,16 @@ import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.api.Ap
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.request.Accounts
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.response.UpsertResponse
 import br.symbiosys.solucoes.cronospharma.cronospharma.sym.gateway.repository.SymCustomerRepository
+import br.symbiosys.solucoes.cronospharma.cronospharma.sym.gateway.repository.SymErrosRepository
 import br.symbiosys.solucoes.cronospharma.cronospharma.sym.model.SymCustomer
+import br.symbiosys.solucoes.cronospharma.cronospharma.sym.model.SymErros
+import br.symbiosys.solucoes.cronospharma.cronospharma.sym.model.SymParametros
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class AccountsService {
@@ -17,10 +23,16 @@ class AccountsService {
     private lateinit var symCustomerRepository: SymCustomerRepository
 
     @Autowired
+    private lateinit var symErrosRepository: SymErrosRepository
+
+    @Autowired
     private lateinit var cliForRepository: CliForRepository
 
     @Autowired
     private lateinit var apiPetronasUpsertAccounts: ApiPetronasUpsertAccounts
+
+    val logger = LoggerFactory.getLogger(AccountsService::class.java)
+    val mapper = ObjectMapper()
 
     fun createAccounts(request: List<Accounts>): List<UpsertResponse> {
 
@@ -56,27 +68,42 @@ class AccountsService {
         return response
     }
 
-    fun sendAccountsToSfa(codigoDistribuidor: String) {
-        val clientesCronos = cliForRepository.findAll()
+    fun sendAccountsToSfa(symParametros: SymParametros) {
+        val clientesCronos = cliForRepository.findAll(symParametros)
+        println(clientesCronos.size)
         val clientesSales = symCustomerRepository.findAll().map { it.codigoCronos }
         val clientesNovosCronos = clientesCronos.filter { !clientesSales.contains(it.codCliFor) }
 
-        val accounts = clientesNovosCronos.map { Accounts.fromCliFor(it, codigoDistribuidor) }.chunked(50).toList()
+        val accounts = clientesNovosCronos.map { Accounts.fromCliFor(it, symParametros.codigoDistribuidorPetronas!!) }.chunked(50).toList()
+        var i = 1
+        val erros = mutableListOf<SymErros>()
         for (request in accounts) {
+            logger.info("enviando request {$i} de ${accounts.size} para SFA")
+            i++
             val response = apiPetronasUpsertAccounts.upsertAccounts(request)
             if (response.statusCode == HttpStatus.OK) {
                 val body = response.body!!
                 body.filter { it.isSuccess && it.isCreated }.forEach {
                     val customer = SymCustomer().apply {
                         idIntegrador = it.sfdcId
-                        codigoCronos = it.externalId?.replace("$codigoDistribuidor-", "")
+                        codigoCronos = it.externalId?.replace("${symParametros.codigoDistribuidorPetronas}-", "")
                         codigoIntegrador = it.externalId
                         tipoIntegrador = "PETRONAS"
                     }
                     symCustomerRepository.save(customer)
                 }
 
+                body.filter { !it.isSuccess }.forEach {
+                    erros.add(SymErros().apply {
+                        dataOperacao = LocalDateTime.now()
+                        tipoOperacao = "CADASTRO CLIENTE SFA"
+                        petronasResponse = mapper.writeValueAsString(it)
+                    })
+                }
+
             }
         }
+
+        symErrosRepository.saveAll(erros)
     }
 }

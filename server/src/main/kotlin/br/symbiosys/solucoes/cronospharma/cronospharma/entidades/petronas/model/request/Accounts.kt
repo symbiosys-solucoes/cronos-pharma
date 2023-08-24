@@ -106,6 +106,7 @@ class Accounts {
 
     companion object {
         fun fromCliFor(cliFor: CliFor, codigoDistribuidor: String, salesId: String? = null): Accounts {
+
             return Accounts().apply {
                 accountNumber = cliFor.codCliFor
                 salesForceId = salesId
@@ -114,7 +115,7 @@ class Accounts {
                 accountName = cliFor.razaoSocial
                 fantasyName = cliFor.nomeCliFor
                 customerType = "Onboarded"
-                bussinessType = "B2B"
+                bussinessType = if(cliFor.tipoPessoa == "J") "B2B" else "B2C"
                 accountSource = "DT ERP"
                 zipCode = cliFor.cepCliFor
                 phone = cliFor.foneCliFor
@@ -125,7 +126,7 @@ class Accounts {
                 city = cliFor.cidade
                 neighborhood = cliFor.bairroCliFor
                 state = cliFor.ufCliFor
-                userCode = cliFor.codFunc
+                userCode = if(!cliFor.codFunc.isNullOrBlank()) cliFor.codFunc else if (codigoDistribuidor == "FAALRN") "99999" else "99998"
                 creditLimit = cliFor.limiteCredito ?: 0.0
                 paymentMethod = cliFor.portadorPadrao
                 paymentCondition = cliFor.condicaoPagamentoPadrao

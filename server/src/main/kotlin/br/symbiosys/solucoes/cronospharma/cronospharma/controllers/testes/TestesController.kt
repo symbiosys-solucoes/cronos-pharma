@@ -76,11 +76,24 @@ class TestesController {
 
     @GetMapping("/account")
     fun analisaraccount(): Any {
-        return accountsService.sendAccountsToSfa("FAALRN")
+        return accountsService.sendAccountsToSfa(SymParametros().apply {
+            codigoFilial = "01"
+            codigoDistribuidorPetronas = "FAALRN"
+        })
     }
 
     @GetMapping("/product")
     fun sendProduct(): Any {
+
+        productsService.sendProductsToSFA(SymParametros().apply {
+            codigoFilial = "01"
+            codigoDistribuidorPetronas = "FAALRN"
+        })
+
+        return "OK"
+    }
+    @GetMapping("/productkey")
+    fun sendProductKey(): Any {
 
         productsService.sendKeyProductsToSFA(SymParametros().apply {
             codigoFilial = "01"
@@ -92,12 +105,12 @@ class TestesController {
     @GetMapping("/inventory")
     fun sendEstoque(): Any {
 
-        productsService.sendKeyProductsInventoryToSFA(SymParametros().apply {
+        return productsService.sendKeyProductsInventoryToSFA(SymParametros().apply {
             codigoFilial = "01"
             codigoLocal = "01"
             codigoDistribuidorPetronas = "FAALRN"
         })
 
-        return "OK"
+
     }
 }

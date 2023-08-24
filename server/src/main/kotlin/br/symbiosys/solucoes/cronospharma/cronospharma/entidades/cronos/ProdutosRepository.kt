@@ -46,97 +46,8 @@ class ProdutosRepository(
     }
 
     fun findPrecos(): MutableList<TabelaPreco> {
-        val parametrosPreco = jdbcTemplate.query(selectParametrosPreco, mapperParametrosPreco).first()
-        val tabelaPreco = jdbcTemplate.query(selectTabelaPreco, mapperTabeloPreco)
-        val tabelas = mutableListOf<TabelaPreco>()
-        if (!parametrosPreco.nomeTabela1.isNullOrBlank()) {
-            for (tabela in tabelaPreco) {
-                tabela.nomeTabela = parametrosPreco.nomeTabela1
-                tabela.activePrice = "1"
-                if (parametrosPreco.idPrecoPromocao == 1 && parametrosPreco.dataFimPromocao!!.isAfter(LocalDateTime.now())
-                ) {
-                    tabela.promocaoAtiva = true
-                    tabela.dataInicioPromocao = parametrosPreco.dataInicioPromocao
-                    tabela.dataFimPromocao = parametrosPreco.dataFimPromocao!!
-                }
-                tabelas.add(tabela)
-            }
+        return jdbcTemplate.query(selectTabelaPreco, mapperTabeloPreco)
 
-        }
-        if (!parametrosPreco.nomeTabela2.isNullOrBlank()) {
-            for (tabela in tabelaPreco) {
-                tabela.nomeTabela = parametrosPreco.nomeTabela2
-                tabela.activePrice = "2"
-                if (parametrosPreco.idPrecoPromocao == 2 && parametrosPreco.dataFimPromocao!!
-                        .isAfter(LocalDateTime.now())
-                ) {
-                    tabela.promocaoAtiva = true
-                    tabela.dataInicioPromocao = parametrosPreco.dataInicioPromocao
-                    tabela.dataFimPromocao = parametrosPreco.dataFimPromocao!!
-                }
-                tabelas.add(tabela)
-            }
-        }
-        if (!parametrosPreco.nomeTabela3.isNullOrBlank()) {
-            for (tabela in tabelaPreco) {
-                tabela.nomeTabela = parametrosPreco.nomeTabela3
-                tabela.activePrice = "3"
-                if (parametrosPreco.idPrecoPromocao == 3 && parametrosPreco.dataFimPromocao!!
-                        .isAfter(LocalDateTime.now())
-                ) {
-                    tabela.promocaoAtiva = true
-                    tabela.dataInicioPromocao = parametrosPreco.dataInicioPromocao
-                    tabela.dataFimPromocao = parametrosPreco.dataFimPromocao!!
-                }
-                tabelas.add(tabela)
-            }
-
-        }
-        if (!parametrosPreco.nomeTabela4.isNullOrBlank()) {
-            for (tabela in tabelaPreco) {
-                tabela.nomeTabela = parametrosPreco.nomeTabela4
-                tabela.activePrice = "4"
-                if (parametrosPreco.idPrecoPromocao == 4 && parametrosPreco.dataFimPromocao!!
-                        .isAfter(LocalDateTime.now())
-                ) {
-                    tabela.promocaoAtiva = true
-                    tabela.dataInicioPromocao = parametrosPreco.dataInicioPromocao
-                    tabela.dataFimPromocao = parametrosPreco.dataFimPromocao!!
-                }
-                tabelas.add(tabela)
-            }
-
-        }
-        if (!parametrosPreco.nomeTabela5.isNullOrBlank()) {
-            for (tabela in tabelaPreco) {
-                tabela.nomeTabela = parametrosPreco.nomeTabela5
-                tabela.activePrice = "5"
-                if (parametrosPreco.idPrecoPromocao == 5 && parametrosPreco.dataFimPromocao!!
-                        .isAfter(LocalDateTime.now())
-                ) {
-                    tabela.promocaoAtiva = true
-                    tabela.dataInicioPromocao = parametrosPreco.dataInicioPromocao
-                    tabela.dataFimPromocao = parametrosPreco.dataFimPromocao!!
-                }
-                tabelas.add(tabela)
-            }
-        }
-        if (!parametrosPreco.nomeTabela6.isNullOrBlank()) {
-            for (tabela in tabelaPreco) {
-                tabela.nomeTabela = parametrosPreco.nomeTabela6
-                tabela.activePrice = "6"
-                if (parametrosPreco.idPrecoPromocao == 6 && parametrosPreco.dataFimPromocao!!
-                        .isAfter(LocalDateTime.now())
-                ) {
-                    tabela.promocaoAtiva = true
-                    tabela.dataInicioPromocao = parametrosPreco.dataInicioPromocao
-                    tabela.dataFimPromocao = parametrosPreco.dataFimPromocao!!
-                }
-                tabelas.add(tabela)
-            }
-        }
-
-        return tabelas
 
     }
 
@@ -156,21 +67,6 @@ class ProdutosRepository(
             }
         }
 
-        private val mapperParametrosPreco = RowMapper<ParametrosPreco> { rs: ResultSet, rowNum: Int ->
-            ParametrosPreco().apply {
-                nomeTabela1 = rs.getString("NomePrcVenda1")
-                nomeTabela2 = rs.getString("NomePrcVenda2")
-                nomeTabela3 = rs.getString("NomePrcVenda3")
-                nomeTabela4 = rs.getString("NomePrcVenda4")
-                nomeTabela5 = rs.getString("NomePrcVenda5")
-                nomeTabela6 = rs.getString("NomePrcVenda6")
-                promocaoAtiva = if (rs.getString("PromocaoAtiva") == "S") true else false
-                dataInicioPromocao = rs.getTimestamp("DataInicioPromocao")?.toLocalDateTime() ?: LocalDateTime.now().minusDays(1)
-                dataFimPromocao = rs.getTimestamp("DataFimPromocao")?.toLocalDateTime() ?: LocalDateTime.now().minusDays(1)
-                idPrecoPromocao = rs.getInt("IdPrecoPromocao")
-            }
-        }
-
 
         private val mapperTabeloPreco = RowMapper<TabelaPreco> { rs: ResultSet, rowNum: Int ->
             TabelaPreco().apply {
@@ -184,6 +80,8 @@ class ProdutosRepository(
                 descontoMaximo = rs.getDouble("PercDescMax")
                 codigoSales = rs.getString("MedicReferencia")
                 status = rs.getString("StatusProduto")
+                fabricante = rs.getString("FABRICANTE")
+                referenciaFabricante = rs.getString("CodProdutoFabr")
             }
         }
 
@@ -194,28 +92,31 @@ class ProdutosRepository(
                 "INNER JOIN Fabricantes f ON p.CodFabr = f.CodFabr\n" +
                 "LEFT JOIN ZProdutosCompl zc ON p.IdProduto = zc.IdProduto\n"
 
-        val selectParametrosPreco = "" +
-                "SELECT NomePrcVenda1, NomePrcVenda2, NomePrcVenda3, NomePrcVenda4,\n" +
-                "NomePrcVenda5, NomePrcVenda6, PromocaoAtiva, DataInicioPromocao, DataFimPromocao, IdPrecoPromocao\n" +
-                "FROM Parametros p "
+
         val selectTabelaPreco = "" +
                 "SELECT \n" +
                 "CODPRODUTO, PrecoVenda1, PrecoVenda2, PrecoVenda3, PrecoVenda4, PrecoVenda5, PrecoVenda6,\n" +
-                "PercDescMax, MedicReferencia, StatusProduto\n" +
+                "PercDescMax, MedicReferencia, StatusProduto, CodProdutoFabr, FABRICANTE = (SELECT NomeFabr FROM Fabricantes WHERE CodFabr = p.CodFabr)\n" +
                 "\n" +
                 "FROM Produtos p \n" +
-                "WHERE MedicReferencia IS NOT NULL"
+                ""
 
 
         val selectEstoque = "" +
-                "SELECT Produtos.CODPRODUTO, Estoque.SdoAtual FROM Estoque " +
+                "SELECT Produtos.CODPRODUTO, Estoque.SdoAtual, FABRICANTE = (SELECT NomeFabr FROM Fabricantes WHERE CodFabr = Produtos.CodFabr), Produtos.CodProdutoFabr FROM Estoque " +
                 "LEFT JOIN Produtos ON Estoque.IdProduto = Produtos.IdProduto\n" +
-                " WHERE Codfilial = :codfilial AND CodLocal = :codlocal"
+                " WHERE Codfilial = :codfilial AND CodLocal = :codlocal AND Produtos.MedicReferencia IS NOT NULL " +
+                "UNION\n" +
+                "SELECT Produtos.CODPRODUTO, Estoque.SdoAtual, FABRICANTE = (SELECT NomeFabr FROM Fabricantes WHERE CodFabr = Produtos.CodFabr), Produtos.CodProdutoFabr FROM Estoque " +
+                "LEFT JOIN Produtos ON Estoque.IdProduto = Produtos.IdProduto\n" +
+                " WHERE Codfilial = :codfilial AND CodLocal = :codlocal AND (SELECT NomeFabr FROM Fabricantes WHERE CodFabr = Produtos.CodFabr) = 'PETRONAS'"
 
         private val mapperEstoque = RowMapper<Estoque> { rs: ResultSet, rowNum: Int ->
             Estoque().apply {
                 codigoProduto = rs.getString("CODPRODUTO")
                 sdoAtual = rs.getDouble("SdoAtual")
+                referenciaFabricante = rs.getString("CodProdutoFabr")
+                fabricante = rs.getString("FABRICANTE")
             }
         }
     }
@@ -225,10 +126,14 @@ class ProdutosRepository(
 class Estoque {
     var codigoProduto: String? = null
     var sdoAtual = 0.0
+    var referenciaFabricante: String? = ""
+    var fabricante: String? = ""
 }
 
 class TabelaPreco {
     var activePrice = ""
+    var referenciaFabricante: String? = null
+    var fabricante: String? = null
     var codigoProduto: String? = null
     var nomeTabela: String? = null
     var preco1: Double = 0.0
@@ -246,18 +151,5 @@ class TabelaPreco {
 
 }
 
-class ParametrosPreco {
-    var nomeTabela1: String? = ""
-    var nomeTabela2: String? = ""
-    var nomeTabela3: String? = ""
-    var nomeTabela4: String? = ""
-    var nomeTabela5: String? = ""
-    var nomeTabela6: String? = ""
-    var promocaoAtiva = false
-    var dataInicioPromocao: LocalDateTime? = null
-    var dataFimPromocao: LocalDateTime? = null
-    var idPrecoPromocao: Int = 0
-
-}
 
 

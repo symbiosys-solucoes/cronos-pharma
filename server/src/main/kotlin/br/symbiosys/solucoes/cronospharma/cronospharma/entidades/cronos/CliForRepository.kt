@@ -1,6 +1,7 @@
 package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos
 
 import CliFor
+import br.symbiosys.solucoes.cronospharma.cronospharma.sym.model.SymParametros
 import org.slf4j.LoggerFactory
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
@@ -24,7 +25,11 @@ class CliForRepository(
         return null
     }
 
-    fun findAll(): List<CliFor> {
+    fun findAll(symParametros: SymParametros? = null): List<CliFor> {
+        if (symParametros != null) {
+            val uf = if(symParametros.codigoDistribuidorPetronas == "FAALRN") "RN" else "PB"
+            return jdbcTemplate.query(selectCliFor + " AND UfCliFor = '$uf' ", mapperCliFor)
+        }
         return jdbcTemplate.query(selectCliFor, mapperCliFor)
     }
 
@@ -266,7 +271,7 @@ class CliForRepository(
                 "FROM Cli_For cli LEFT JOIN Cidade cid ON cli.IdCidade = cid.IdCidade\n" +
                 "LEFT JOIN Portador p ON cli.CodPortador = p.CodPortador\n" +
                 "LEFT JOIN CondPag c ON cli.CodCondPag = c.CodCondPag\n" +
-                "WHERE cli.CodClifor LIKE 'C%'"
+                "WHERE cli.CodClifor LIKE 'C%' AND cli.Inativo = 'N'"
     }
 
 }

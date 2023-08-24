@@ -96,7 +96,7 @@ class MovimentosEventosService : ISymEventos {
                 paymentMethod = movimento.get("Portador").asText()
                 paymentKeyTerms = movimento.get("CondPag").asText()
                 destination = ""
-                deliveryType = "FOB"
+                deliveryType = "CIF"
                 customerOrderNumber = pedido.NumPedidoPalmAux
                 active = if(statusMovimento == "C") false else true
             }

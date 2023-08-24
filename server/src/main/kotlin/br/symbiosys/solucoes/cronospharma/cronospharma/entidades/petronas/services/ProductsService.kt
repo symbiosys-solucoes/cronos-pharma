@@ -5,6 +5,7 @@ import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.api.Ap
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.KeyProductsInventory
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.request.KeyProducts
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.request.Products
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.response.UpsertResponse
 import br.symbiosys.solucoes.cronospharma.cronospharma.sym.model.SymParametros
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -52,45 +53,38 @@ class ProductsService  {
 
     fun sendKeyProductsToSFA(parametros: SymParametros) {
         val tabelas = produtosRepository.findPrecos().map { KeyProducts().apply {
-            productCode = it.codigoProduto
-            basePrice = when (it.activePrice) {
-                "1" -> it.preco1
-                "2" -> it.preco2
-                "3" -> it.preco3
-                "4" -> it.preco4
-                "5" -> it.preco5
-                "6" -> it.preco6
-                else -> {it.preco1}
-            }
+            productCode = if(it.fabricante == "PETRONAS") it.referenciaFabricante else it.codigoProduto
+            basePrice = it.preco1
+            manufacture = if(it.fabricante == "PETRONAS") "PETRONAS" else "NON PETRONAS"
             maxDiscount = it.descontoMaximo
-            promotionPrice = if(it.promocaoAtiva) it.preco6 else 0.0
-            promotionStartDate = it.dataInicioPromocao!!.toLocalDate()
-            promotionEndDate = it.dataFimPromocao.toLocalDate()
             active = true
             dtCode = parametros.codigoDistribuidorPetronas
-            priceBookName = it.nomeTabela
+            priceBookName = "GeneralPriceBook"
 
         }}.chunked(50).toList()
-
+        println(tabelas.size)
         for (request in tabelas) {
             val response = apiPetronasUpsertProducts.upsertKeyProducts(request)
             logger.info(response.body!!.get(0).toString())
         }
     }
 
-    fun sendKeyProductsInventoryToSFA(parametros: SymParametros) {
-        val estoques = produtosRepository.findEstoqueByCodFilialAndCodLocal(parametros.codigoFilial?: "01", parametros.codigoLocal ?: "01").map {
+    fun sendKeyProductsInventoryToSFA(parametros: SymParametros): MutableList<List<UpsertResponse>> {
+        val estoques = produtosRepository.findEstoqueByCodFilialAndCodLocal(parametros.codigoFilial?: "01", parametros.codigoLocal ?: "01")
+            .map {
             KeyProductsInventory().apply {
-                productCode = it.codigoProduto
+                productCode = if(it.fabricante == "PETRONAS") it.referenciaFabricante else it.codigoProduto
                 inventoryQuantity = it.sdoAtual
                 dtCode = parametros.codigoDistribuidorPetronas
                 active = true
             }
         }.chunked(50).toList()
-
+        var payload = mutableListOf<List<UpsertResponse>>()
         for (request in estoques) {
             val response = apiPetronasUpsertProducts.upsertKeyProductsInventory(request)
+            payload.add(response.body!!)
             logger.info(response.body!!.get(0).toString())
         }
+        return payload
     }
 }
