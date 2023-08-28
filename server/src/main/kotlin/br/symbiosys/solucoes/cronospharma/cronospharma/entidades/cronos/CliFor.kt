@@ -180,5 +180,6 @@ class CliFor {
     var cidade: String? = null
     var condicaoPagamentoPadrao: String? = null
     var portadorPadrao: String? = null
+    var revendaPetronas: String? = null
 
 }

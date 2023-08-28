@@ -115,7 +115,7 @@ class Accounts {
                 accountName = cliFor.razaoSocial
                 fantasyName = cliFor.nomeCliFor
                 customerType = "Onboarded"
-                bussinessType = if(cliFor.tipoPessoa == "J") "B2B" else "B2C"
+                bussinessType = if(cliFor.revendaPetronas == "N") "B2B" else "B2C"
                 accountSource = "DT ERP"
                 zipCode = cliFor.cepCliFor
                 phone = cliFor.foneCliFor

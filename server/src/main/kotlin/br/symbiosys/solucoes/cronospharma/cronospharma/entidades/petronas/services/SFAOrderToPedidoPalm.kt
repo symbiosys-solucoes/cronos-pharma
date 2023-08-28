@@ -2,28 +2,30 @@ package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.servi
 
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.PedidoPalm
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.request.Order
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.repositories.PedidoPalmPetronas
+import br.symbiosys.solucoes.cronospharma.cronospharma.sym.model.SymParametros
+import java.time.LocalDateTime
 
 class SFAOrderToPedidoPalm {
 
     companion object {
-        fun convert(order: Order): PedidoPalm {
+        fun convert(order: Order, symParametros: SymParametros): PedidoPalmPetronas {
 
-            return PedidoPalm(
-                Origem = "PETRONAS",
-                CodFilial = "01",
-                NumPedidoPalm = order.orderNumberSfa?:"",
-                CodCliFor = order.accountNumber,
-                CnpjCpfCliFor = order.accountNumber,
-                DataPedido = order.orderDate,
-                CodPortador = order.paymentMethod?:"",
-                CodCondPag = order.paymentKeyTerms?:"",
-                DataEntrega = order.expectedDeliveryDate,
-                NumPedidoPalmAux = order.customerOrderNumber,
-                CodVendedor = order.userCode,
-                TotalPedido = order.totalAmount.toBigDecimal(),
+            return PedidoPalmPetronas().apply {
+                logImportacao = order.salesForceId
+                codigoFilial = symParametros.codigoFilial
+                numeroPedido = order.orderNumberSfa
+                codigoCliente = order.accountNumber
+                dataPedido = order.orderDate ?: LocalDateTime.now()
+                codigoPortador = order.paymentMethod?:""
+                condicaoPagamento = order.paymentKeyTerms?:""
+                dataEntrega = order.expectedDeliveryDate
+                numeroPedidoPalmAux = order.customerOrderNumber
+                codigoVendedor = order.userCode
+                totalPedido = order.totalAmount
                 itens = mutableListOf()
+            }
 
-            )
         }
     }
 }

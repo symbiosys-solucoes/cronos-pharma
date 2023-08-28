@@ -12,6 +12,8 @@ class SymParametros {
 
     var codigoFabricanteEnviarPetronas: String = ""
 
+    var idTabelaPreco: String = "1"
+
     var active: Boolean = false
 
 }

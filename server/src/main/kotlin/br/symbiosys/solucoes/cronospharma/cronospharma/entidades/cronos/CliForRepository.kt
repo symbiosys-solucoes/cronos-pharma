@@ -214,6 +214,7 @@ class CliForRepository(
                 cidade = rs.getString("Cidade")
                 condicaoPagamentoPadrao = rs.getString("Condicao")
                 portadorPadrao = rs.getString("Portador")
+                revendaPetronas = rs.getString("Revenda")
 
 
 
@@ -267,10 +268,11 @@ class CliForRepository(
                 "CodContabil, CodContrapartida, PercDescFinanc, PercDescFinancFixo, ChaveSeguranca, PosLatitudeCad, PosLongitudeCad, CNAE, " +
                 "ProdutorRural, CodSUFRAMA, SyncDate, cli.DataOperacao, cli.IdUsuario, WebSite, RefBancoId, RefBancoAgenciaDV, RefBancoContaDV, " +
                 "RefBancoContaTp, FormaPag, ChavePix, RamoAtividade, OrgaoPublico, ContribISS, PorteEmpresa, Cidade = cid.Cidade, \n" +
-                "Condicao = c.CondPag, Portador = p.NomePortador  \n"+
+                "Condicao = c.CondPag, Portador = p.NomePortador, Revenda = ISNULL(z.petronas_revenda,'N')  \n"+
                 "FROM Cli_For cli LEFT JOIN Cidade cid ON cli.IdCidade = cid.IdCidade\n" +
                 "LEFT JOIN Portador p ON cli.CodPortador = p.CodPortador\n" +
                 "LEFT JOIN CondPag c ON cli.CodCondPag = c.CodCondPag\n" +
+                "LEFT JOIN ZCli_ForCompl z ON cli.CodCliFor = z.CodCliFor\n" +
                 "WHERE cli.CodClifor LIKE 'C%' AND cli.Inativo = 'N'"
     }
 
