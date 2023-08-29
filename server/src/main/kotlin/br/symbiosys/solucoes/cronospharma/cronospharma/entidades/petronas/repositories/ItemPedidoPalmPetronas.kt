@@ -12,7 +12,7 @@ class ItemPedidoPalmPetronas {
 
     var codigoProdutoArquivo: String? = null
 
-    var idProduto: String? = null
+    var idProduto: Int = 0
 
     var codigoProduto: String? = null
 
@@ -22,13 +22,13 @@ class ItemPedidoPalmPetronas {
 
     var idPrecoTabela: Int = 0
 
-    var precoUnitation: Double = 0.0
+    var precoUnitario: Double = 0.0
 
     var percentualDesconto: Double = 0.0
 
     var percentualComissao: Double = 0.0
 
-    var situacaoItem: String? = null
+    var situacaoItem: String = "P"
 
     var logImportacao: String? = null
 
@@ -38,7 +38,7 @@ class ItemPedidoPalmPetronas {
 
     val idUsuario = "SYM"
 
-    val dataOperacao = LocalDateTime.now()
+    var dataOperacao = LocalDateTime.now()
 
 
 }

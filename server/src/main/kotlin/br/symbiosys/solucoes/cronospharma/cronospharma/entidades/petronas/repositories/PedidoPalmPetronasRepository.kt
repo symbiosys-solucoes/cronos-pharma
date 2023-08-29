@@ -40,7 +40,63 @@ class PedidoPalmPetronasRepository {
         return jdbcTemplate.query(queryInsertPedido, params, mapperPedidoPalmPetronas).first()
     }
 
+    fun save(item: ItemPedidoPalmPetronas, numeroPedidoPetronas: String, codigoFilial: String): ItemPedidoPalmPetronas {
+
+        val query = "" +
+                "DECLARE @IDPEDIDOPALM INT\n" +
+                "DECLARE @IDPRODUTO INT \n" +
+                "DECLARE @ItemPedido Table (id int) \n" +
+                "SET @IDPEDIDOPALM = ISNULL((SELECT IdPedidoPalm FROM PedidoPalm WHERE NumPedidoPalm = :numpedido AND CodFilial = :codfilial),0)\n" +
+                "IF :dscretorno = 'PETRONAS'\n" +
+                "BEGIN\n" +
+                "SET @IDPRODUTO = ISNULL((SELECT IdProduto FROM PRODUTOS WHERE CodProdutoFabr = :codproduto),0)\n" +
+                "END\n" +
+                "ELSE\n" +
+                "BEGIN\n" +
+                "SET @IDPRODUTO = ISNULL((SELECT IdProduto FROM PRODUTOS WHERE CodProduto = :codproduto),0)\n" +
+                "END\n" +
+                "\n" +
+                "IF @IDPEDIDOPALM = 0\n" +
+                "THROW 51000, 'The record does not exist.', 1;" +
+                "\n" +
+                "INSERT INTO ItemPedidoPalm\n" +
+                "( IdPedidoPalm, Item, IdEmpresa, CodProdutoArq, IdProduto, CodProduto, Qtd, QtdConfirmada, IdPrecoTabela, PrecoUnit, PercDescontoItem, SituacaoItemPedido, LogImportacao, DscRetornoItem, IdUsuario, DataOperacao) OUTPUT INSERTED.IdItemPedidoPalm INTO @ItemPedido \n" +
+                "VALUES(@IDPEDIDOPALM, :sequencia, 1, :codproduto, @IDPRODUTO, ISNULL((SELECT CODPRODUTO FROM Produtos WHERE IdProduto = @IDPRODUTO),0), :qtd, 0, :tabela, :preco, :percdesc, :situacao, :logimport, :dscretorno, :idusuario, :data);" +
+                "\n" +
+                "SELECT * FROM ItemPedidoPalm where IdItemPedidoPalm = (SELECT id FROM @ItemPedido)"
+
+        val params = MapSqlParameterSource("dscretorno", item.descricaoRetornoItem).addValue("numpedido", numeroPedidoPetronas).addValue("codfilial", codigoFilial)
+            .addValue("codproduto", item.codigoProdutoArquivo).addValue("qtd", item.quantidadeSolicitada).addValue("sequencia", item.sequencialItem)
+            .addValue("tabela", item.idPrecoTabela).addValue("preco", item.precoUnitario).addValue("percdesc", item.percentualDesconto).addValue("situacao", item.situacaoItem)
+            .addValue("logimport", item.logImportacao).addValue("idusuario", item.idUsuario).addValue("data", item.dataOperacao)
+
+        return jdbcTemplate.query(query, params, mapperItemPedidoPalmPetronas).first()
+    }
+
+
     companion object {
+
+        private val mapperItemPedidoPalmPetronas = RowMapper<ItemPedidoPalmPetronas> { rs: ResultSet, rowNum: Int ->
+            ItemPedidoPalmPetronas().apply {
+                idPedidoPalmPetronas = rs.getInt("IdPedidoPalm")
+                idItemPedido = rs.getInt("IdItemPedidoPalm")
+                sequencialItem = rs.getInt("Item")
+                codigoProdutoArquivo = rs.getString("CodProdutoArq")
+                idProduto = rs.getInt("IdProduto")
+                codigoProduto = rs.getString("CodProduto")
+                quantidadeSolicitada = rs.getDouble("Qtd")
+                quantidadeConfirmada = rs.getDouble("QtdConfirmada")
+                idPrecoTabela = rs.getInt("IdPrecoTabela")
+                precoUnitario = rs.getDouble("PrecoUnit")
+                percentualDesconto = rs.getDouble("PercDescontoItem")
+                situacaoItem = rs.getString("SituacaoItemPedido")
+                logImportacao = rs.getString("LogImportacao")
+                codigoRetornoItem = rs.getString("CodRetornoItem")
+                descricaoRetornoItem = rs.getString("DscRetornoItem")
+                dataOperacao = rs.getTimestamp("DataOperacao").toLocalDateTime()
+            }
+        }
+
         private val mapperPedidoPalmPetronas = RowMapper<PedidoPalmPetronas> { rs: ResultSet, rowNum: Int ->
             PedidoPalmPetronas(
             ).apply {

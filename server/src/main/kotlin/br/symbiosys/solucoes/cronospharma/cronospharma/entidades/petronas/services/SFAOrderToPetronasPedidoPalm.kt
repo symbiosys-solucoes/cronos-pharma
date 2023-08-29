@@ -1,12 +1,11 @@
 package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.services
 
-import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.PedidoPalm
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.request.Order
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.repositories.PedidoPalmPetronas
 import br.symbiosys.solucoes.cronospharma.cronospharma.sym.model.SymParametros
 import java.time.LocalDateTime
 
-class SFAOrderToPedidoPalm {
+class SFAOrderToPetronasPedidoPalm {
 
     companion object {
         fun convert(order: Order, symParametros: SymParametros): PedidoPalmPetronas {

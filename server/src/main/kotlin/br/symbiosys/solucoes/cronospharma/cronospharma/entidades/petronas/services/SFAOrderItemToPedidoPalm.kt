@@ -2,23 +2,23 @@ package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.servi
 
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.ItemPedidoPalm
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.request.OrderItem
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.repositories.ItemPedidoPalmPetronas
 
-class SFAOrderItemToPedidoPalm {
+class SFAOrderItemToItemPedidoPalmPetronas {
 
     companion object {
-        fun convert(item: OrderItem, idPedidoPalm: Long, sequencia: Int): ItemPedidoPalm {
+        fun convert(item: OrderItem, sequencia: Int): ItemPedidoPalmPetronas {
+            return ItemPedidoPalmPetronas().apply {
 
-            return ItemPedidoPalm(
-                IdPedidoPalm = idPedidoPalm,
-                CodProdutoArq = item.productCodeErp?:"",
-                Qtd = item.orderQuantity,
-                QtdConfirmada = item.confirmedQuantity,
-                PrecoUnit = item.unitPrice.toBigDecimal(),
-                PercDescontoItem = item.discountPercentage,
-                Item = sequencia
-            )
-
-
+                codigoProdutoArquivo = item.productCodeErp ?: ""
+                quantidadeSolicitada = item.orderQuantity
+                precoUnitario = item.unitPrice
+                percentualDesconto = item.discountPercentage
+                sequencialItem = sequencia
+                idPrecoTabela = 1
+                logImportacao = item.orderItemNumberSfa
+                descricaoRetornoItem = item.manufacturer
+            }
         }
     }
 }

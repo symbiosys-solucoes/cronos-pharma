@@ -28,7 +28,7 @@ class OrderService {
         request.forEach { order ->
             run {
                 try {
-                    val pedido = SFAOrderToPedidoPalm.convert(
+                    val pedido = SFAOrderToPetronasPedidoPalm.convert(
                         order,
                         parametros.find { it.codigoDistribuidorPetronas == order.dtCode }!!
                     )
