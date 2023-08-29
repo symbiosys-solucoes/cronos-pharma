@@ -46,7 +46,7 @@ class PedidoPalmPetronasRepository {
                 "DECLARE @IDPEDIDOPALM INT\n" +
                 "DECLARE @IDPRODUTO INT \n" +
                 "DECLARE @ItemPedido Table (id int) \n" +
-                "SET @IDPEDIDOPALM = ISNULL((SELECT IdPedidoPalm FROM PedidoPalm WHERE NumPedidoPalm = :numpedido AND CodFilial = :codfilial),0)\n" +
+                "SET @IDPEDIDOPALM = ISNULL((SELECT IdPedidoPalm FROM PedidoPalm WHERE NumPedidoPalm = :numpedido AND CodFilial = :codfilial),0) AND SituacaoPedido = 'P'\n" +
                 "IF :dscretorno = 'PETRONAS'\n" +
                 "BEGIN\n" +
                 "SET @IDPRODUTO = ISNULL((SELECT IdProduto FROM PRODUTOS WHERE CodProdutoFabr = :codproduto),0)\n" +
