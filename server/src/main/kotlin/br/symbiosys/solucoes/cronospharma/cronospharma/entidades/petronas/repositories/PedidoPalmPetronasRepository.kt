@@ -1,5 +1,7 @@
 package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.repositories
 
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.BloqueioMovimentoRepository
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.request.Order
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
@@ -13,6 +15,40 @@ class PedidoPalmPetronasRepository {
     @Autowired
     private lateinit var jdbcTemplate: NamedParameterJdbcTemplate
 
+    @Autowired
+    lateinit var bloqueioMovimentoRepository: BloqueioMovimentoRepository
+
+    fun markAsSent(numPedidoCronos: String, atualizado: Boolean = false) {
+        jdbcTemplate.update("UPDATE ZMovimentoCompl SET sym_enviar_petronas = 0 WHERE IdMov = (SELECT IdMov FROM Movimento WHERE NUMMOV = :numpedido)",
+            MapSqlParameterSource("numpedido", numPedidoCronos))
+    }
+    fun findAll(enviados: Boolean = false): List<Order> {
+        val mapper =  RowMapper<Order> { rs: ResultSet, rowNum: Int ->
+            Order().apply {
+                orderNumberSfa = rs.getString("SFAOrderNumber")
+                orderNumberErp = rs.getString("ERPOrderNumber")
+                orderSource = rs.getString("OrderSource")
+                type = rs.getString("OrderType")
+                dtCode = rs.getString("DTCode")
+                accountNumber = rs.getString("AccountNumber")
+                status = rs.getString("Status")
+                orderDate = rs.getTimestamp("OrderDate").toLocalDateTime()
+                totalQuantity = rs.getDouble("TotalQuantity")
+                confirmedQuantity = rs.getDouble("TotalQuantity")
+                orderTotalVolume = rs.getDouble("OrderTotalVolume")
+                netAmount = rs.getDouble("NetAmount")
+                totalAmount = rs.getDouble("TotalAmount")
+                paymentMethod = rs.getString("PaymentMethod")
+                paymentKeyTerms = rs.getString("PaymenteKeyTerms")
+                destination = rs.getString("Destination")
+                deliveryType = rs.getString("DeliveryType")
+                customerOrderNumber = rs.getString("PONumber")
+                userCode = rs.getString("UserCode")
+            }
+
+        }
+        return jdbcTemplate.query("SELECT * FROM sym_petronas_order WHERE PrecisaEnviar = 1", mapper)
+    }
 
     fun save(pedido: PedidoPalmPetronas): PedidoPalmPetronas {
 
@@ -73,7 +109,24 @@ class PedidoPalmPetronasRepository {
         return jdbcTemplate.query(query, params, mapperItemPedidoPalmPetronas).first()
     }
 
+    fun toMovimento(pedido: PedidoPalmPetronas) {
+        val query = "exec dbo.sym_converte_pedido :idpedido, :tipomov, :codfilial"
+        val params = MapSqlParameterSource("idpedido", pedido.idPedidoPalm).addValue("tipomov", "2.7").addValue("codfilial", pedido.codigoFilial)
+        val result = jdbcTemplate.queryForObject(query, params, String::class.java)
+        if (!result.isNullOrBlank()) {
+            val idmov: Int = jdbcTemplate.queryForObject("SELECT ISNULL(MAX(IdMov),0) FROM Movimento WHERE NumMov = :numero", MapSqlParameterSource("numero", result), Int::class.java) ?: 0
+            if (idmov != 0) {
+                bloqueioMovimentoRepository.executaRegrasMovimento(idmov.toLong())
+            }
+        }
+    }
 
+    fun convertAll() {
+        val pedidos = jdbcTemplate.query("SELECT * FROM PedidoPalm WHERE SituacaoPedido = 'P'", mapperPedidoPalmPetronas)
+        for (pedido in pedidos) {
+            toMovimento(pedido)
+        }
+    }
     companion object {
 
         private val mapperItemPedidoPalmPetronas = RowMapper<ItemPedidoPalmPetronas> { rs: ResultSet, rowNum: Int ->

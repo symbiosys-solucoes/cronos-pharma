@@ -92,4 +92,36 @@ class OrderRequest : Order() {
 
     @JsonProperty("ebMobile__OrderDate__c")
     override var orderDate: LocalDateTime? = null
+
+    companion object{
+        fun from(order: Order): OrderRequest {
+            return OrderRequest().apply {
+                salesForceId = order.salesForceId
+                orderNumberSfa = order.orderNumberSfa
+                orderNumberErp = order.orderNumberErp
+                orderSource = order.orderSource
+                type = order.type
+                dtCode = order.dtCode
+                accountNumber = order.accountNumber
+                status = order.status
+                orderDate = order.orderDate
+                totalQuantity = order.totalQuantity
+                confirmedQuantity = order.confirmedQuantity
+                orderTotalVolume = order.orderTotalVolume
+                netAmount = order.netAmount
+                totalAmount = order.totalAmount
+                paymentMethod = order.paymentMethod
+                paymentKeyTerms = order.paymentKeyTerms
+                destination = order.destination
+                deliveryType = order.deliveryType
+                expectedDeliveryDate = order.expectedDeliveryDate
+                driverMessage = order.driverMessage
+                customerOrderNumber = customerOrderNumber
+                userCode = order.userCode
+                takenBy = order.takenBy
+                active = order.active
+                shipToAccountNumber = order.shipToAccountNumber
+            }
+        }
+    }
 }

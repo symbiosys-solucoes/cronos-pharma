@@ -4,7 +4,6 @@ import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.response.UpsertResponse
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.services.AuthorizationTokenService
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.services.OrderService
-import br.symbiosys.solucoes.cronospharma.cronospharma.sym.gateway.repository.SymParametrosRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.web.bind.annotation.*
@@ -24,7 +23,7 @@ class SFAOrderController
         @RequestHeader(HttpHeaders.AUTHORIZATION) token: String
     ): List<UpsertResponse> {
         authService.validate(token)
-        return orderService.createOrder(request)
+        return orderService.createOrderERP(request)
     }
 
 }
