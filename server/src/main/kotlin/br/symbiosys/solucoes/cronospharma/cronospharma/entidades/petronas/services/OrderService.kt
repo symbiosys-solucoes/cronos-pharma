@@ -26,6 +26,9 @@ class OrderService {
     @Autowired
     lateinit var pedidoPalmPetronasRepository: PedidoPalmPetronasRepository
 
+    @Autowired
+    lateinit var orderItemService: OrderItemService
+
     val logger = LoggerFactory.getLogger(OrderService::class.java)
 
     fun createOrderERP(request: List<Order>): List<UpsertResponse> {
@@ -81,16 +84,22 @@ class OrderService {
             response.body?.forEach {
                 if (it.isSuccess && it.isCreated) {
                     logger.info("Pedido ${it.externalId} enviado e criado com sucesso")
-                    pedidoPalmPetronasRepository.markAsSent(it.externalId!!.split("-")[1])
+                    val numPedido = it.externalId!!.split("-")[1]
+                    pedidoPalmPetronasRepository.markAsSent(numPedido)
+                    orderItemService.sendOrderItemToSFA(numPedido)
                 }
                 if (it.isSuccess && !it.isCreated) {
                     logger.info("Pedido ${it.externalId} enviado e atualizado com sucesso")
-                    pedidoPalmPetronasRepository.markAsSent(it.externalId!!.split("-")[1], true)
+                    val numPedido = it.externalId!!.split("-")[1]
+                    pedidoPalmPetronasRepository.markAsSent(numPedido)
+                    orderItemService.sendOrderItemToSFA(numPedido)
                 }
                 logger.error("erro ao enviar pedido ${it.externalId}")
             }
         }
 
     }
+
+
 
 }

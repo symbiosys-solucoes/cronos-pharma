@@ -2,6 +2,7 @@ package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.repos
 
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.BloqueioMovimentoRepository
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.request.Order
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.request.OrderItem
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
@@ -18,7 +19,42 @@ class PedidoPalmPetronasRepository {
     @Autowired
     lateinit var bloqueioMovimentoRepository: BloqueioMovimentoRepository
 
-    fun markAsSent(numPedidoCronos: String, atualizado: Boolean = false) {
+    fun findItems(numPedidoCronos: String): List<OrderItem> {
+        val mapper =  RowMapper<OrderItem> { rs: ResultSet, rowNum: Int ->
+            OrderItem().apply {
+                orderNumberSfa = rs.getString("SFAOrderNumber")
+                orderNumberErp = rs.getString("ERPOrderNumber")
+                orderItemNumberSfa = rs.getString("SFAOrderItemNumber")
+                orderItemNumberErp = rs.getString("ERPOrderItemNumber")
+                productCodeErp = rs.getString("ProductCode")
+                orderItemStatus = rs.getString("OrderItemStatus")
+                orderQuantity = rs.getDouble("OrderQuantity")
+                confirmedQuantity = rs.getDouble("OrderQuantity")
+                confirmedDate = rs.getTimestamp("ConfirmedDate").toLocalDateTime().toLocalDate()
+                totalVolume = rs.getDouble("TotalVolume")
+                unitPrice = rs.getDouble("UnitPrice")
+                lineNetAmount = rs.getDouble("LineNetAmount")
+                lineAmount = rs.getDouble("LineAmount")
+                discountPercentage = rs.getDouble("DiscountPercentage")
+                orderDate = rs.getTimestamp("OrderDate").toLocalDateTime().toLocalDate()
+                itemSequence = rs.getInt("ItemSequence")
+                manufacturer = rs.getString("Manufacturer")
+                totalCost = rs.getDouble("COGS")
+                active = true
+                dtCode = rs.getString("DTCode")
+
+            }
+        }
+
+        return jdbcTemplate.query("SELECT * FROM dbo.sym_petronas_order_item WHERE ERPOrderNumber = :numpedido", MapSqlParameterSource("numpedido", numPedidoCronos), mapper)
+
+    }
+    fun markAsSent(idItem: Int, SFAOrderItemNumber: String) {
+        jdbcTemplate.update("UPDATE ItensMov SET CampoAlfaImOp1 = :itemnumber WHERE IdItemMov = :iditem",
+            MapSqlParameterSource("itemnumber", SFAOrderItemNumber).addValue("iditem", idItem))
+    }
+
+    fun markAsSent(numPedidoCronos: String,  atualizado: Boolean = false) {
         jdbcTemplate.update("UPDATE ZMovimentoCompl SET sym_enviar_petronas = 0 WHERE IdMov = (SELECT IdMov FROM Movimento WHERE NUMMOV = :numpedido)",
             MapSqlParameterSource("numpedido", numPedidoCronos))
     }
@@ -44,6 +80,7 @@ class PedidoPalmPetronasRepository {
                 deliveryType = rs.getString("DeliveryType")
                 customerOrderNumber = rs.getString("PONumber")
                 userCode = rs.getString("UserCode")
+                active = true
             }
 
         }

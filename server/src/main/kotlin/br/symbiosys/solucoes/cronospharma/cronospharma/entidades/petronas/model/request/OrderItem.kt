@@ -49,6 +49,9 @@ class OrderItem {
     @JsonProperty("ebMobile__LineNetAmount__c")
     var lineNetAmount: Double = 0.0
 
+    @JsonProperty("ebMobile__LineAmount__c")
+    var lineAmount: Double = 0.0
+
     @JsonProperty("Discount_Pcentage__c")
     var discountPercentage: Double = 0.0
 
