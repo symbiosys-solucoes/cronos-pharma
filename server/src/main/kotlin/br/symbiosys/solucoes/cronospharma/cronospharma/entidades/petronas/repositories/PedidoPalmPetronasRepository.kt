@@ -3,6 +3,7 @@ package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.repos
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.BloqueioMovimentoRepository
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.request.Order
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.request.OrderItem
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
@@ -12,6 +13,8 @@ import java.sql.ResultSet
 
 @Repository
 class PedidoPalmPetronasRepository {
+
+    val logger = LoggerFactory.getLogger(PedidoPalmPetronasRepository::class.java)
 
     @Autowired
     private lateinit var jdbcTemplate: NamedParameterJdbcTemplate
@@ -119,7 +122,7 @@ class PedidoPalmPetronasRepository {
                 "DECLARE @IDPEDIDOPALM INT\n" +
                 "DECLARE @IDPRODUTO INT \n" +
                 "DECLARE @ItemPedido Table (id int) \n" +
-                "SET @IDPEDIDOPALM = ISNULL((SELECT IdPedidoPalm FROM PedidoPalm WHERE NumPedidoPalm = :numpedido AND CodFilial = :codfilial),0) AND SituacaoPedido = 'P'\n" +
+                "SET @IDPEDIDOPALM = ISNULL((SELECT IdPedidoPalm FROM PedidoPalm WHERE NumPedidoPalm = :numpedido AND CodFilial = :codfilial AND SituacaoPedido = 'P'),0) \n" +
                 "IF :dscretorno = 'PETRONAS'\n" +
                 "BEGIN\n" +
                 "SET @IDPRODUTO = ISNULL((SELECT IdProduto FROM PRODUTOS WHERE CodProdutoFabr = :codproduto),0)\n" +
@@ -147,8 +150,9 @@ class PedidoPalmPetronasRepository {
     }
 
     fun toMovimento(pedido: PedidoPalmPetronas) {
-        val query = "exec dbo.sym_converte_pedido :idpedido, :tipomov, :codfilial"
-        val params = MapSqlParameterSource("idpedido", pedido.idPedidoPalm).addValue("tipomov", "2.7").addValue("codfilial", pedido.codigoFilial)
+        val query = "exec dbo.sym_converte_pedido :idpedido, :tipomov, :codlocal"
+        logger.info(pedido.toString())
+        val params = MapSqlParameterSource("idpedido", pedido.idPedidoPalm).addValue("tipomov", "2.7").addValue("codlocal", "01")
         val result = jdbcTemplate.queryForObject(query, params, String::class.java)
         if (!result.isNullOrBlank()) {
             val idmov: Int = jdbcTemplate.queryForObject("SELECT ISNULL(MAX(IdMov),0) FROM Movimento WHERE NumMov = :numero", MapSqlParameterSource("numero", result), Int::class.java) ?: 0
@@ -159,8 +163,10 @@ class PedidoPalmPetronasRepository {
     }
 
     fun convertAll() {
-        val pedidos = jdbcTemplate.query("SELECT * FROM PedidoPalm WHERE SituacaoPedido = 'P'", mapperPedidoPalmPetronas)
+        val pedidos = jdbcTemplate.query("SELECT * FROM PedidoPalm WHERE SituacaoPedido = 'P' AND Origem = 'DiscoverySFA'", mapperPedidoPalmPetronas)
+        logger.info("Foram encontrados ${pedidos.size} para serem importados")
         for (pedido in pedidos) {
+            logger.info("Convertendo pedido ${pedido.numeroPedido} da petronas")
             toMovimento(pedido)
         }
     }
@@ -190,6 +196,7 @@ class PedidoPalmPetronasRepository {
         private val mapperPedidoPalmPetronas = RowMapper<PedidoPalmPetronas> { rs: ResultSet, rowNum: Int ->
             PedidoPalmPetronas(
             ).apply {
+                idPedidoPalm = rs.getInt("IdPedidoPalm")
                 numeroPedido = rs.getString("NumPedidoPalm")
                 codigoVendedor = rs.getString("CodVendedor")
                 codigoCliente = rs.getString("CodCliFor")

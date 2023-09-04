@@ -6,6 +6,7 @@ import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.Finaliza
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.cronos.PedidoPalmRepository
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.api.ApiPetronasAuth
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.services.AccountsService
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.services.OrderService
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.services.ProductsService
 import br.symbiosys.solucoes.cronospharma.cronospharma.sym.model.SymParametros
 import br.symbiosys.solucoes.cronospharma.cronospharma.sym.service.SymEventosService
@@ -42,6 +43,9 @@ class TestesController {
 
     @Autowired
     private lateinit var productsService: ProductsService
+
+    @Autowired
+    private lateinit var orderService: OrderService
 
     @Value("\${app.filial.cnpj}")
     private lateinit var cnpj: String
@@ -110,7 +114,10 @@ class TestesController {
             codigoLocal = "01"
             codigoDistribuidorPetronas = "FAALRN"
         })
+    }
 
-
+    @PostMapping("/convert")
+    fun convertOrderToMovimento() {
+        return orderService.convertOrderToMovimento()
     }
 }

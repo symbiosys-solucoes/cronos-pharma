@@ -6,7 +6,7 @@ class PedidoPalmPetronas {
 
     var idPedidoPalm: Int? = null
 
-    val origem = "PETRONAS"
+    val origem = "DiscoverySFA"
 
     var numeroPedido: String? = null
 
@@ -67,9 +67,9 @@ class PedidoPalmPetronas {
     var numeroPedidoPalmAux: String? = null
 
     var itens: MutableList<ItemPedidoPalmPetronas> = mutableListOf()
-
-
-
+    override fun toString(): String {
+        return "PedidoPalmPetronas(idPedidoPalm=$idPedidoPalm, origem='$origem', numeroPedido=$numeroPedido, codigoVendedor=$codigoVendedor, codigoCliente=$codigoCliente, cnpjCpfCliente=$cnpjCpfCliente, dataPedido=$dataPedido, percentualComissao=$percentualComissao, condicaoPagamento=$condicaoPagamento, codigoPortador=$codigoPortador, percentualDesconto=$percentualDesconto, totalPedido=$totalPedido, dataEntrega=$dataEntrega, observacoes=$observacoes, idExpedicao=$idExpedicao, dataProximaVisita=$dataProximaVisita, situacaoPedido=$situacaoPedido, numeroNF=$numeroNF, logImportacao=$logImportacao, statusRetorno=$statusRetorno, codigoRetorno=$codigoRetorno, descricaoRetorno=$descricaoRetorno, numeroPedidoCronos=$numeroPedidoCronos, arquivoRetornoPedido=$arquivoRetornoPedido, arquivoRetornoNotaFiscal=$arquivoRetornoNotaFiscal, idUsuario='$idUsuario', dataOperacao=$dataOperacao, codigoFilial=$codigoFilial, arquivoRetornoSegundaViaPedido=$arquivoRetornoSegundaViaPedido, versaoLayout=$versaoLayout, numeroPedidoPalmAux=$numeroPedidoPalmAux, itens=$itens)"
+    }
 
 
 }
