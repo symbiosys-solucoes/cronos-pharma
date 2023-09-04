@@ -22,8 +22,6 @@ class MovimentosEventosService : ISymEventos {
 
     private val logger = LoggerFactory.getLogger(MovimentosEventosService::class.java)
 
-    @Value("\${app.petronas.dtcode}")
-    lateinit var petronasDtCode: String
 
     @Autowired
     lateinit var pedidoPalmRepository: PedidoPalmRepository
@@ -84,7 +82,7 @@ class MovimentosEventosService : ISymEventos {
                 orderNumberErp = pedido.NumPedidoCRONOS
                 orderSource = "SFA Mobile"
                 type = "Sales Order"
-                dtCode = petronasDtCode
+                dtCode = "FAALRN"
                 accountNumber = customer.get().codigoIntegrador
                 status = statusSales
                 orderDate = LocalDateTime.parse(movimento.get("DtMov").asText())
