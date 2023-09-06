@@ -2,12 +2,8 @@ package br.symbiosys.solucoes.cronospharma.cronospharma.sym.model
 
 import javax.persistence.*
 
-@Entity
-@Table(name = "Zsym_clientes")
 class SymCustomer {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
 
     var idIntegrador: String? = null

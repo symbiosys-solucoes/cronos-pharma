@@ -6,85 +6,125 @@ import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.request.KeyProducts
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.request.Products
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.response.UpsertResponse
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.repositories.ProductsInventoryPetronasRepository
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.repositories.ProductsKeyPetronasRepository
+import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.repositories.ProductsPetronasRepository
+import br.symbiosys.solucoes.cronospharma.cronospharma.sym.gateway.repository.SymErrosRepository
+import br.symbiosys.solucoes.cronospharma.cronospharma.sym.model.SymErros
 import br.symbiosys.solucoes.cronospharma.cronospharma.sym.model.SymParametros
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Service
-class ProductsService  {
+class ProductsService {
 
     private val logger = LoggerFactory.getLogger(ProductsService::class.java)
 
     @Autowired
-    lateinit var produtosRepository: ProdutosRepository
+    lateinit var productsRepository: ProductsPetronasRepository
+
+    @Autowired
+    lateinit var keyPetronasRepository: ProductsKeyPetronasRepository
+
+    @Autowired
+    lateinit var productsInventoryPetronasRepository: ProductsInventoryPetronasRepository
+
+    @Autowired
+    lateinit var symErrosRepository: SymErrosRepository
 
     @Autowired
     lateinit var apiPetronasUpsertProducts: ApiPetronasUpsertProducts
 
-    fun sendProductsToSFA(parametros: SymParametros) {
-       val products = produtosRepository.findAll().map {
-            Products().apply {
-                productCode = it.codProduto
-                dtCode = parametros.codigoDistribuidorPetronas
-                name = it.nomeProduto
-                description = it.descricaoProduto
-                unid = it.unidadeMedida
-                unidQuantity = it.volume.toString() + "L"
-                category = it.codigoGrupo
-                brand = it.fabricante
-                manufacture = "NON PETRONAS"
-                active = it.ativo
-            }
-        }.chunked(50).toList()
+    val mapper = ObjectMapper()
 
+    fun sendProductsToSFA() {
+        val products = productsRepository.findAll().chunked(50).toList()
+        var i = 1
+        val erros = mutableListOf<SymErros>()
         for (p in products) {
-           val response = apiPetronasUpsertProducts.upsertProducts(p)
-            response.body?.filter { it.isSuccess && it.isCreated }?.forEach {
-                val codProduto = it.externalId?.replace(parametros.codigoDistribuidorPetronas + "-", "")
-                if (codProduto != null) {
-                    produtosRepository.updateSalesID(codProduto, it.sfdcId!!)
-                }
+            logger.info("enviando request {$i} de ${products.size} para SFA")
+            i++
+            val response = apiPetronasUpsertProducts.upsertProducts(p)
+            val body = response.body!!
+            body.filter { it.isSuccess && it.isCreated }.forEach {
+                val codProduto = it.externalId!!.split("-")[1]
+                logger.info("Produto criado com sucesso no SFA: $codProduto")
+                productsRepository.markAsCreated(codProduto)
+            }
+            body.filter { it.isSuccess && !it.isCreated }.forEach {
+                val codProduto = it.externalId!!.split("-")[1]
+                logger.info("Produto atualizado com sucesso no SFA: $codProduto")
+                productsRepository.markAsUpdated(codProduto)
+            }
+            body.filter { !it.isSuccess }.forEach {
+                logger.error("produto ${it.externalId} não foi atualizado nem cadastrado")
+                erros.add(SymErros().apply {
+                    dataOperacao = LocalDateTime.now()
+                    tipoOperacao = "CADASTRO PRODUTO SFA"
+                    petronasResponse = mapper.writeValueAsString(it)
+                })
             }
         }
+        symErrosRepository.saveAll(erros)
 
     }
 
-    fun sendKeyProductsToSFA(parametros: SymParametros) {
-        val tabelas = produtosRepository.findPrecos().map { KeyProducts().apply {
-            productCode = if(it.fabricante == "PETRONAS") it.referenciaFabricante else it.codigoProduto
-            basePrice = it.preco1
-            manufacture = if(it.fabricante == "PETRONAS") "PETRONAS" else "NON PETRONAS"
-            maxDiscount = it.descontoMaximo
-            active = true
-            dtCode = parametros.codigoDistribuidorPetronas
-            priceBookName = "GeneralPriceBook"
-
-        }}.chunked(50).toList()
-        println(tabelas.size)
-        for (request in tabelas) {
+    fun sendKeyProductsToSFA() {
+        val keyProducts = keyPetronasRepository.findAll().chunked(50).toList()
+        var i = 1
+        val erros = mutableListOf<SymErros>()
+        for (request in keyProducts) {
             val response = apiPetronasUpsertProducts.upsertKeyProducts(request)
-            logger.info(response.body!!.get(0).toString())
+            val body = response.body!!
+            body.filter { it.isSuccess && it.isCreated }.forEach {
+                val codProduto = it.externalId!!.split("-")[1]
+                logger.info("Preco criado com sucesso no SFA: $codProduto")
+                keyPetronasRepository.markAsCreated(codProduto)
+            }
+            body.filter { it.isSuccess && !it.isCreated }.forEach {
+                val codProduto = it.externalId!!.split("-")[1]
+                logger.info("Preco atualizado com sucesso no SFA: $codProduto")
+                keyPetronasRepository.markAsUpdated(codProduto)
+            }
+            body.filter { !it.isSuccess }.forEach {
+                logger.error("Preco ${it.externalId} não foi atualizado nem cadastrado")
+                erros.add(SymErros().apply {
+                    dataOperacao = LocalDateTime.now()
+                    tipoOperacao = "CADASTRO PRECO SFA"
+                    petronasResponse = mapper.writeValueAsString(it)
+                })
+            }
         }
+        symErrosRepository.saveAll(erros)
     }
 
-    fun sendKeyProductsInventoryToSFA(parametros: SymParametros): MutableList<List<UpsertResponse>> {
-        val estoques = produtosRepository.findEstoqueByCodFilialAndCodLocal(parametros.codigoFilial?: "01", parametros.codigoLocal ?: "01")
-            .map {
-            KeyProductsInventory().apply {
-                productCode = if(it.fabricante == "PETRONAS") it.referenciaFabricante else it.codigoProduto
-                inventoryQuantity = it.sdoAtual
-                dtCode = parametros.codigoDistribuidorPetronas
-                active = true
-            }
-        }.chunked(50).toList()
-        var payload = mutableListOf<List<UpsertResponse>>()
+    fun sendKeyProductsInventoryToSFA(){
+        val estoques = productsInventoryPetronasRepository.findAll().chunked(50).toList()
+
+        var i = 1
+        val erros = mutableListOf<SymErros>()
         for (request in estoques) {
+            logger.info("enviando request {$i} de ${estoques.size} para SFA")
+            i++
             val response = apiPetronasUpsertProducts.upsertKeyProductsInventory(request)
-            payload.add(response.body!!)
-            logger.info(response.body!!.get(0).toString())
+            val body = response.body!!
+            body.filter { it.isSuccess }.forEach {
+                logger.info("Estoque atualizado com sucesso no SFA: ${it.externalId}")
+            }
+            body.filter { !it.isSuccess }.forEach {
+                logger.error("Preco ${it.externalId} não foi atualizado nem cadastrado")
+                erros.add(SymErros().apply {
+                    dataOperacao = LocalDateTime.now()
+                    tipoOperacao = "CADASTRO ESTOQUE SFA"
+                    petronasResponse = mapper.writeValueAsString(it)
+
+                })
+            }
         }
-        return payload
+        symErrosRepository.saveAll(erros)
     }
 }

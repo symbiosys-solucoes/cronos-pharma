@@ -21,7 +21,8 @@ class SFACustomersController {
     @PostMapping
     fun createAccounts( @RequestBody request: List<Accounts>, @RequestHeader(HttpHeaders.AUTHORIZATION) token: String ): List<UpsertResponse> {
         authService.validate(token)
-      return accountsService.createAccounts(request)
+      return listOf()//accountsService.createAccounts(request)
     }
+
 
 }

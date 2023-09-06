@@ -76,6 +76,9 @@ class Accounts {
     @JsonProperty("ebMobile__CreditLimit__c")
     var creditLimit: Double = 0.0
 
+    @JsonProperty("ActivePriceBook__c")
+    var activePriceBook: String? = null
+
 
 
     fun toSymCustomer(): SymCustomer {

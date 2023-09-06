@@ -5,11 +5,9 @@ import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
 
-@Entity
+
 class SymMovimentos {
 
-    @Id
-    @GeneratedValue(strategy = javax.persistence.GenerationType.IDENTITY)
     var id: Long? = null
 
     var idPedidoPalm: Long? = null
