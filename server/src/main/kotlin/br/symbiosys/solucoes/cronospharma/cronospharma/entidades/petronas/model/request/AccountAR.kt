@@ -1,28 +1,29 @@
 package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.request
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import java.time.LocalDateTime
 
 class AccountAR {
     @JsonProperty("ID")
-    lateinit var salesForceId: String
+    var salesForceId: String? = null
 
     @JsonProperty("ebMobile__Number__c")
-    lateinit var accountNumber: String
+    var accountNumber: String? = null
 
     @JsonProperty("DTCode__c")
-    lateinit var dtCode: String
+    var dtCode: String? = null
 
     @JsonProperty("ebMobile__PaymentDate__c")
-    lateinit var paymentDate: String
+    var paymentDate: LocalDateTime? = null
 
     @JsonProperty("ebMobile__InvoiceDate__c")
-    lateinit var invoiceDate: String
+    var invoiceDate: LocalDateTime? = null
 
     @JsonProperty("ebMobile__InvoiceDueDate__c")
-    lateinit var invoiceDueDate: String
+    var invoiceDueDate: LocalDateTime? = null
 
     @JsonProperty("ebMobile__InvoiceNumber__c")
-    lateinit var invoiceNumber: String
+    var invoiceNumber: String? = null
 
     @JsonProperty("ebMobile__InvoiceAmount__c")
     var invoiceAmount: Double = 0.0
@@ -34,5 +35,5 @@ class AccountAR {
     var creditLimit: Double = 0.0
 
     @JsonProperty("ebMobile__Remarks__c")
-    lateinit var remarks: String
+    var remarks: String? = null
 }

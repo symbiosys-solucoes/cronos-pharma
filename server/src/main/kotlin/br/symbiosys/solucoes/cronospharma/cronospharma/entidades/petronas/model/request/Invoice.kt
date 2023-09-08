@@ -4,40 +4,40 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 class Invoice {
     @JsonProperty("ebMobile__OrderNumber__c")
-    lateinit var ebMobileOrderNumber: String
+     var ebMobileOrderNumber: String? = null
 
     @JsonProperty("DTCode__c")
-    lateinit var dtCode: String
+    var dtCode: String? = null
 
     @JsonProperty("Invoice_Document_Number__c")
-    lateinit var invoiceDocumentNumber: String
+    var invoiceDocumentNumber: String? = null
 
     @JsonProperty("InvoiceSerialNumber__c")
-    lateinit var invoiceSerialNumber: String
+    var invoiceSerialNumber: String? = null
 
     @JsonProperty("ebMobile__TotalQuantity__c")
-    var ebMobileTotalQuantity: Int = 0
+    var ebMobileTotalQuantity: Int? = 0
 
     @JsonProperty("ebMobile__BillingDate__c")
-    lateinit var ebMobileBillingDate: String
+    var ebMobileBillingDate: String? = null
 
     @JsonProperty("ebMobile__PaymentTerms__c")
-    lateinit var ebMobilePaymentTerms: String
+    var ebMobilePaymentTerms: String? = null
 
     @JsonProperty("ebMobile__AccountNumber__c")
-    lateinit var ebMobileAccountNumber: String
+    var ebMobileAccountNumber: String? = null
 
     @JsonProperty("ebMobile__DeliveryNumber__c")
-    lateinit var ebMobileDeliveryNumber: String
+    var ebMobileDeliveryNumber: String? = null
 
     @JsonProperty("ebMobile__InvoiceType__c")
-    lateinit var ebMobileInvoiceType: String
+    var ebMobileInvoiceType: String? = null
 
     @JsonProperty("ebMobile__SalesOrg__c")
-    lateinit var ebMobileSalesOrg: String
+    var ebMobileSalesOrg: String? = null
 
     @JsonProperty("ebMobile__Status__c")
-    lateinit var ebMobileStatus: String
+    var ebMobileStatus: String? = null
 
     @JsonProperty("ebMobile__NetValue__c")
     var ebMobileNetValue: Double = 0.0
