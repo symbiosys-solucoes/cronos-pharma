@@ -3,6 +3,8 @@ package br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model
 import CliFor
 import br.symbiosys.solucoes.cronospharma.cronospharma.sym.model.SymCustomer
 import com.fasterxml.jackson.annotation.JsonProperty
+import io.swagger.v3.oas.annotations.media.Schema
+
 
 class Accounts {
 

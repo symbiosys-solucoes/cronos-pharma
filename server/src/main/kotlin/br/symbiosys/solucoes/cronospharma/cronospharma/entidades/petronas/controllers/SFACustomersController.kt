@@ -4,6 +4,7 @@ import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.model.response.UpsertResponse
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.services.AccountsService
 import br.symbiosys.solucoes.cronospharma.cronospharma.entidades.petronas.services.AuthorizationTokenService
+import io.swagger.v3.oas.annotations.Operation
 import org.springframework.beans.factory.annotation.Autowired
 
 import org.springframework.http.HttpHeaders
