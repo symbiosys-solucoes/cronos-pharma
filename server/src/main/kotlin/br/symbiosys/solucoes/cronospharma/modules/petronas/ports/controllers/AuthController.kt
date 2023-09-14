@@ -1,5 +1,6 @@
 package br.symbiosys.solucoes.cronospharma.modules.petronas.ports.controllers
 
+import br.symbiosys.solucoes.cronospharma.commons.ROTAS
 import br.symbiosys.solucoes.cronospharma.modules.petronas.models.request.TokenRequest
 import br.symbiosys.solucoes.cronospharma.modules.petronas.models.request.TokenResponse
 import org.springframework.beans.factory.annotation.Value
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController
 
 
 @RestController
-@RequestMapping("/api/petronas/token")
+@RequestMapping(ROTAS.PETRONAS_GERAR_TOKEN)
 class AuthController {
 
     @Value("\${app.petronas.auth.user}")

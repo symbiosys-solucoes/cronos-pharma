@@ -1,15 +1,15 @@
 package br.symbiosys.solucoes.cronospharma.modules.petronas.ports.controllers
 
+import br.symbiosys.solucoes.cronospharma.commons.ROTAS
 import br.symbiosys.solucoes.cronospharma.modules.petronas.usecases.SendProductInfoToSFAUseCase
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/petronas/envio")
 class ProductsController (private val sendProductInfoToSFAUseCase: SendProductInfoToSFAUseCase) {
 
-    @PostMapping("/produtos")
+    @PostMapping(ROTAS.PETRONAS_ENVIO_PRODUTOS)
     fun sendProducts() {
         try {
             sendProductInfoToSFAUseCase.info()
@@ -18,7 +18,7 @@ class ProductsController (private val sendProductInfoToSFAUseCase: SendProductIn
         }
     }
 
-    @PostMapping("/precos")
+    @PostMapping(ROTAS.PETRONAS_ENVIO_PRECOS)
     fun sendPrecos() {
         try {
             sendProductInfoToSFAUseCase.prices()
@@ -27,7 +27,7 @@ class ProductsController (private val sendProductInfoToSFAUseCase: SendProductIn
         }
     }
 
-    @PostMapping("/estoque")
+    @PostMapping(ROTAS.PETRONAS_ENVIO_ESTOQUE)
     fun sendEstoque() {
         try {
             sendProductInfoToSFAUseCase.inventory()
