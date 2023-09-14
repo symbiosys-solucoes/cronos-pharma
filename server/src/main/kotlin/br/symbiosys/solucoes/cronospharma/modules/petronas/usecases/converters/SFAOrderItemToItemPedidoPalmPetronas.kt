@@ -1,7 +1,7 @@
 package br.symbiosys.solucoes.cronospharma.modules.petronas.usecases.converters
 
 import br.symbiosys.solucoes.cronospharma.modules.petronas.models.request.OrderItem
-import br.symbiosys.solucoes.cronospharma.modules.petronas.ports.repositories.ItemPedidoPalmPetronas
+import br.symbiosys.solucoes.cronospharma.modules.petronas.ports.repositories.dao.ItemPedidoPalmPetronas
 
 class SFAOrderItemToItemPedidoPalmPetronas {
 

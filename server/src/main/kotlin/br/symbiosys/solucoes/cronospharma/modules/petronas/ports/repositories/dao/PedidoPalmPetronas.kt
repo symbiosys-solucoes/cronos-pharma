@@ -1,4 +1,4 @@
-package br.symbiosys.solucoes.cronospharma.modules.petronas.ports.repositories
+package br.symbiosys.solucoes.cronospharma.modules.petronas.ports.repositories.dao
 
 import java.time.LocalDateTime
 

@@ -1,7 +1,7 @@
 package br.symbiosys.solucoes.cronospharma.modules.petronas.usecases.converters
 
 import br.symbiosys.solucoes.cronospharma.modules.petronas.models.request.Order
-import br.symbiosys.solucoes.cronospharma.modules.petronas.ports.repositories.PedidoPalmPetronas
+import br.symbiosys.solucoes.cronospharma.modules.petronas.ports.repositories.dao.PedidoPalmPetronas
 import br.symbiosys.solucoes.cronospharma.sym.model.SymParametros
 import java.time.LocalDateTime
 
