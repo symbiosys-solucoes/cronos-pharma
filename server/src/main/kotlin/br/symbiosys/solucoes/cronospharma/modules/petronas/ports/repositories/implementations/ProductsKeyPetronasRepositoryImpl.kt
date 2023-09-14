@@ -22,7 +22,7 @@ class ProductsKeyPetronasRepositoryImpl(private val jdbcTemplate: NamedParameter
     override fun markAsCreated(codProduto: String) {
         val query = "" +
                 "DECLARE @IDPRODUTO INT\n" +
-                "SET @IDPRODUTO = (SELECT IdProduto FROM Produtos WHERE CODPRODUTO = :codproduto)\n" +
+                "SET @IDPRODUTO = ISNULL((SELECT IdProduto FROM Produtos WHERE CODPRODUTO = :codproduto), (SELECT IdProduto FROM Produtos WHERE CodProdutoFabr = :codproduto))\n" +
                 "IF NOT EXISTS (SELECT 1 FROM ZProdutosCompl WHERE IdProduto = @IDPRODUTO)\n" +
                 "BEGIN\n" +
                 "INSERT INTO ZProdutosCompl (IdProduto, sym_enviar_petronas) VALUES (@IDPRODUTO, 0)\n" +
@@ -38,7 +38,7 @@ class ProductsKeyPetronasRepositoryImpl(private val jdbcTemplate: NamedParameter
                 )
             )
         } catch (e: Exception) {
-            logger.error("erro ao marcar atualizacao do produto $codProduto")
+            logger.error("erro ao marcar atualizacao do produto $codProduto", e)
         }
 
     }
@@ -46,7 +46,7 @@ class ProductsKeyPetronasRepositoryImpl(private val jdbcTemplate: NamedParameter
     override fun markAsUpdated(codProduto: String) {
         val query = "" +
                 "DECLARE @IDPRODUTO INT\n" +
-                "SET @IDPRODUTO = (SELECT IdProduto FROM Produtos WHERE CODPRODUTO = :codproduto)\n" +
+                "SET @IDPRODUTO = ISNULL((SELECT IdProduto FROM Produtos WHERE CODPRODUTO = :codproduto), (SELECT IdProduto FROM Produtos WHERE CodProdutoFabr = :codproduto))\n" +
                 "IF NOT EXISTS (SELECT 1 FROM ZProdutosCompl WHERE IdProduto = @IDPRODUTO)\n" +
                 "BEGIN\n" +
                 "INSERT INTO ZProdutosCompl (IdProduto, sym_enviar_petronas) VALUES (@IDPRODUTO, 0)\n" +
@@ -62,7 +62,7 @@ class ProductsKeyPetronasRepositoryImpl(private val jdbcTemplate: NamedParameter
                 )
             )
         } catch (e: Exception) {
-            logger.error("erro ao marcar atualizacao do produto $codProduto")
+            logger.error("erro ao marcar atualizacao do produto $codProduto", e)
         }
     }
 

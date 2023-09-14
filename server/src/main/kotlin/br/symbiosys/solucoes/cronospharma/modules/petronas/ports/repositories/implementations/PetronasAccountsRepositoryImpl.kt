@@ -80,7 +80,7 @@ class PetronasAccountsRepositoryImpl(
                 creditLimit = rs.getDouble("CreditLimit")
                 paymentMethod = rs.getString("PaymentMethod")
                 paymentCondition = rs.getString("PaymentTerms")
-                active = true
+                active = if (rs.getString("Active") == "S") true else false
                 activePriceBook = rs.getString("ActivePriceBook")
             }
         }

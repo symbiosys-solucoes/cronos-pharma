@@ -49,7 +49,7 @@ class SendAccountsToSFAUseCaseImpl(
                 body.filter { !it.isCreated && it.isSuccess }.forEach {
                     val accountNumber = it.externalId!!.split("-")[1]
                     logger.info("cliente ${it.externalId} atualizado com sucesso")
-                    petronasAccountsRepository.markAsUpdated(it.sfdcId!!, accountNumber)
+                    petronasAccountsRepository.markAsCreated(it.sfdcId!!, accountNumber)
                 }
                 body.filter { !it.isSuccess }.forEach {
                     logger.error("cliente ${it.externalId} não foi atualizado nem cadastrado")

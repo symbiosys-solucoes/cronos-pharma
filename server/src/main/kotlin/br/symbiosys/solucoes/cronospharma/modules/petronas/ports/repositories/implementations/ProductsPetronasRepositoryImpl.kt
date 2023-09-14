@@ -68,7 +68,7 @@ class ProductsPetronasRepositoryImpl(private val jdbcTemplate: NamedParameterJdb
                 unidQuantity = rs.getString("PackVol")
                 category = rs.getString("Category")
                 manufacture = rs.getString("Manufacturer")
-                active = true
+                active = if (rs.getString("Active") == "S") true else false
             }
         }
     }
