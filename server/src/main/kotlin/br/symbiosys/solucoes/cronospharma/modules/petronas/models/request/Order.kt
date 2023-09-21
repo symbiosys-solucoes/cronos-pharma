@@ -31,8 +31,7 @@ open class Order {
     var status: String? = null
 
     @JsonProperty("ebMobile__OrderDate__c")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-    open var orderDate: LocalDateTime? = null
+    open var orderDate: String? = null
 
     @JsonProperty("ebMobile__TotalQuantity__c")
     var totalQuantity: Double = 0.0
@@ -62,8 +61,7 @@ open class Order {
     var deliveryType: String? = null
 
     @JsonProperty("ExpectedDeliveryDate__c")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-    open var expectedDeliveryDate: LocalDateTime? = null
+    open var expectedDeliveryDate: String? = null
 
     @JsonProperty("ebMobile__DriverMessage__c")
     var driverMessage: String? = null
@@ -87,10 +85,10 @@ open class Order {
 
 class OrderRequest : Order() {
     @JsonProperty("ExpectedDeliveryDate__c")
-    override var expectedDeliveryDate: LocalDateTime? = null
+    override var expectedDeliveryDate: String? = null
 
     @JsonProperty("ebMobile__OrderDate__c")
-    override var orderDate: LocalDateTime? = null
+    override var orderDate: String? = null
 
     companion object{
         fun from(order: Order): OrderRequest {
@@ -115,7 +113,7 @@ class OrderRequest : Order() {
                 deliveryType = order.deliveryType
                 expectedDeliveryDate = order.expectedDeliveryDate
                 driverMessage = order.driverMessage
-                customerOrderNumber = customerOrderNumber
+                customerOrderNumber = customerOrderNumber.toString() + "0+0000"
                 userCode = order.userCode
                 takenBy = order.takenBy
                 active = order.active

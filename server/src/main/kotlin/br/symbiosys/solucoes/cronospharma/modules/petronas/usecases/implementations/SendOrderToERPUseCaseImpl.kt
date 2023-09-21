@@ -18,6 +18,7 @@ class SendOrderToERPUseCaseImpl(
     private val pedidoPalmPetronasRepository: PedidoPalmPetronasRepository
 ) : SendOrderToERPUseCase {
     val logger = LoggerFactory.getLogger(SendOrderToERPUseCase::class.java)
+
     override fun execute(request: List<Order>): List<UpsertResponse> {
         val parametros = symParametrosRepository.findAll()
 

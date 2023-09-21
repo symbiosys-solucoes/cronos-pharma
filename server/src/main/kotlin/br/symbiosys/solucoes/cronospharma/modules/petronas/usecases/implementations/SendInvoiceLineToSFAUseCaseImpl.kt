@@ -1,7 +1,7 @@
 package br.symbiosys.solucoes.cronospharma.modules.petronas.usecases.implementations
 
-import br.symbiosys.solucoes.cronospharma.modules.petronas.ports.repositories.InvoiceLinePetronasRepository
 import br.symbiosys.solucoes.cronospharma.modules.petronas.ports.api.ApiPetronasInvoices
+import br.symbiosys.solucoes.cronospharma.modules.petronas.ports.repositories.InvoiceLinePetronasRepository
 import br.symbiosys.solucoes.cronospharma.modules.petronas.usecases.SendInvoiceLineToSFAUseCase
 import br.symbiosys.solucoes.cronospharma.sym.gateway.repository.SymErrosRepository
 import br.symbiosys.solucoes.cronospharma.sym.model.SymErros

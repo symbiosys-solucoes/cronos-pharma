@@ -1,12 +1,12 @@
 package br.symbiosys.solucoes.cronospharma.modules.petronas.usecases.implementations
 
+import br.symbiosys.solucoes.cronospharma.modules.petronas.ports.api.ApiPetronasUpsertProducts
 import br.symbiosys.solucoes.cronospharma.modules.petronas.ports.repositories.ProductsInventoryPetronasRepository
 import br.symbiosys.solucoes.cronospharma.modules.petronas.ports.repositories.ProductsKeyPetronasRepository
 import br.symbiosys.solucoes.cronospharma.modules.petronas.ports.repositories.ProductsPetronasRepository
+import br.symbiosys.solucoes.cronospharma.modules.petronas.usecases.SendProductInfoToSFAUseCase
 import br.symbiosys.solucoes.cronospharma.sym.gateway.repository.SymErrosRepository
 import br.symbiosys.solucoes.cronospharma.sym.model.SymErros
-import br.symbiosys.solucoes.cronospharma.modules.petronas.ports.api.ApiPetronasUpsertProducts
-import br.symbiosys.solucoes.cronospharma.modules.petronas.usecases.SendProductInfoToSFAUseCase
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.EnableScheduling

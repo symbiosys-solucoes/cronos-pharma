@@ -34,8 +34,7 @@ class OrderItem {
     var confirmedQuantity: Double = 0.0
 
     @JsonProperty("ebMobile__ConfirmedDate__c")
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    var confirmedDate: LocalDate? = null
+    var confirmedDate: String? = null
 
     @JsonProperty("TotalVol__c")
     var totalVolume: Double = 0.0
@@ -56,8 +55,7 @@ class OrderItem {
     var discountPercentage: Double = 0.0
 
     @JsonProperty("ebMobile__OrderDate__c")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-    var orderDate: LocalDate? = null
+    var orderDate: String? = null
 
     @JsonProperty("ebMobile__ItemSequence__c")
     var itemSequence: Int = 0

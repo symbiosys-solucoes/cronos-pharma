@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
 @Component
-@EnableScheduling
 class SendAccountsToSFAUseCaseImpl(
     private val symErrosRepository: SymErrosRepository,
     private val petronasAccountsRepository: PetronasAccountsRepository,
@@ -25,7 +24,7 @@ class SendAccountsToSFAUseCaseImpl(
     val logger = LoggerFactory.getLogger(SendAccountsToSFAUseCaseImpl::class.java)
     val mapper = ObjectMapper()
 
-    @Scheduled(cron = "\${app.cron.petronas.envia.clientes}")
+
     override fun execute() {
         val customers = petronasAccountsRepository.findAll()
         logger.info("Foram encontrados ${customers.size} clientes")

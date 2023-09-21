@@ -33,13 +33,13 @@ class PedidoPalmPetronasRepositoryImpl(
                 orderItemStatus = rs.getString("OrderItemStatus")
                 orderQuantity = rs.getDouble("OrderQuantity")
                 confirmedQuantity = rs.getDouble("OrderQuantity")
-                confirmedDate = rs.getTimestamp("ConfirmedDate").toLocalDateTime().toLocalDate()
+                confirmedDate = rs.getString("ConfirmedDate")
                 totalVolume = rs.getDouble("TotalVolume")
                 unitPrice = rs.getDouble("UnitPrice")
                 lineNetAmount = rs.getDouble("LineNetAmount")
                 lineAmount = rs.getDouble("LineAmount")
                 discountPercentage = rs.getDouble("DiscountPercentage")
-                orderDate = rs.getTimestamp("OrderDate").toLocalDateTime().toLocalDate()
+                orderDate = rs.getString("OrderDate")
                 itemSequence = rs.getInt("ItemSequence")
                 manufacturer = rs.getString("Manufacturer")
                 totalCost = rs.getDouble("COGS")
@@ -49,8 +49,21 @@ class PedidoPalmPetronasRepositoryImpl(
             }
         }
 
+        val query = "" +
+                "DECLARE @PEDIDO VARCHAR(50)\n" +
+                "\n" +
+                "SET @PEDIDO = :numpedido\n" +
+                "IF EXISTS (SELECT 1 FROM dbo.sym_petronas_order_item WHERE ERPOrderNumber = @PEDIDO and SFAOrderNumber is not null)\n" +
+                "\tBEGIN\n" +
+                "\t\tSELECT * FROM dbo.sym_petronas_order_item WHERE ERPOrderNumber = @PEDIDO\n" +
+                "\tEND\n" +
+                "ELSE\n" +
+                "\tBEGIN\n" +
+                "\tSELECT * FROM dbo.sym_petronas_order_item WHERE ERPOrderNumber = @PEDIDO AND Manufacturer = 'PETRONAS'\n" +
+                "\tEND"
+
         return jdbcTemplate.query(
-            "SELECT * FROM dbo.sym_petronas_order_item WHERE ERPOrderNumber = :numpedido",
+            query,
             MapSqlParameterSource("numpedido", numPedidoCronos),
             mapper
         )
@@ -81,7 +94,7 @@ class PedidoPalmPetronasRepositoryImpl(
                 dtCode = rs.getString("DTCode")
                 accountNumber = rs.getString("AccountNumber")
                 status = rs.getString("Status")
-                orderDate = rs.getTimestamp("OrderDate").toLocalDateTime()
+                orderDate = rs.getString("OrderDate")
                 totalQuantity = rs.getDouble("TotalQuantity")
                 confirmedQuantity = rs.getDouble("TotalQuantity")
                 orderTotalVolume = rs.getDouble("OrderTotalVolume")

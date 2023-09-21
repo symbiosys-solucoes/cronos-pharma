@@ -7,6 +7,7 @@ public final class ROTAS {
     public static final String PETRONAS_ENVIO_PRECOS =  BASE_URL + "/petronas/envio/precos";
     public static final String PETRONAS_ENVIO_ESTOQUE =  BASE_URL + "/petronas/envio/estoque";
     public static final String PETRONAS_ENVIO_CLIENTES =  BASE_URL + "/petronas/envio/clientes";
+    public static final String PETRONAS_ENVIO_PEDIDOS =  BASE_URL + "/petronas/envio/pedidos";
     public static final String PETRONAS_GERAR_TOKEN =  BASE_URL + "/petronas/token";
     public static final String PETRONAS_CADASTRAR_CLIENTES =  BASE_URL + "/petronas/Sfa/BR/Cust";
     public static final String PETRONAS_CADASTRAR_PEDIDOS =  BASE_URL + "/petronas/Sfa/BR/Order";

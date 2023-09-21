@@ -14,10 +14,10 @@ class SFAOrderToPetronasPedidoPalm {
                 codigoFilial = symParametros.codigoFilial
                 numeroPedido = order.orderNumberSfa
                 codigoCliente = order.accountNumber
-                dataPedido = order.orderDate ?: LocalDateTime.now()
+                dataPedido = LocalDateTime.parse(order.orderDate) ?: LocalDateTime.now()
                 codigoPortador = order.paymentMethod?:""
                 condicaoPagamento = order.paymentKeyTerms?:""
-                dataEntrega = order.expectedDeliveryDate
+                dataEntrega = LocalDateTime.parse(order.expectedDeliveryDate?.split("+")?.get(0))
                 numeroPedidoPalmAux = order.customerOrderNumber
                 codigoVendedor = order.userCode
                 totalPedido = order.totalAmount

@@ -5,26 +5,30 @@ import br.symbiosys.solucoes.cronospharma.modules.petronas.models.request.OrderR
 import br.symbiosys.solucoes.cronospharma.modules.petronas.ports.api.ApiPetronasUpsertOrders
 import br.symbiosys.solucoes.cronospharma.modules.petronas.usecases.SendOrderItemToSFAUseCase
 import br.symbiosys.solucoes.cronospharma.modules.petronas.usecases.SendOrdersToSFAUseCase
+import br.symbiosys.solucoes.cronospharma.sym.gateway.repository.SymErrosRepository
+import br.symbiosys.solucoes.cronospharma.sym.model.SymErros
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 
 @Component
-@EnableScheduling
 class SendOrdersToSFAUseCaseImpl(
     private val apiPetronasUpsertOrders: ApiPetronasUpsertOrders,
     private val pedidoPalmPetronasRepository: PedidoPalmPetronasRepository,
-    private val sendOrderItemToSFAUseCase: SendOrderItemToSFAUseCase
+    private val sendOrderItemToSFAUseCase: SendOrderItemToSFAUseCase,
+    private val symErrosRepository: SymErrosRepository,
 ) : SendOrdersToSFAUseCase {
     val logger = LoggerFactory.getLogger(SendOrdersToSFAUseCaseImpl::class.java)
+    val mapper = ObjectMapper()
 
-
-    @Scheduled(cron = "\${app.cron.petronas.envia.pedidos}")
     override fun execute() {
         pedidoPalmPetronasRepository.findAll(enviados = false).chunked(50).forEach {
             val response = apiPetronasUpsertOrders.upsertOrders(it.map { OrderRequest.from(it) }.toList())
+            val erros = mutableListOf<SymErros>()
             response.body?.forEach {
                 if (it.isSuccess && it.isCreated) {
                     logger.info("Pedido ${it.externalId} enviado e criado com sucesso")
@@ -38,10 +42,18 @@ class SendOrdersToSFAUseCaseImpl(
                     pedidoPalmPetronasRepository.markAsSent(numPedido)
                     sendOrderItemToSFAUseCase.execute(numPedido)
                 }
-                logger.error("erro ao enviar pedido ${it.externalId}")
-            }
-        }
+                if (!it.isSuccess) {
+                    logger.error("erro ao enviar pedido ${it.externalId}")
+                    erros.add(SymErros().apply {
+                        dataOperacao = LocalDateTime.now()
+                        tipoOperacao = "CADASTRO PEDIDO SFA"
+                        petronasResponse = mapper.writeValueAsString(it)
+                    })
+                }
 
+            }
+            symErrosRepository.saveAll(erros)
+        }
     }
 
 }
