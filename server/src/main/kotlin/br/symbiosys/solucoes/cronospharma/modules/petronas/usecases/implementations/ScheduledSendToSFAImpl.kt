@@ -24,6 +24,11 @@ class ScheduledSendToSFAImpl
         sendProductInfoToSFAUseCase.info()
         sendProductInfoToSFAUseCase.prices()
         sendProductInfoToSFAUseCase.inventory()
+
+    }
+
+    @Scheduled(cron = "\${app.cron.petronas.envia.pedidos}")
+    fun sendOrdersInvoicesAndARs(){
         sendOrdersToSFAUseCase.execute()
         sendInvoicesToSFAUseCase.execute()
         sendAccountARsToSFAUseCase.execute()
