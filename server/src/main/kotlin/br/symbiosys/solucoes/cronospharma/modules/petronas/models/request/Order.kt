@@ -1,8 +1,6 @@
 package br.symbiosys.solucoes.cronospharma.modules.petronas.models.request
 
-import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonProperty
-import java.time.LocalDateTime
 
 open class Order {
 

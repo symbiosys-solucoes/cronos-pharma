@@ -37,7 +37,7 @@ class SendOrderItemToERPUseCaseImpl(
                     response.add(UpsertResponse().apply {
                         isSuccess = true
                         isCreated = true
-                        sfdcId = orderItem.orderItemNumberSfa ?: ""
+                        sfdcId = orderItem.sfaOrderItemId ?: ""
                         externalId = "${orderItem.dtCode}-${itemPedido.idItemPedido}"
                         errors = ""
                     })
@@ -47,7 +47,7 @@ class SendOrderItemToERPUseCaseImpl(
                     response.add(UpsertResponse().apply {
                         isSuccess = false
                         isCreated = false
-                        sfdcId = orderItem.orderItemNumberSfa ?: ""
+                        sfdcId = orderItem.sfaOrderItemId ?: ""
                         externalId = "${orderItem.dtCode}-${orderItem.orderNumberSfa}"
                     })
                 }

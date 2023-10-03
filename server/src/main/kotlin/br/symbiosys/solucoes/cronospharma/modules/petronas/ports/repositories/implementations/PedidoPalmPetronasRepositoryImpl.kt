@@ -79,7 +79,7 @@ class PedidoPalmPetronasRepositoryImpl(
 
     override fun markAsSent(numPedidoCronos: String, atualizado: Boolean) {
         jdbcTemplate.update(
-            "UPDATE ZMovimentoCompl SET sym_enviar_petronas = 0 WHERE IdMov = (SELECT IdMov FROM Movimento WHERE NUMMOV = :numpedido)",
+            "UPDATE Movimento SET NumPrisma = 0 WHERE IdMov = (SELECT IdMov FROM Movimento WHERE NUMMOV = :numpedido)",
             MapSqlParameterSource("numpedido", numPedidoCronos)
         )
     }
@@ -117,8 +117,8 @@ class PedidoPalmPetronasRepositoryImpl(
 
         val queryInsertPedido = "" +
                 "DECLARE @CODCOND VARCHAR(2), @CODPORTADOR VARCHAR(2)\n" +
-                "SET @CODCOND = (SELECT ISNULL(CodCondPag,'01') FROM CondPag WHERE CondPag = :codcondicao)\n" +
-                "SET @CODPORTADOR = (SELECT ISNULL(CodPortador,'01') FROM Portador WHERE NomePortador = :codportador)\n" +
+                "SET @CODCOND = (SELECT TOP 1 ISNULL(CodCondPag,'01') FROM CondPag WHERE CondPag = :codcondicao)\n" +
+                "SET @CODPORTADOR = (SELECT TOP 1 ISNULL(CodPortador,'01') FROM Portador WHERE NomePortador = :codportador)\n" +
                 "\n" +
                 "INSERT INTO PedidoPalm\n" +
                 "(Origem, IdEmpresa, NumPedidoPalm, CodVendedor, CodCliFor,  DataPedido, PercComissao, CodCondPag, CodPortador, PercDesconto, TotalPedido, DataEntrega, Observacoes,  SituacaoPedido,  LogImportacao, IdUsuario, DataOperacao, CodFilial, NumPedidoPalmAux) OUTPUT INSERTED.*\n" +
@@ -148,11 +148,11 @@ class PedidoPalmPetronasRepositoryImpl(
                 "SET @IDPEDIDOPALM = ISNULL((SELECT IdPedidoPalm FROM PedidoPalm WHERE NumPedidoPalm = :numpedido AND CodFilial = :codfilial AND SituacaoPedido = 'P'),0) \n" +
                 "IF :dscretorno = 'PETRONAS'\n" +
                 "BEGIN\n" +
-                "SET @IDPRODUTO = ISNULL((SELECT IdProduto FROM PRODUTOS WHERE CodProdutoFabr = :codproduto),0)\n" +
+                "SET @IDPRODUTO = ISNULL((SELECT MAX(IdProduto) FROM PRODUTOS WHERE CodProdutoFabr = :codproduto AND ProdutoInativo = 'N'),0)\n" +
                 "END\n" +
                 "ELSE\n" +
                 "BEGIN\n" +
-                "SET @IDPRODUTO = ISNULL((SELECT IdProduto FROM PRODUTOS WHERE CodProduto = :codproduto),0)\n" +
+                "SET @IDPRODUTO = ISNULL((SELECT MAX(IdProduto) FROM PRODUTOS WHERE CodProduto = :codproduto AND ProdutoInativo = 'N'),0)\n" +
                 "END\n" +
                 "\n" +
                 "IF @IDPEDIDOPALM = 0\n" +

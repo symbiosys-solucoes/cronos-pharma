@@ -1,7 +1,5 @@
 package br.symbiosys.solucoes.cronospharma.modules.petronas.models.request
 
-class TokenRequest {
+data class TokenRequest(var username: String?, var password: String?) {
 
-    lateinit var username: String
-    lateinit var password: String
 }

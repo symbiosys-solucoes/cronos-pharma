@@ -32,7 +32,7 @@ class SendOrderToERPUseCaseImpl(
                     )
                     logger.info("gravando pedido ${pedido.numeroPedido} no Cronos")
                     val pedidoPalm = pedidoPalmPetronasRepository.save(pedido)
-                    logger.info("pedido gravado com sucesso no Cronos id: ${pedido.idPedidoPalm}")
+                    logger.info("pedido gravado com sucesso no Cronos id: ${pedidoPalm.idPedidoPalm}")
                     response.add(UpsertResponse().apply {
                         isSuccess = true
                         isCreated = true

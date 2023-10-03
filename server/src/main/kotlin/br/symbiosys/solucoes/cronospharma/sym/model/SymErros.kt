@@ -1,6 +1,7 @@
 package br.symbiosys.solucoes.cronospharma.sym.model
 
 import java.time.LocalDateTime
+import java.time.ZoneId
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
@@ -14,7 +15,7 @@ class SymErros {
     @Id @GeneratedValue(strategy = javax.persistence.GenerationType.IDENTITY)
     var id: Long? = null
 
-    var dataOperacao = LocalDateTime.now()
+    var dataOperacao = LocalDateTime.now(ZoneId.of("America/Sao_Paulo"))
 
     var tipoOperacao = ""
 

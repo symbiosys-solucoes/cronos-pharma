@@ -60,7 +60,7 @@ class OrderItem {
     @JsonProperty("ebMobile__ItemSequence__c")
     var itemSequence: Int = 0
 
-    @JsonProperty("Manufacturer__c")
+    @JsonProperty("Manufacture__c")
     var manufacturer: String? = null
 
     @JsonProperty("COGS__c")
