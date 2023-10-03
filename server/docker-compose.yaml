@@ -1,10 +1,36 @@
-
-srvcronos:
-  image: 'mcr.microsoft.com/mssql/server:2019-latest'
-  ports:
-    - 1433:1433
-  environment:
-    MSSQL_COLLATION: SQL_Latin1_General_CP1_CI_AI
-    MSSQL_PID: Developer
-    ACCEPT_EULA: Y
-    SA_PASSWORD: "@nfs32xpt#"
+version: '2'
+services:
+  srvcronos:
+    image: 'mcr.microsoft.com/mssql/server:2019-latest'
+    ports:
+      - '1433:1433'
+    environment:
+      MSSQL_COLLATION: SQL_Latin1_General_CP1_CI_AI
+      MSSQL_PID: Developer
+      ACCEPT_EULA: Y
+      SA_PASSWORD: "@nfs32xpt#"
+  integrador:
+    image: 'lucasrodrigues062/cronos-integrador:petronas'
+    depends_on:
+      - srvcronos
+    ports:
+      - '6500:6500'
+    environment:
+      JDBC_URL: jdbc:sqlserver://10.0.0.100;port=1433;databaseName=dbCronos;encrypt=false;applicationName=cronos-pharma
+      APP_PORT: 6500
+      DB_USER: manutencao
+      DB_PASSWORD: manutencao
+      REGRAS_COMERCIAIS: true
+      REGRAS_FINANCEIRAS: true
+      REGRAS_FINALIZACAO: true
+      CRON_PETRONAS_ENVIO: "0 */30 7-22 * * 1-6"
+      CRON_PETRONAS_PEDIDOS: "0 */15 7-22 * * 1-6"
+      PETRONAS_AUTH_URL: https://login.salesforce.com/services
+      PETRONAS_BASE_URL: https://brazilnew.my.salesforce.com
+      PETRONAS_CLIENT_ID: 3MVG9wt4IL4O5wvL9pjLbEDATwJ2MQWVPxS_aYNiv7OuBN6gbWbO4BhmeFmG7uem3Nh8GvejP0fKk5.rvvWzj
+      PETRONAS_CLIENT_SECRET: 5B8730088C0DDE9E5A3EDE09ECA90D3BD9575D2F4DC718B833FE00979F5932C4
+      PETRONAS_USERNAME: ebestmobile_integration@newbrazil.ebestmobile.com
+      PETRONAS_PASSWORD: eBest@2023
+      PETRONAS_GRANT_TYPE: password
+      AUTH_USERNAME: petronas
+      AUTH_PASSWORD: petronas
