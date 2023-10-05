@@ -4,7 +4,7 @@ import br.symbiosys.solucoes.cronospharma.modules.petronas.models.request.Produc
 
 interface ProductsPetronasRepository {
 
-    fun findAll(): MutableList<Products>
+    fun findAll(full: Boolean = false): MutableList<Products>
 
     fun markAsCreated(codProduto: String)
 

@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 
@@ -28,6 +29,40 @@ class SendOrdersToSFAUseCaseImpl(
     override fun execute() {
         pedidoPalmPetronasRepository.findAll(enviados = false).chunked(50).forEach {
             val response = apiPetronasUpsertOrders.upsertOrders(it.map { OrderRequest.from(it) }.toList())
+            val erros = mutableListOf<SymErros>()
+            response.body?.forEach {
+                if (it.isSuccess && it.isCreated) {
+                    logger.info("Pedido ${it.externalId} enviado e criado com sucesso")
+                    val numPedido = it.externalId!!.split("-")[1]
+                    pedidoPalmPetronasRepository.markAsSent(numPedido)
+                    sendOrderItemToSFAUseCase.execute(numPedido)
+                }
+                if (it.isSuccess && !it.isCreated) {
+                    logger.info("Pedido ${it.externalId} enviado e atualizado com sucesso")
+                    val numPedido = it.externalId!!.split("-")[1]
+                    pedidoPalmPetronasRepository.markAsSent(numPedido)
+                    sendOrderItemToSFAUseCase.execute(numPedido)
+                }
+                if (!it.isSuccess) {
+                    logger.error("erro ao enviar pedido ${it.externalId}")
+                    erros.add(SymErros().apply {
+                        dataOperacao = LocalDateTime.now()
+                        tipoOperacao = "CADASTRO PEDIDO SFA"
+                        petronasResponse = mapper.writeValueAsString(it)
+                    })
+                }
+
+            }
+            symErrosRepository.saveAll(erros)
+        }
+    }
+
+    override fun execute(initialDate: LocalDate?, endDate: LocalDate?, erpOrderNumber: String?) {
+        logger.info("Iniciando busca de pedidos para envio com os seguintes parametros: ${initialDate} - ${endDate} - ${erpOrderNumber}")
+        pedidoPalmPetronasRepository.findAll(initialDate, endDate, erpOrderNumber).chunked(50).forEach {
+            logger.info("Enviando pedidos para SFA")
+            val response = apiPetronasUpsertOrders.upsertOrders(it.map { OrderRequest.from(it) }.toList())
+            logger.info("Enviado pedidos para SFA", response)
             val erros = mutableListOf<SymErros>()
             response.body?.forEach {
                 if (it.isSuccess && it.isCreated) {

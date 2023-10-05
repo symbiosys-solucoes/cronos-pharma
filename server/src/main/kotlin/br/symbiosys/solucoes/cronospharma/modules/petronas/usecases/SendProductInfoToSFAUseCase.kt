@@ -2,9 +2,9 @@ package br.symbiosys.solucoes.cronospharma.modules.petronas.usecases
 
 interface SendProductInfoToSFAUseCase {
 
-    fun info()
+    fun info(full: Boolean = false)
 
-    fun prices()
+    fun prices(full: Boolean = false)
 
-    fun inventory()
+    fun inventory(full: Boolean = false)
 }

@@ -27,7 +27,7 @@ class SendOrderItemToERPUseCaseImpl(
                 try {
                     val item = SFAOrderItemToItemPedidoPalmPetronas.convert(orderItem, index + 1)
 
-                    logger.info("gravando item ${item.codigoProduto} no Cronos")
+                    logger.info("gravando item ${item.codigoProdutoArquivo} no Cronos")
                     val itemPedido = pedidoPalmPetronasRepository.save(
                         item,
                         orderItem.orderNumberSfa!!,

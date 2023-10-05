@@ -12,7 +12,13 @@ class ProductsPetronasRepositoryImpl(private val jdbcTemplate: NamedParameterJdb
     ProductsPetronasRepository {
 
 
-    override fun findAll(): MutableList<Products> {
+    override fun findAll(full: Boolean): MutableList<Products> {
+        if (full) {
+            return jdbcTemplate.query(
+                "SELECT * FROM sym_petronas_products",
+                productsMapper
+            )
+        }
         return jdbcTemplate.query(
             "SELECT * FROM sym_petronas_products WHERE ISNULL(PrecisaEnviar,1) = 1",
             productsMapper

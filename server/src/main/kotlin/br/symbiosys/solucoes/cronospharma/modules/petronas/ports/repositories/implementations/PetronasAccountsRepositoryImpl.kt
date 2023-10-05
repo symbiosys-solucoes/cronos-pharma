@@ -17,16 +17,7 @@ class PetronasAccountsRepositoryImpl(
     }
 
     override fun markAsCreated(salesId: String, accountNumber: String) {
-        val query = "" +
-                "IF NOT EXISTS (SELECT 1 FROM ZCli_ForCompl WHERE CodClifor = :account)\n" +
-                "BEGIN\n" +
-                "INSERT INTO ZCli_ForCompl (CodClifor, sym_enviar_petronas) VALUES (:account, 0)\n" +
-                "END\n" +
-                "ELSE\n" +
-                "BEGIN\n" +
-                "UPDATE ZCli_ForCompl SET sym_enviar_petronas = 0 WHERE CodClifor = :account\n" +
-                "END\n" +
-                "UPDATE Cli_FOR SET CampoAlfaOp1 = :salesid WHERE CodClifor = :account"
+        val query = "UPDATE Cli_FOR SET CampoAlfaOp1 = :salesid, ValorOp1 = 0 WHERE CodClifor = :account"
         jdbcTemplate.update(
             query, mapOf(
                 "account" to accountNumber,
@@ -36,15 +27,7 @@ class PetronasAccountsRepositoryImpl(
     }
 
     override fun markAsUpdated(salesId: String, accountNumber: String) {
-        val query = "" +
-                "IF NOT EXISTS (SELECT 1 FROM ZCli_ForCompl WHERE CodClifor = :account)\n" +
-                "BEGIN\n" +
-                "INSERT INTO ZCli_ForCompl (CodClifor, sym_enviar_petronas) VALUES (:account, 0)\n" +
-                "END\n" +
-                "ELSE\n" +
-                "BEGIN\n" +
-                "UPDATE ZCli_ForCompl SET sym_enviar_petronas = 0 WHERE CodClifor = :account\n" +
-                "END\n"
+        val query = "UPDATE Cli_FOR SET  ValorOp1 = 0 WHERE CodClifor = :account"
 
         jdbcTemplate.update(
             query, mapOf(

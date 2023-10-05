@@ -28,9 +28,9 @@ class SendProductInfoToSFAUseCaseImpl (
 
     val mapper = ObjectMapper()
 
-    @Scheduled(cron = "\${app.cron.petronas.envia.produtos}")
-    override fun info() {
-        val products = productsRepository.findAll().chunked(50).toList()
+
+    override fun info(full: Boolean) {
+        val products = productsRepository.findAll(full).chunked(50).toList()
         var i = 1
         val erros = mutableListOf<SymErros>()
         for (p in products) {
@@ -61,8 +61,7 @@ class SendProductInfoToSFAUseCaseImpl (
 
     }
 
-    @Scheduled(cron = "\${app.cron.petronas.envia.precos}")
-    override fun prices() {
+    override fun prices(full: Boolean) {
         val keyProducts = keyPetronasRepository.findAll().chunked(50).toList()
         var i = 1
         val erros = mutableListOf<SymErros>()
@@ -91,8 +90,7 @@ class SendProductInfoToSFAUseCaseImpl (
         symErrosRepository.saveAll(erros)
     }
 
-    @Scheduled(cron = "\${app.cron.petronas.envia.estoque}")
-    override fun inventory(){
+    override fun inventory(full: Boolean){
         val estoques = productsInventoryPetronasRepository.findAll().chunked(50).toList()
 
         var i = 1

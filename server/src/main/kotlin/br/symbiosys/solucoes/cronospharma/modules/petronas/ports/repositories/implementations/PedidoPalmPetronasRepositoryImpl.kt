@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
 import java.sql.ResultSet
+import java.time.LocalDate
 
 @Repository
 class PedidoPalmPetronasRepositoryImpl(
@@ -78,40 +79,55 @@ class PedidoPalmPetronasRepositoryImpl(
     }
 
     override fun markAsSent(numPedidoCronos: String, atualizado: Boolean) {
+        val query = "DECLARE @IDMOV INT, @TIPOMOV VARCHAR(5), @IDPEDIDO INT\n" +
+                "SELECT TOP 1 @IDMOV = IdMov, @TIPOMOV = TipoMov, @IDPEDIDO = IdPedidoPalm FROM Movimento WHERE NUMMOV = :numpedido AND TipoMov IN ('2.1', '2.4', '2.7')\n" +
+                "IF @TIPOMOV IN ('2.7')\n" +
+                "\tBEGIN\n" +
+                "\tDECLARE @ID INT\n" +
+                "        \n" +
+                "\tDECLARE XCURSOR CURSOR FOR \n" +
+                "\t\t\n" +
+                "\t\tSELECT IdMov FROM Movimento WHERE IdPedidoPalm = @IDPEDIDO\n" +
+                "\t\t\n" +
+                "\tOPEN XCURSOR\n" +
+                "\tFETCH NEXT FROM XCURSOR INTO @ID\n" +
+                "\t\n" +
+                "\tWHILE @@FETCH_STATUS = 0\n" +
+                "\tBEGIN\n" +
+                "\t\tUPDATE Movimento SET NumPrisma = 0 WHERE IdMov = @ID\n" +
+                "\n" +
+                "\tFETCH NEXT FROM XCURSOR INTO @ID\n" +
+                "\tEND\n" +
+                "\t\n" +
+                "\tCLOSE XCURSOR\n" +
+                "\tDEALLOCATE XCURSOR\n" +
+                "\tEND\n" +
+                "ELSE\n" +
+                "\tBEGIN\n" +
+                "\t\tUPDATE Movimento SET NumPrisma = 0 WHERE IdMov = @IDMOV\n" +
+                "\tEND\n"
         jdbcTemplate.update(
-            "UPDATE Movimento SET NumPrisma = 0 WHERE IdMov = (SELECT IdMov FROM Movimento WHERE NUMMOV = :numpedido)",
+            query,
             MapSqlParameterSource("numpedido", numPedidoCronos)
         )
     }
 
     override fun findAll(enviados: Boolean): List<Order> {
-        val mapper = RowMapper<Order> { rs: ResultSet, rowNum: Int ->
-            Order().apply {
-                orderNumberSfa = rs.getString("SFAOrderNumber")
-                orderNumberErp = rs.getString("ERPOrderNumber")
-                orderSource = rs.getString("OrderSource")
-                type = rs.getString("OrderType")
-                dtCode = rs.getString("DTCode")
-                accountNumber = rs.getString("AccountNumber")
-                status = rs.getString("Status")
-                orderDate = rs.getString("OrderDate")
-                totalQuantity = rs.getDouble("TotalQuantity")
-                confirmedQuantity = rs.getDouble("TotalQuantity")
-                orderTotalVolume = rs.getDouble("OrderTotalVolume")
-                netAmount = rs.getDouble("NetAmount")
-                totalAmount = rs.getDouble("TotalAmount")
-                paymentMethod = rs.getString("PaymentMethod")
-                paymentKeyTerms = rs.getString("PaymenteKeyTerms")
-                destination = rs.getString("Destination")
-                deliveryType = rs.getString("DeliveryType")
-                customerOrderNumber = rs.getString("PONumber")
-                userCode = rs.getString("UserCode")
-                active = true
-            }
 
-        }
-        return jdbcTemplate.query("SELECT * FROM sym_petronas_order WHERE PrecisaEnviar = 1", mapper)
+        return jdbcTemplate.query("SELECT * FROM sym_petronas_order WHERE PrecisaEnviar = 1", mapperOrder)
     }
+
+    override fun findAll(initialDate: LocalDate?, endDate: LocalDate?, erpOrderNumber: String?): List<Order> {
+        if(erpOrderNumber != null) {
+            return jdbcTemplate.query("SELECT * FROM sym_petronas_order WHERE ERPOrderNumber = :numpedido", MapSqlParameterSource("numpedido", erpOrderNumber), mapperOrder)
+        }
+        if (initialDate != null && endDate != null) {
+            return jdbcTemplate.query("SELECT * FROM sym_petronas_order WHERE CAST(REPLACE(OrderDate,'+0400', '') as DATE) BETWEEN :initialDate AND :endDate",
+                MapSqlParameterSource("initialDate", initialDate).addValue("endDate", endDate), mapperOrder)
+        }
+        return jdbcTemplate.query("SELECT * FROM sym_petronas_order WHERE PrecisaEnviar = 1", mapperOrder)
+    }
+
 
     override fun save(pedido: PedidoPalmPetronas): PedidoPalmPetronas {
 
@@ -200,7 +216,7 @@ class PedidoPalmPetronasRepositoryImpl(
             "SELECT * FROM PedidoPalm WHERE SituacaoPedido = 'P' AND Origem = 'DiscoverySFA'",
             mapperPedidoPalmPetronas
         )
-        logger.info("Foram encontrados ${pedidos.size} para serem importados")
+        logger.info("Foram encontrados ${pedidos.size} pedidos para serem convertidos em orcamento")
         for (pedido in pedidos) {
             logger.info("Convertendo pedido ${pedido.numeroPedido} da petronas")
             toMovimento(pedido)
@@ -208,6 +224,32 @@ class PedidoPalmPetronasRepositoryImpl(
     }
 
     companion object {
+
+        private val mapperOrder =  RowMapper<Order> { rs: ResultSet, rowNum: Int ->
+            Order().apply {
+                orderNumberSfa = rs.getString("SFAOrderNumber")
+                orderNumberErp = rs.getString("ERPOrderNumber")
+                orderSource = rs.getString("OrderSource")
+                type = rs.getString("OrderType")
+                dtCode = rs.getString("DTCode")
+                accountNumber = rs.getString("AccountNumber")
+                status = rs.getString("Status")
+                orderDate = rs.getString("OrderDate")
+                totalQuantity = rs.getDouble("TotalQuantity")
+                confirmedQuantity = rs.getDouble("TotalQuantity")
+                orderTotalVolume = rs.getDouble("OrderTotalVolume")
+                netAmount = rs.getDouble("NetAmount")
+                totalAmount = rs.getDouble("TotalAmount")
+                paymentMethod = rs.getString("PaymentMethod")
+                paymentKeyTerms = rs.getString("PaymenteKeyTerms")
+                destination = rs.getString("Destination")
+                deliveryType = rs.getString("DeliveryType")
+                customerOrderNumber = rs.getString("PONumber")
+                userCode = rs.getString("UserCode")
+                active = true
+            }
+
+        }
 
         private val mapperItemPedidoPalmPetronas = RowMapper<ItemPedidoPalmPetronas> { rs: ResultSet, rowNum: Int ->
             ItemPedidoPalmPetronas().apply {

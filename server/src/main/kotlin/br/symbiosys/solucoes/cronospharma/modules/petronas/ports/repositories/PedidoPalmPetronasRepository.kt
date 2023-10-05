@@ -4,8 +4,7 @@ import br.symbiosys.solucoes.cronospharma.modules.petronas.models.request.Order
 import br.symbiosys.solucoes.cronospharma.modules.petronas.models.request.OrderItem
 import br.symbiosys.solucoes.cronospharma.modules.petronas.ports.repositories.dao.ItemPedidoPalmPetronas
 import br.symbiosys.solucoes.cronospharma.modules.petronas.ports.repositories.dao.PedidoPalmPetronas
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
-import java.sql.ResultSet
+import java.time.LocalDate
 
 interface PedidoPalmPetronasRepository {
 
@@ -18,5 +17,6 @@ interface PedidoPalmPetronasRepository {
     fun toMovimento(pedido: PedidoPalmPetronas)
 
     fun convertAll()
+    fun findAll(enviados: LocalDate?, endDate: LocalDate?, erpOrderNumber: String?): List<Order>
 
 }

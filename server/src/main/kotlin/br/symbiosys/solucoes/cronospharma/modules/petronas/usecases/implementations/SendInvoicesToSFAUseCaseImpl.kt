@@ -19,9 +19,6 @@ class SendInvoicesToSFAUseCaseImpl (
     private val sendInvoiceLineToSFAUseCase: SendInvoiceLineToSFAUseCase,
     private val symErrosRepository: SymErrosRepository
 ) : SendInvoicesToSFAUseCase {
-
-
-
     val logger = LoggerFactory.getLogger(SendInvoicesToSFAUseCaseImpl::class.java)
     val mapper = ObjectMapper()
 

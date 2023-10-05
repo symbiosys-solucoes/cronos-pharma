@@ -12,7 +12,7 @@ class ProductsController (private val sendProductInfoToSFAUseCase: SendProductIn
     @PostMapping(ROTAS.PETRONAS_ENVIO_PRODUTOS)
     fun sendProducts() {
         try {
-            sendProductInfoToSFAUseCase.info()
+            sendProductInfoToSFAUseCase.info(full = true)
         } catch (e: Exception) {
             throw InternalError(e.message)
         }
