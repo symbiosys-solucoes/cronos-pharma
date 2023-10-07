@@ -77,6 +77,52 @@ class FinalizaMovimento(
         return statusSeparacao
     }
 
+    private fun analisaRegras(retornos: List<RetornoRegras>, idMovimentoCronos: Int): String? {
+        retornos.forEach  {
+
+            if (it.ok == "S" && it.tipo == "COMERCIAL" && usaRegrasComercias=="true") {
+                jdbcTemplate.queryForObject("UPDATE Movimento SET StatusSeparacao = 'B', BloqueioComercial = 'S'" +
+                        "WHERE IdMov = :id\n" +
+                        "SELECT BloqueioComercial FROM Movimento WHERE IdMov = :id ", MapSqlParameterSource("id", idMovimentoCronos), String::class.java)
+            }
+            if (it.ok == "S" && it.tipo == "FINANCEIRO" && usaRegrasFinanceiras == "true") {
+                jdbcTemplate.queryForObject("UPDATE Movimento SET StatusSeparacao = 'B', BloqueioFinanceiro = 'S' " +
+                        "WHERE IdMov = :id\n" +
+                        "SELECT BloqueioFinanceiro FROM Movimento WHERE IdMov = :id ", MapSqlParameterSource("id", idMovimentoCronos), String::class.java)
+            }
+
+            if (it.ok == "S" && it.tipo == "FINALIZACAO" && usaRegrasFinalizacao == "true"){
+                jdbcTemplate.queryForObject("DECLARE @IDMOV INT\n" +
+                        "SET @IDMOV = :id\n" +
+                        "IF EXISTS(SELECT 1 FROM ZMovimentoCompl WHERE IdMov = @IDMOV)\n" +
+                        "\tBEGIN\n" +
+                        "\t\tUPDATE ZMovimentoCompl  set sym_deveFinalizar = 'S' OUTPUT inserted.sym_deveFinalizar WHERE IdMov = @IDMOV\n" +
+                        "\tEND\n" +
+                        "ELSE\n" +
+                        "\tBEGIN\n" +
+                        "\t\tINSERT INTO ZMovimentoCompl (IdMov, sym_deveFinalizar) OUTPUT inserted.sym_deveFinalizar VALUES (@IDMOV, 'S')\n" +
+                        "\tEND", MapSqlParameterSource("id", idMovimentoCronos), String::class.java)
+            }
+        }
+
+        val statusSeparacao = jdbcTemplate.queryForObject(paramRules,
+            MapSqlParameterSource("id", idMovimentoCronos)
+                .addValue("comercial", usaRegrasComercias)
+                .addValue("financeiro", usaRegrasFinanceiras), String::class.java)
+        when (statusSeparacao) {
+            "N" -> logger.info("O Movimento não foi finalizado, pois alguma regra de négocio impediu a finalização")
+            "B" -> logger.info("O Movimento foi atualizado com status Bloqueado, pois não passou em alguma regra")
+            else -> logger.info("O Movimento foi finalizado com sucesso")
+        }
+        return statusSeparacao
+    }
+
+    fun finaliza(idMovimentoCronos : Int): String?{
+        val listaResultados =  bloqueioMovimentoRepository.executaRegrasMovimento(idMovimentoCronos.toLong())
+        return analisaRegras(listaResultados, idMovimentoCronos)
+    }
+
+
     companion object{
         private val idmovByIdPedidoPalm = "select IdMov from Movimento where IdPedidoPalm = :idPedido "
         private val paramRules = "" +

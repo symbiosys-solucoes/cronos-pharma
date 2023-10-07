@@ -1,6 +1,7 @@
 package br.symbiosys.solucoes.cronospharma.modules.petronas.ports.repositories.implementations
 
 import br.symbiosys.solucoes.cronospharma.entidades.cronos.BloqueioMovimentoRepository
+import br.symbiosys.solucoes.cronospharma.entidades.cronos.FinalizaMovimento
 import br.symbiosys.solucoes.cronospharma.modules.petronas.models.request.Order
 import br.symbiosys.solucoes.cronospharma.modules.petronas.models.request.OrderItem
 import br.symbiosys.solucoes.cronospharma.modules.petronas.ports.repositories.PedidoPalmPetronasRepository
@@ -17,7 +18,7 @@ import java.time.LocalDate
 @Repository
 class PedidoPalmPetronasRepositoryImpl(
     private val jdbcTemplate: NamedParameterJdbcTemplate,
-    private val bloqueioMovimentoRepository: BloqueioMovimentoRepository
+    private val finalizaMovimento: FinalizaMovimento
 ) : PedidoPalmPetronasRepository {
 
     val logger = LoggerFactory.getLogger(PedidoPalmPetronasRepositoryImpl::class.java)
@@ -200,14 +201,23 @@ class PedidoPalmPetronasRepositoryImpl(
             MapSqlParameterSource("idpedido", pedido.idPedidoPalm).addValue("tipomov", "2.7").addValue("codlocal", "01")
         val result = jdbcTemplate.queryForObject(query, params, String::class.java)
         if (!result.isNullOrBlank()) {
-            val idmov: Int = jdbcTemplate.queryForObject(
-                "SELECT ISNULL(MAX(IdMov),0) FROM Movimento WHERE NumMov = :numero",
-                MapSqlParameterSource("numero", result),
-                Int::class.java
-            ) ?: 0
-            if (idmov != 0) {
-                bloqueioMovimentoRepository.executaRegrasMovimento(idmov.toLong())
+            try {
+                val idmov: Int =   result.split("-")[1].toInt()
+                if (idmov != 0) {
+                    finalizaMovimento.finaliza(idmov)
+                    val resultado =  finalizaMovimento.finaliza(idmov)
+                    logger.info("Finalizacao do Movimento executada para o movimento: $idmov, seu status foi: $resultado")
+                }
+            } catch (e: Exception) {
+                logger.error("Erro ao receber o retorno da conversao de pedido", e)
             }
+
+//                jdbcTemplate.queryForObject(
+//                "SELECT ISNULL(MAX(IdMov),0) FROM Movimento WHERE NumMov = :numero",
+//                MapSqlParameterSource("numero", result),
+//                Int::class.java
+//            ) ?: 0
+
         }
     }
 
@@ -218,8 +228,13 @@ class PedidoPalmPetronasRepositoryImpl(
         )
         logger.info("Foram encontrados ${pedidos.size} pedidos para serem convertidos em orcamento")
         for (pedido in pedidos) {
-            logger.info("Convertendo pedido ${pedido.numeroPedido} da petronas")
-            toMovimento(pedido)
+            try {
+                logger.info("Convertendo pedido ${pedido.numeroPedido} da petronas")
+                toMovimento(pedido)
+            }
+            catch (e: Exception) {
+                logger.error("Erro ao converter pedido", e)
+            }
         }
     }
 
@@ -247,6 +262,7 @@ class PedidoPalmPetronasRepositoryImpl(
                 customerOrderNumber = rs.getString("PONumber")
                 userCode = rs.getString("UserCode")
                 active = true
+                takenBy = rs.getString("TakenBy")
             }
 
         }
