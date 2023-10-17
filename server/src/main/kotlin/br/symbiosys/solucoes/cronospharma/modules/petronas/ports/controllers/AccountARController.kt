@@ -11,12 +11,17 @@ class AccountARController (private val sendAccountARsToSFAUseCase: SendAccountAR
 
 
     @PostMapping(ROTAS.PETRONAS_ENVIO_CPR)
-    fun send() {
+    suspend fun send(): AccountARResponse {
         try {
-            sendAccountARsToSFAUseCase.execute()
+            sendAccountARsToSFAUseCase.executeAsync()
+            return AccountARResponse("Enviando carga de Titulos para PETRONAS")
         } catch (e: Exception) {
             throw InternalError(e.message)
         }
 
     }
+
+
 }
+
+data class AccountARResponse(val message: String)

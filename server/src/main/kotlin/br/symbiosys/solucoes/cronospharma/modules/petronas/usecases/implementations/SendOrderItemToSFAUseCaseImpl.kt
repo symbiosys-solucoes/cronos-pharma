@@ -31,8 +31,11 @@ class SendOrderItemToSFAUseCaseImpl(
                 }
                 if (it.isSuccess && !it.isCreated) {
                     logger.info("Item ${it.externalId} enviado e atualizado com sucesso")
-                    val numItem = it.externalId!!.split("-")[1].toInt()
-                    pedidoPalmPetronasRepository.markAsSent(numItem, it.sfdcId!!)
+                    if(it.externalId != null){
+                        val numItem = it.externalId!!.split("-")[1].toInt()
+                        pedidoPalmPetronasRepository.markAsSent(numItem, it.sfdcId!!)
+                    }
+
                 }
                 if (!it.isSuccess) {
                     logger.error("erro ao enviar item ${it.externalId}")

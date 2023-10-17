@@ -16,9 +16,10 @@ class OrdersController (private val sendOrdersToSFAUseCase: SendOrdersToSFAUseCa
 
 
     @PostMapping
-    fun send(@RequestBody request: OrdersSenderRequest) {
+    suspend fun send(@RequestBody request: OrdersSenderRequest): OrdersSenderResponse {
         try {
-            return sendOrdersToSFAUseCase.execute(request.initialDate, request.endDate, request.erpOrderNumber)
+            sendOrdersToSFAUseCase.executeAsync(request.initialDate, request.endDate, request.erpOrderNumber)
+            return OrdersSenderResponse("Enviando carga de pedidos para PETRONAS")
         } catch (e: Exception) {
             e.printStackTrace()
             throw InternalError(e.message)
@@ -26,6 +27,8 @@ class OrdersController (private val sendOrdersToSFAUseCase: SendOrdersToSFAUseCa
 
     }
 }
+data class OrdersSenderResponse(val message: String)
+
 
 data class OrdersSenderRequest(
     @JsonProperty("data_inicial")

@@ -9,6 +9,7 @@ import br.symbiosys.solucoes.cronospharma.sym.gateway.repository.SymErrosReposit
 import br.symbiosys.solucoes.cronospharma.sym.model.SymErros
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
+import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -57,6 +58,11 @@ class SendOrdersToSFAUseCaseImpl(
         }
     }
 
+    @Async
+    override suspend fun executeAsync() {
+        this.execute()
+    }
+
     override fun execute(initialDate: LocalDate?, endDate: LocalDate?, erpOrderNumber: String?) {
         logger.info("Iniciando busca de pedidos para envio com os seguintes parametros: ${initialDate} - ${endDate} - ${erpOrderNumber}")
         pedidoPalmPetronasRepository.findAll(initialDate, endDate, erpOrderNumber).chunked(50).forEach {
@@ -89,6 +95,11 @@ class SendOrdersToSFAUseCaseImpl(
             }
             symErrosRepository.saveAll(erros)
         }
+    }
+
+    @Async
+    override suspend fun executeAsync(initialDate: LocalDate?, endDate: LocalDate?, erpOrderNumber: String?) {
+        this.execute(initialDate, endDate, erpOrderNumber)
     }
 
 }

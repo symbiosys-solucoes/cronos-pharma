@@ -12,12 +12,15 @@ class AccountsController (private val sendAccountsToSFAUseCase: SendAccountsToSF
 
 
     @PostMapping
-    fun send() {
+    suspend fun send(): AccountsResponse {
         try {
-            sendAccountsToSFAUseCase.execute()
+            sendAccountsToSFAUseCase.executeAsync()
+            return AccountsResponse("Enviando Carga de Clientes para a Petronas")
         } catch (e: Exception) {
             throw InternalError(e.message)
         }
 
     }
 }
+
+data class AccountsResponse(val message: String)

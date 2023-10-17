@@ -8,6 +8,7 @@ import br.symbiosys.solucoes.cronospharma.sym.model.SymErros
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
@@ -58,5 +59,10 @@ class SendAccountARsToSFAUseCaseImpl
         }
 
         symErrosRepository.saveAll(erros)
+    }
+
+    @Async
+    override suspend fun executeAsync() {
+        this.execute()
     }
 }

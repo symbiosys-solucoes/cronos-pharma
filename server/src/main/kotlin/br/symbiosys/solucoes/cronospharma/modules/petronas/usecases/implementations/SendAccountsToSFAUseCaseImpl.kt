@@ -1,15 +1,14 @@
 package br.symbiosys.solucoes.cronospharma.modules.petronas.usecases.implementations
 
-import br.symbiosys.solucoes.cronospharma.modules.petronas.ports.repositories.PetronasAccountsRepository
 import br.symbiosys.solucoes.cronospharma.modules.petronas.ports.api.ApiPetronasUpsertAccounts
+import br.symbiosys.solucoes.cronospharma.modules.petronas.ports.repositories.PetronasAccountsRepository
 import br.symbiosys.solucoes.cronospharma.modules.petronas.usecases.SendAccountsToSFAUseCase
 import br.symbiosys.solucoes.cronospharma.sym.gateway.repository.SymErrosRepository
 import br.symbiosys.solucoes.cronospharma.sym.model.SymErros
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
-import org.springframework.scheduling.annotation.EnableScheduling
-import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
@@ -62,5 +61,10 @@ class SendAccountsToSFAUseCaseImpl(
         }
 
         symErrosRepository.saveAll(erros)
+    }
+
+    @Async
+    override suspend fun executeAsync() {
+        this.execute()
     }
 }

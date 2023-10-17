@@ -176,8 +176,8 @@ class PedidoPalmPetronasRepositoryImpl(
                 "THROW 51000, 'The record does not exist.', 1;" +
                 "\n" +
                 "INSERT INTO ItemPedidoPalm\n" +
-                "( IdPedidoPalm, Item, IdEmpresa, CodProdutoArq, IdProduto, CodProduto, Qtd, QtdConfirmada, IdPrecoTabela, PrecoUnit, PercDescontoItem, SituacaoItemPedido, LogImportacao, DscRetornoItem, IdUsuario, DataOperacao) OUTPUT INSERTED.IdItemPedidoPalm INTO @ItemPedido \n" +
-                "VALUES(@IDPEDIDOPALM, :sequencia, 1, :codproduto, @IDPRODUTO, ISNULL((SELECT CODPRODUTO FROM Produtos WHERE IdProduto = @IDPRODUTO),0), :qtd, 0, :tabela, :preco, :percdesc, :situacao, :logimport, :dscretorno, :idusuario, :data);" +
+                "( IdPedidoPalm, Item, IdEmpresa, CodProdutoArq, IdProduto, CodProduto, Qtd, QtdConfirmada, IdPrecoTabela, PrecoUnit, PercDescontoItem, SituacaoItemPedido, LogImportacao, DscRetornoItem, IdUsuario, DataOperacao, CodRetornoItem) OUTPUT INSERTED.IdItemPedidoPalm INTO @ItemPedido \n" +
+                "VALUES(@IDPEDIDOPALM, :sequencia, 1, :codproduto, @IDPRODUTO, ISNULL((SELECT CODPRODUTO FROM Produtos WHERE IdProduto = @IDPRODUTO),0), :qtd, 0, :tabela, :preco, :percdesc, :situacao, :logimport, :dscretorno, :idusuario, :data, :codretorno);" +
                 "\n" +
                 "SELECT * FROM ItemPedidoPalm where IdItemPedidoPalm = (SELECT id FROM @ItemPedido)"
 
@@ -190,6 +190,7 @@ class PedidoPalmPetronasRepositoryImpl(
                 .addValue("percdesc", item.percentualDesconto).addValue("situacao", item.situacaoItem)
                 .addValue("logimport", item.logImportacao).addValue("idusuario", item.idUsuario)
                 .addValue("data", item.dataOperacao)
+                .addValue("codretorno", item.codigoRetornoItem)
 
         return jdbcTemplate.query(query, params, mapperItemPedidoPalmPetronas).first()
     }

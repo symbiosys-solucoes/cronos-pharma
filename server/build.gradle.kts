@@ -20,6 +20,16 @@ repositories {
 extra["springCloudVersion"] = "2021.0.8"
 
 dependencies {
+
+
+// https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core
+	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+	// https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-reactor
+	runtimeOnly("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.7.3")
+
+
+
+
 // https://mvnrepository.com/artifact/io.springfox/springfox-swagger2
 	implementation("io.springfox:springfox-swagger2:2.9.2")
 // https://mvnrepository.com/artifact/io.springfox/springfox-swagger-ui

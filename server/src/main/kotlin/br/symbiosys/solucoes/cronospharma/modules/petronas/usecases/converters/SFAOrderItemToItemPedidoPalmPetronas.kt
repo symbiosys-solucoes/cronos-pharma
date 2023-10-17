@@ -16,6 +16,7 @@ class SFAOrderItemToItemPedidoPalmPetronas {
                 idPrecoTabela = 1
                 logImportacao = item.orderItemNumberSfa
                 descricaoRetornoItem = item.manufacturer
+                codigoRetornoItem = item.sfaOrderItemId
             }
         }
     }

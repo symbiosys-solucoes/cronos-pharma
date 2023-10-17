@@ -9,13 +9,12 @@ import br.symbiosys.solucoes.cronospharma.sym.gateway.repository.SymErrosReposit
 import br.symbiosys.solucoes.cronospharma.sym.model.SymErros
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
+import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.EnableScheduling
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
 @Component
-@EnableScheduling
 class SendProductInfoToSFAUseCaseImpl (
     private val productsRepository: ProductsPetronasRepository,
     private val keyPetronasRepository: ProductsKeyPetronasRepository,
@@ -29,7 +28,7 @@ class SendProductInfoToSFAUseCaseImpl (
     val mapper = ObjectMapper()
 
 
-    override fun info(full: Boolean) {
+    override  fun info(full: Boolean)  {
         val products = productsRepository.findAll(full).chunked(100).toList()
         var i = 1
         val erros = mutableListOf<SymErros>()
@@ -61,6 +60,11 @@ class SendProductInfoToSFAUseCaseImpl (
 
     }
 
+    @Async
+    override suspend fun infoAsync(full: Boolean) {
+        this.info(full)
+    }
+
     override fun prices(full: Boolean) {
         val keyProducts = keyPetronasRepository.findAll().chunked(100).toList()
         var i = 1
@@ -90,6 +94,12 @@ class SendProductInfoToSFAUseCaseImpl (
         symErrosRepository.saveAll(erros)
     }
 
+    @Async
+    override suspend fun pricesAsync(full: Boolean) {
+        this.prices(full)
+    }
+
+
     override fun inventory(full: Boolean){
         val estoques = productsInventoryPetronasRepository.findAll().chunked(100).toList()
 
@@ -115,4 +125,10 @@ class SendProductInfoToSFAUseCaseImpl (
         }
         symErrosRepository.saveAll(erros)
     }
+
+    @Async
+    override suspend fun inventoryAsync(full: Boolean) {
+        this.inventory(full)
+    }
+
 }
