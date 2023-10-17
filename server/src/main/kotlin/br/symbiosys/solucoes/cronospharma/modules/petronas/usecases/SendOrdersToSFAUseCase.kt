@@ -13,4 +13,6 @@ interface SendOrdersToSFAUseCase {
 
     suspend fun executeAsync(initialDate: LocalDate? = null, endDate: LocalDate? = null, erpOrderNumber: String? = null)
 
+    fun delete(sfaOrderNumber: String)
+
 }

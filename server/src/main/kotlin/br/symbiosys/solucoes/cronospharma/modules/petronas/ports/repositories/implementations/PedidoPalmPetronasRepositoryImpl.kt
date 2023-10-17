@@ -23,7 +23,34 @@ class PedidoPalmPetronasRepositoryImpl(
 
     val logger = LoggerFactory.getLogger(PedidoPalmPetronasRepositoryImpl::class.java)
 
-
+    override fun deletePedidoPalmPetronas(numPedido: String) {
+        val query = " DECLARE @IDPEDIDO INT\n" +
+                " SET @IDPEDIDO = (SELECT IdPedidoPalm FROM PedidoPalm WHERE NumPedidoPalm = :numPedido)\n" +
+                "\n" +
+                " IF EXISTS (SELECT 1 FROM Movimento WHERE IdPedidoPalm = @IDPEDIDO)\n" +
+                " BEGIN\n" +
+                "\t\tDECLARE @IDMOV INT\n" +
+                "\t\tDECLARE XCURSOR CURSOR FOR \n" +
+                "\t\tSELECT IdMov FROM Movimento m WHERE m.IdPedidoPalm = @IDPEDIDO\n" +
+                "\t\tOPEN XCURSOR\n" +
+                "\t\tFETCH NEXT FROM XCURSOR INTO @IDMOV\n" +
+                "\t\tWHILE @@FETCH_STATUS = 0\n" +
+                "\t\tBEGIN\n" +
+                "\n" +
+                "\t\t\tUPDATE Movimento SET IdPedidoPalm = NULL WHERE IdMov = @IDMOV\n" +
+                "\t\t\n" +
+                "\t\tFETCH NEXT FROM XCURSOR INTO @IDMOV\n" +
+                "\t\tEND\n" +
+                "\n" +
+                "\t\tCLOSE XCURSOR\n" +
+                "\t\tDEALLOCATE XCURSOR\n" +
+                "\n" +
+                " END\n" +
+                " \n" +
+                " UPDATE PedidoPalm set SituacaoPedido = 'P' WHERE IdPedidoPalm = @IDPEDIDO\n" +
+                " DELETE PedidoPalm WHERE IdPedidoPalm = @IDPEDIDO"
+        jdbcTemplate.update(query,  MapSqlParameterSource("numPedido", numPedido))
+    }
     override fun findItems(numPedidoCronos: String): List<OrderItem> {
         val mapper = RowMapper<OrderItem> { rs: ResultSet, rowNum: Int ->
             OrderItem().apply {

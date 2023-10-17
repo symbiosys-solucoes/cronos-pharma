@@ -59,7 +59,7 @@ class SendOrderToERPUseCaseImpl(
         return response
     }
 
-    @Scheduled(fixedDelay = 60 * 2 * 1000)
+    @Scheduled(fixedDelay = 60 * 5 * 1000)
     fun convertOrderToMovimento() {
         pedidoPalmPetronasRepository.convertAll()
     }

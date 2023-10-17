@@ -19,4 +19,6 @@ interface PedidoPalmPetronasRepository {
     fun convertAll()
     fun findAll(enviados: LocalDate?, endDate: LocalDate?, erpOrderNumber: String?): List<Order>
 
+    fun deletePedidoPalmPetronas(numPedido: String)
+
 }

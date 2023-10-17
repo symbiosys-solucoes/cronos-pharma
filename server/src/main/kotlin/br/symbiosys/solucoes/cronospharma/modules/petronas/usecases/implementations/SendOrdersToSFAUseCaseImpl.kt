@@ -102,4 +102,9 @@ class SendOrdersToSFAUseCaseImpl(
         this.execute(initialDate, endDate, erpOrderNumber)
     }
 
+    override fun delete(sfaOrderNumber: String) {
+        logger.info("Deletando pedido $sfaOrderNumber")
+        pedidoPalmPetronasRepository.deletePedidoPalmPetronas(sfaOrderNumber)
+    }
+
 }
