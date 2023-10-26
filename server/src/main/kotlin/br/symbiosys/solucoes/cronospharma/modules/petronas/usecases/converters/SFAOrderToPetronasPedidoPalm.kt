@@ -21,6 +21,7 @@ class SFAOrderToPetronasPedidoPalm {
                 numeroPedidoPalmAux = order.customerOrderNumber
                 codigoVendedor = order.userCode?.split("-")?.get(1)
                 totalPedido = order.totalAmount
+                observacoes = order.driverMessage?.substring(0,400)
                 itens = mutableListOf()
             }
 
