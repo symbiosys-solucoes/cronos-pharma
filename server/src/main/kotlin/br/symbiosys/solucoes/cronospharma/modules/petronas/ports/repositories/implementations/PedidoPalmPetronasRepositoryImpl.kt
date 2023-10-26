@@ -150,7 +150,7 @@ class PedidoPalmPetronasRepositoryImpl(
             return jdbcTemplate.query("SELECT * FROM sym_petronas_order WHERE ERPOrderNumber = :numpedido", MapSqlParameterSource("numpedido", erpOrderNumber), mapperOrder)
         }
         if (initialDate != null && endDate != null) {
-            return jdbcTemplate.query("SELECT * FROM sym_petronas_order WHERE CAST(REPLACE(OrderDate,'+0400', '') as DATE) BETWEEN :initialDate AND :endDate",
+            return jdbcTemplate.query("SELECT * FROM sym_petronas_order WHERE CAST(REPLACE(OrderDate,'T04:00:00+0000', '') as DATE) BETWEEN :initialDate AND :endDate",
                 MapSqlParameterSource("initialDate", initialDate).addValue("endDate", endDate), mapperOrder)
         }
         return jdbcTemplate.query("SELECT * FROM sym_petronas_order WHERE PrecisaEnviar = 1", mapperOrder)
@@ -323,7 +323,7 @@ class PedidoPalmPetronasRepositoryImpl(
                 numeroPedido = rs.getString("NumPedidoPalm")
                 codigoVendedor = rs.getString("CodVendedor")
                 codigoCliente = rs.getString("CodCliFor")
-                dataPedido = rs.getTimestamp("DataPedido").toLocalDateTime()
+                dataPedido = rs.getString("DataPedido")
                 dataEntrega = rs.getTimestamp("DataEntrega")?.toLocalDateTime()
                 percentualComissao = rs.getDouble("PercComissao")
                 condicaoPagamento = rs.getString("CodCondPag")

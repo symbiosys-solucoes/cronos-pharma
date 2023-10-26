@@ -16,7 +16,7 @@ class PedidoPalmPetronas {
 
     var cnpjCpfCliente: String? = null
 
-    var dataPedido: LocalDateTime = LocalDateTime.now()
+    var dataPedido: String? = null
 
     var percentualComissao = 0.0
 
