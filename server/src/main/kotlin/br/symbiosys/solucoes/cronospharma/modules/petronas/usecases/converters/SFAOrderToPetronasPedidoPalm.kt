@@ -9,6 +9,7 @@ class SFAOrderToPetronasPedidoPalm {
     companion object {
         fun convert(order: Order, symParametros: SymParametros): PedidoPalmPetronas {
 
+
             return PedidoPalmPetronas().apply {
                 logImportacao = order.salesForceId
                 codigoFilial = symParametros.codigoFilial
@@ -21,7 +22,8 @@ class SFAOrderToPetronasPedidoPalm {
                 numeroPedidoPalmAux = order.customerOrderNumber
                 codigoVendedor = order.userCode?.split("-")?.get(1)
                 totalPedido = order.totalAmount
-                observacoes = order.driverMessage?.substring(0,400)
+                observacoes = if (order.driverMessage != null && order.driverMessage!!.length > 400) {
+                    order.driverMessage!!.substring(0,400)} else {if (order.driverMessage != null) {order.driverMessage} else {""}}
                 itens = mutableListOf()
             }
 
