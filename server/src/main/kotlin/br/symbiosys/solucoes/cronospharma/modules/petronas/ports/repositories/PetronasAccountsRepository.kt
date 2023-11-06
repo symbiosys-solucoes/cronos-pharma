@@ -4,7 +4,7 @@ import br.symbiosys.solucoes.cronospharma.modules.petronas.models.request.Accoun
 
 
 interface PetronasAccountsRepository {
-    fun findAll(): List<Accounts>
+    fun findAll(full: Boolean = false): List<Accounts>
 
     fun markAsCreated(salesId: String, accountNumber: String)
 

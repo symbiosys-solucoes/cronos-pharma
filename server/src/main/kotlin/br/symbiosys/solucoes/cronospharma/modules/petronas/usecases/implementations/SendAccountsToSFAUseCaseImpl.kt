@@ -24,8 +24,8 @@ class SendAccountsToSFAUseCaseImpl(
     val mapper = ObjectMapper()
 
 
-    override fun execute() {
-        val customers = petronasAccountsRepository.findAll()
+    override fun execute(full: Boolean) {
+        val customers = petronasAccountsRepository.findAll(full)
         logger.info("Foram encontrados ${customers.size} clientes")
 
         var i = 1
@@ -65,6 +65,6 @@ class SendAccountsToSFAUseCaseImpl(
 
     @Async
     override suspend fun executeAsync() {
-        this.execute()
+        this.execute(full = true)
     }
 }

@@ -12,7 +12,10 @@ class PetronasAccountsRepositoryImpl(
     private val jdbcTemplate: NamedParameterJdbcTemplate
 ) : PetronasAccountsRepository {
 
-    override fun findAll(): List<Accounts> {
+    override fun findAll(full: Boolean): List<Accounts> {
+        if (full) {
+            return jdbcTemplate.query("SELECT * FROM dbo.sym_petronas_account", accountsMapper)
+        }
         return jdbcTemplate.query("SELECT * FROM dbo.sym_petronas_account WHERE PrecisaEnviar = 1", accountsMapper)
     }
 
