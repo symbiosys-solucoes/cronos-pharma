@@ -70,28 +70,44 @@ class SendProductInfoToSFAUseCaseImpl (
         var i = 1
         val erros = mutableListOf<SymErros>()
         for (request in keyProducts) {
-            val response = apiPetronasUpsertProducts.upsertKeyProducts(request)
-            val body = response.body!!
-            body.filter { it.isSuccess && it.isCreated }.forEach {
-                val codProduto = it.externalId!!.split("-")[1]
-                logger.info("Preco criado com sucesso no SFA: $codProduto")
-                keyPetronasRepository.markAsCreated(codProduto)
+            logger.info("(PRECOS) enviando request {$i} de ${keyProducts.size} para SFA")
+            try {
+                val response = apiPetronasUpsertProducts.upsertKeyProducts(request)
+                val body = response.body!!
+                body.filter { it.isSuccess && it.isCreated }.forEach {
+                    val codProduto = it.externalId!!.split("-")[1]
+                    logger.info("Preco criado com sucesso no SFA: $codProduto")
+                    keyPetronasRepository.markAsCreated(codProduto)
+                }
+                body.filter { it.isSuccess && !it.isCreated }.forEach {
+                    val codProduto = it.externalId!!.split("-")[1]
+                    logger.info("Preco atualizado com sucesso no SFA: $codProduto")
+                    keyPetronasRepository.markAsUpdated(codProduto)
+                }
+                body.filter { !it.isSuccess }.forEach {
+                    logger.error("Preco ${it.externalId} não foi atualizado nem cadastrado")
+                    erros.add(SymErros().apply {
+                        dataOperacao = LocalDateTime.now()
+                        tipoOperacao = "CADASTRO PRECO SFA"
+                        petronasResponse = mapper.writeValueAsString(it)
+                    })
+                }
+                symErrosRepository.saveAll(erros)
+                erros.clear()
+                i++
+            } catch (e: Exception) {
+                logger.error("erro ao tentar cadastrar precos: ${e.message}", e)
+                i++
+                symErrosRepository.save(
+                    SymErros().apply {
+                        dataOperacao = LocalDateTime.now()
+                        tipoOperacao = "CADASTRO PRECO SFA"
+                        petronasResponse = mapper.writeValueAsString(e.message)
+                    }
+                )
             }
-            body.filter { it.isSuccess && !it.isCreated }.forEach {
-                val codProduto = it.externalId!!.split("-")[1]
-                logger.info("Preco atualizado com sucesso no SFA: $codProduto")
-                keyPetronasRepository.markAsUpdated(codProduto)
-            }
-            body.filter { !it.isSuccess }.forEach {
-                logger.error("Preco ${it.externalId} não foi atualizado nem cadastrado")
-                erros.add(SymErros().apply {
-                    dataOperacao = LocalDateTime.now()
-                    tipoOperacao = "CADASTRO PRECO SFA"
-                    petronasResponse = mapper.writeValueAsString(it)
-                })
-            }
+
         }
-        symErrosRepository.saveAll(erros)
     }
 
     @Async

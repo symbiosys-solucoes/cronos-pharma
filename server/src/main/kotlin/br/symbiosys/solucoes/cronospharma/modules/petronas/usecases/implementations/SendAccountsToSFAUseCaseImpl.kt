@@ -34,33 +34,45 @@ class SendAccountsToSFAUseCaseImpl(
         for (request in accounts) {
             logger.info("enviando request {$i} de ${accounts.size} para SFA")
             i++
-            val response = apiPetronasUpsertAccounts.upsertAccounts(request)
-            if (response.statusCode == HttpStatus.OK) {
-                val body = response.body!!
-                body.filter { it.isSuccess && it.isCreated }.forEach {
+            try {
+                val response = apiPetronasUpsertAccounts.upsertAccounts(request)
+                if (response.statusCode == HttpStatus.OK) {
+                    val body = response.body!!
+                    body.filter { it.isSuccess && it.isCreated }.forEach {
 
-                    val accountNumber = it.externalId!!.split("-")[1]
-                    logger.info("cliente ${it.externalId} cadastrado com sucesso")
-                    petronasAccountsRepository.markAsCreated(it.sfdcId!!, accountNumber)
+                        val accountNumber = it.externalId!!.split("-")[1]
+                        logger.info("cliente ${it.externalId} cadastrado com sucesso")
+                        petronasAccountsRepository.markAsCreated(it.sfdcId!!, accountNumber)
 
+                    }
+                    body.filter { !it.isCreated && it.isSuccess }.forEach {
+                        val accountNumber = it.externalId!!.split("-")[1]
+                        logger.info("cliente ${it.externalId} atualizado com sucesso")
+                        petronasAccountsRepository.markAsCreated(it.sfdcId!!, accountNumber)
+                    }
+                    body.filter { !it.isSuccess }.forEach {
+                        logger.error("cliente ${it.externalId} não foi atualizado nem cadastrado")
+                        erros.add(SymErros().apply {
+                            dataOperacao = LocalDateTime.now()
+                            tipoOperacao = "CADASTRO CLIENTE SFA"
+                            petronasResponse = mapper.writeValueAsString(it)
+                        })
+                    }
                 }
-                body.filter { !it.isCreated && it.isSuccess }.forEach {
-                    val accountNumber = it.externalId!!.split("-")[1]
-                    logger.info("cliente ${it.externalId} atualizado com sucesso")
-                    petronasAccountsRepository.markAsCreated(it.sfdcId!!, accountNumber)
-                }
-                body.filter { !it.isSuccess }.forEach {
-                    logger.error("cliente ${it.externalId} não foi atualizado nem cadastrado")
-                    erros.add(SymErros().apply {
-                        dataOperacao = LocalDateTime.now()
-                        tipoOperacao = "CADASTRO CLIENTE SFA"
-                        petronasResponse = mapper.writeValueAsString(it)
-                    })
-                }
+                symErrosRepository.saveAll(erros)
+                erros.clear()
+            } catch (e: Exception) {
+                logger.error("erro ao enviar request {$i} de ${accounts.size} para SFA", e)
+                symErrosRepository.save(SymErros().apply {
+                    dataOperacao = LocalDateTime.now()
+                    tipoOperacao = "CADASTRO CLIENTE SFA"
+                    petronasResponse = mapper.writeValueAsString(e.message)
+                })
             }
+
         }
 
-        symErrosRepository.saveAll(erros)
+
     }
 
     @Async
