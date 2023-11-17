@@ -8,7 +8,7 @@ import java.time.LocalDate
 
 interface PedidoPalmPetronasRepository {
 
-    fun findItems(numPedidoCronos: String): List<OrderItem>
+    fun findItems(numPedidoCronos: String, cancelados: Boolean = false): List<OrderItem>
     fun markAsSent(idItem: Int, SFAOrderItemNumber: String)
     fun markAsSent(numPedidoCronos: String, atualizado: Boolean = false)
     fun findAll(enviados: Boolean = false): List<Order>

@@ -51,7 +51,7 @@ class PedidoPalmPetronasRepositoryImpl(
                 " DELETE PedidoPalm WHERE IdPedidoPalm = @IDPEDIDO"
         jdbcTemplate.update(query,  MapSqlParameterSource("numPedido", numPedido))
     }
-    override fun findItems(numPedidoCronos: String): List<OrderItem> {
+    override fun findItems(numPedidoCronos: String, cancelados: Boolean): List<OrderItem> {
         val mapper = RowMapper<OrderItem> { rs: ResultSet, rowNum: Int ->
             OrderItem().apply {
                 orderNumberSfa = rs.getString("SFAOrderNumber")
@@ -77,19 +77,21 @@ class PedidoPalmPetronasRepositoryImpl(
 
             }
         }
-
-        val query = "" +
+        var query = "" +
                 "DECLARE @PEDIDO VARCHAR(50)\n" +
                 "\n" +
                 "SET @PEDIDO = :numpedido\n" +
                 "IF EXISTS (SELECT 1 FROM dbo.sym_petronas_order_item WHERE ERPOrderNumber = @PEDIDO and SFAOrderNumber is not null)\n" +
                 "\tBEGIN\n" +
-                "\t\tSELECT * FROM dbo.sym_petronas_order_item WHERE ERPOrderNumber = @PEDIDO\n" +
+                "\t\tSELECT * FROM dbo.sym_petronas_order_item WHERE ERPOrderNumber = @PEDIDO and OrderItemStatus = 'FATURADO' \n" +
                 "\tEND\n" +
                 "ELSE\n" +
                 "\tBEGIN\n" +
-                "\tSELECT * FROM dbo.sym_petronas_order_item WHERE ERPOrderNumber = @PEDIDO AND Manufacturer = 'PETRONAS'\n" +
+                "\tSELECT * FROM dbo.sym_petronas_order_item WHERE ERPOrderNumber = @PEDIDO AND Manufacturer = 'PETRONAS' and OrderItemStatus = 'FATURADO' \n" +
                 "\tEND"
+        if (cancelados) {
+            query.replace("FATURADO", "CANCELADO")
+        }
 
         return jdbcTemplate.query(
             query,
@@ -150,7 +152,7 @@ class PedidoPalmPetronasRepositoryImpl(
             return jdbcTemplate.query("SELECT * FROM sym_petronas_order WHERE ERPOrderNumber = :numpedido", MapSqlParameterSource("numpedido", erpOrderNumber), mapperOrder)
         }
         if (initialDate != null && endDate != null) {
-            return jdbcTemplate.query("SELECT * FROM sym_petronas_order WHERE CAST(REPLACE(OrderDate,'T04:00:00+0000', '') as DATE) BETWEEN :initialDate AND :endDate",
+            return jdbcTemplate.query("SELECT * FROM sym_petronas_order WHERE DataErp BETWEEN :initialDate AND :endDate",
                 MapSqlParameterSource("initialDate", initialDate).addValue("endDate", endDate), mapperOrder)
         }
         return jdbcTemplate.query("SELECT * FROM sym_petronas_order WHERE PrecisaEnviar = 1", mapperOrder)
