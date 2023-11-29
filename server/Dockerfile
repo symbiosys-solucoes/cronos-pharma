@@ -1,4 +1,4 @@
-FROM openjdk:11
+FROM amazoncorretto:11
 
 RUN mkdir -p /opt
 ARG JAR_FILE=build/libs/cronos-pharma-1.5.0.jar

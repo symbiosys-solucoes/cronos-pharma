@@ -2,6 +2,7 @@ package br.symbiosys.solucoes.cronospharma.modules.petronas.models.request
 
 import CliFor
 import br.symbiosys.solucoes.cronospharma.sym.model.SymCustomer
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 
 
@@ -29,8 +30,8 @@ class Accounts {
     var customerType: String? = null
 
     @JsonProperty("BusinessType__c")
+    @JsonIgnore
     var bussinessType: String? = null
-
 
     @JsonProperty("AccountSource")
     var accountSource: String? = null
