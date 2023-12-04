@@ -9,4 +9,5 @@ interface PetronasAccountsRepository {
     fun markAsCreated(salesId: String, accountNumber: String)
 
     fun markAsUpdated(salesId: String, accountNumber: String)
+    fun findByCode(code: String): Accounts
 }

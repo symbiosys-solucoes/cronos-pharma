@@ -21,4 +21,6 @@ class SymErros {
 
     @Column(columnDefinition = "TEXT")
     var petronasResponse = ""
+
+    var cronosId: String? = null
 }

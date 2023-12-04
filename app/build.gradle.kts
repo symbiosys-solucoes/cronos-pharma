@@ -27,13 +27,10 @@ dependencies {
 	// https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-reactor
 	runtimeOnly("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.7.3")
 
+// https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core
+	implementation("com.fasterxml.jackson.core:jackson-core:2.16.0")
 
 
-
-// https://mvnrepository.com/artifact/io.springfox/springfox-swagger2
-	implementation("io.springfox:springfox-swagger2:2.9.2")
-// https://mvnrepository.com/artifact/io.springfox/springfox-swagger-ui
-	implementation("io.springfox:springfox-swagger-ui:2.9.2")
 
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -42,7 +39,7 @@ dependencies {
 	runtimeOnly("com.microsoft.sqlserver:mssql-jdbc")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 
-	implementation("commons-net:commons-net:3.8.0")
+	implementation("commons-net:commons-net:3.9.0")
 	implementation("org.mockftpserver:MockFtpServer:2.7.1")
 
 	testImplementation("org.hamcrest:hamcrest-library:2.2")

@@ -40,6 +40,14 @@ class PetronasAccountsRepositoryImpl(
         )
     }
 
+    override fun findByCode(code: String): Accounts {
+        return jdbcTemplate.query(
+            "SELECT  * FROM dbo.sym_petronas_account WHERE AccountNumber = :code",
+            mapOf("code" to code),
+            accountsMapper
+        ).first()
+    }
+
 
     companion object {
         val accountsMapper = RowMapper<Accounts> { rs: ResultSet, rowNum: Int ->

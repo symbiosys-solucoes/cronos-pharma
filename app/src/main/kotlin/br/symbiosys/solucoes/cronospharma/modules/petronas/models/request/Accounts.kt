@@ -29,8 +29,7 @@ class Accounts {
     @JsonProperty("CustomerType__c")
     var customerType: String? = null
 
-    @JsonProperty("BusinessType__c")
-    @JsonIgnore
+    @JsonProperty("BusinessType__c", access = JsonProperty.Access.WRITE_ONLY)
     var bussinessType: String? = null
 
     @JsonProperty("AccountSource")
