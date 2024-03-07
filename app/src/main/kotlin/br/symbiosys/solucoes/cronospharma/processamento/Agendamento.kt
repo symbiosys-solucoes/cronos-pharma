@@ -135,11 +135,19 @@ class Agendamento (
 
             arquivos.forEach { arq ->
                 logger.info(arq)
-                clienteFTP.downloadArquivo(
-                    arq,
-                    diretorio.diretorioPedidoLocal + arq.replace(diretorio.diretorioPedidoFTP,""),
-                )
-                listaArquivos.add(arq)
+                if(!arq.contains(diretorio.diretorioPedidoFTP)){
+                    clienteFTP.downloadArquivo(
+                        diretorio.diretorioPedidoFTP + arq,
+                        diretorio.diretorioPedidoLocal + arq.replace(diretorio.diretorioPedidoFTP,""),
+                    )
+                    listaArquivos.add(arq)
+                } else {
+                    clienteFTP.downloadArquivo(
+                        arq,
+                        diretorio.diretorioPedidoLocal + arq.replace(diretorio.diretorioPedidoFTP, ""),
+                    )
+                    listaArquivos.add(arq)
+                }
             }
             clienteFTP.fechaConexaoFTP()
 
