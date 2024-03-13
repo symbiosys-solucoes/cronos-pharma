@@ -47,7 +47,7 @@ class Agendamento (
 
     // To-Do:
     // Passo 1 - Pegar os Diretórios
-    // Passo 2 - Iterar sobre todos os Diretórios a cada x tempo definido no application.properties
+    // Passo 2 - Iterar sobre todos os Diretórios a cada x tempo definido no application.yml
     // Passo 3 - Fazer download dos devidos arquivos
     // Passo 4 - Inserir Pedido no Cronos
     // Passo 5 - Copiar pedido para a pasta de pedidos importados

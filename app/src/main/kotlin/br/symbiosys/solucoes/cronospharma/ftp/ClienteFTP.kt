@@ -19,7 +19,7 @@ class ClienteFTP(
     private val password: String,
 ) {
     constructor(d: Diretorio): this(server = d.url, user = d.login, password = d.senha)
-    private var ftp: FTPClient = FTPClient()
+    private val ftp: FTPClient = FTPClient()
     private val logger = LoggerFactory.getLogger(ClienteFTP::class.java)
 
 

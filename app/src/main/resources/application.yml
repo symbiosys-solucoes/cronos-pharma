@@ -1,0 +1,82 @@
+server:
+  port: '${APP_PORT:6500}'
+spring:
+  datasource:
+    url: '${JDBC_URL:jdbc:sqlserver://127.0.0.1;databaseName'
+    username: '${DB_USER:sa}'
+    password: '${DB_PASSWORD:@nfs32xpt#}'
+    driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    hikari:
+      maxLifetime: '1800000'
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+    show-sql: false
+    hibernate:
+      ddl-auto: update
+      dialect: org.hibernate.dialect.SQLServer2012Dialect
+  output:
+    ansi:
+      enabled: ALWAYS
+  sql:
+    init:
+      mode: always
+  jackson:
+    mapper:
+      ACCEPT_CASE_INSENSITIVE_PROPERTIES: true
+app:
+  filial: '01'
+  usa:
+    regras:
+      comercias: '${REGRAS_COMERCIAIS:false}'
+      financeiras: '${REGRAS_FINANCEIRAS:false}'
+      finalizacao: '${REGRAS_FINALIZACAO:false}'
+  cron:
+    busca:
+      ftp: '${CRON_BUSCA_FTP:-}'
+    gera:
+      estoque: '${CRON_GERA_ESTOQUE:-}'
+    petronas:
+      envia:
+        geral: '${CRON_PETRONAS_ENVIO:-}'
+        clientes: '${CRON_PETRONAS_CLIENTES:-}'
+        pedidos: '${CRON_PETRONAS_PEDIDOS:-}'
+        notas: '${CRON_PETRONAS_NOTAS:-}'
+        produtos: '${CRON_PETRONAS_PRODUTOS:-}'
+        precos: '${CRON_PETRONAS_PRECOS:-}'
+        estoque: '${CRON_PETRONAS_ESTOQUE:-}'
+  petronas:
+    url: '${PETRONAS_AUTH_URL:https://test.salesforce.com/services}'
+    base:
+      url: >-
+        ${PETRONAS_BASE_URL:https://brazilnew--partial.sandbox.my.salesforce.com}
+    client_id: >-
+      ${PETRONAS_CLIENT_ID:3MVG9ZUGg10Hh224dLrl9wXsHAMhaWv0AlXHHJuAbEn5CKKZLjmx__nDwfuaZguaBFWV7KmXhCYwpKWysVd5R}
+    client_secret: >-
+      ${PETRONAS_CLIENT_SECRET:799C4B5F514C8F25CCF0AE0128A3A068C06EBC3B4B074A2BF2A7B3A768959DA0}
+    username: >-
+      ${PETRONAS_USERNAME:ebestmobile_integration@newbrazil.ebestmobile.com.partial}
+    password: '${PETRONAS_PASSWORD:eBest@2023}'
+    grant_type: password
+    auth:
+      user: '${AUTH_USERNAME:petronas}'
+      password: '${AUTH_PASSWORD:petronas}'
+      token: '${AUTH_TOKEN:ed91a9f64a03896a76bd091f5128f10d169cf51f}'
+logging:
+  level:
+    br:
+      symbiosys:
+        solucoes:
+          cronospharma:
+            modules:
+              petronas:
+                ports:
+                  api:
+                    implementation: DEBUG
+feign:
+  client:
+    config:
+      default:
+        loggerLevel: full
