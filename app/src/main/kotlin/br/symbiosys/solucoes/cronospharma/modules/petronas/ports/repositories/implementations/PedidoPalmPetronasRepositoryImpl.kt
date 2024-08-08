@@ -74,6 +74,7 @@ class PedidoPalmPetronasRepositoryImpl(
                 totalCost = rs.getDouble("COGS")
                 active = true
                 dtCode = rs.getString("DTCode")
+                finalUnitPrice = rs.getDouble("LineNetAmount")
 
             }
         }
@@ -187,28 +188,22 @@ class PedidoPalmPetronasRepositoryImpl(
 
     override fun save(item: ItemPedidoPalmPetronas, numeroPedidoPetronas: String, codigoFilial: String): ItemPedidoPalmPetronas {
 
-        val query = "" +
-                "DECLARE @IDPEDIDOPALM INT\n" +
-                "DECLARE @IDPRODUTO INT \n" +
-                "DECLARE @ItemPedido Table (id int) \n" +
-                "SET @IDPEDIDOPALM = ISNULL((SELECT IdPedidoPalm FROM PedidoPalm WHERE NumPedidoPalm = :numpedido AND CodFilial = :codfilial AND SituacaoPedido = 'P'),0) \n" +
-                "IF :dscretorno = 'PETRONAS'\n" +
-                "BEGIN\n" +
-                "SET @IDPRODUTO = ISNULL((SELECT MAX(IdProduto) FROM PRODUTOS WHERE CodProdutoFabr = :codproduto AND ProdutoInativo = 'N'),0)\n" +
-                "END\n" +
-                "ELSE\n" +
-                "BEGIN\n" +
-                "SET @IDPRODUTO = ISNULL((SELECT MAX(IdProduto) FROM PRODUTOS WHERE CodProduto = :codproduto AND ProdutoInativo = 'N'),0)\n" +
-                "END\n" +
-                "\n" +
-                "IF @IDPEDIDOPALM = 0\n" +
-                "THROW 51000, 'The record does not exist.', 1;" +
-                "\n" +
-                "INSERT INTO ItemPedidoPalm\n" +
-                "( IdPedidoPalm, Item, IdEmpresa, CodProdutoArq, IdProduto, CodProduto, Qtd, QtdConfirmada, IdPrecoTabela, PrecoUnit, PercDescontoItem, SituacaoItemPedido, LogImportacao, DscRetornoItem, IdUsuario, DataOperacao, CodRetornoItem) OUTPUT INSERTED.IdItemPedidoPalm INTO @ItemPedido \n" +
-                "VALUES(@IDPEDIDOPALM, :sequencia, 1, :codproduto, @IDPRODUTO, ISNULL((SELECT CODPRODUTO FROM Produtos WHERE IdProduto = @IDPRODUTO),0), :qtd, 0, :tabela, :preco, :percdesc, :situacao, :logimport, :dscretorno, :idusuario, :data, :codretorno);" +
-                "\n" +
-                "SELECT * FROM ItemPedidoPalm where IdItemPedidoPalm = (SELECT id FROM @ItemPedido)"
+        val query = "exec [dbo].[sym_insere_item_petronas] \n" +
+                "   :numpedido\n" +
+                "  ,:codfilial\n" +
+                "  ,:dscretorno\n" +
+                "  ,:codproduto\n" +
+                "  ,:sequencia\n" +
+                "  ,:qtd\n" +
+                "  ,:tabela\n" +
+                "  ,:preco\n" +
+                "  ,:percdesc\n" +
+                "  ,:situacao\n" +
+                "  ,:logimport\n" +
+                "  ,:idusuario\n" +
+                "  ,:data\n" +
+                "  ,:codretorno"
+
 
         val params =
             MapSqlParameterSource("dscretorno", item.descricaoRetornoItem).addValue("numpedido", numeroPedidoPetronas)
