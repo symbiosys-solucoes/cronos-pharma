@@ -2,7 +2,7 @@ server:
   port: '${APP_PORT:6500}'
 spring:
   datasource:
-    url: '${JDBC_URL:jdbc:sqlserver://127.0.0.1;databaseName'
+    url: ${JDBC_URL:jdbc:sqlserver://127.0.0.1;databaseName}
     username: '${DB_USER:sa}'
     password: '${DB_PASSWORD:@nfs32xpt#}'
     driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
