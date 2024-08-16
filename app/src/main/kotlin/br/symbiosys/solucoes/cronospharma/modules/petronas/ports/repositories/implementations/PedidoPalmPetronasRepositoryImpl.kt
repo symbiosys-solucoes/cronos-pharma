@@ -1,6 +1,5 @@
 package br.symbiosys.solucoes.cronospharma.modules.petronas.ports.repositories.implementations
 
-import br.symbiosys.solucoes.cronospharma.entidades.cronos.BloqueioMovimentoRepository
 import br.symbiosys.solucoes.cronospharma.entidades.cronos.FinalizaMovimento
 import br.symbiosys.solucoes.cronospharma.modules.petronas.models.request.Order
 import br.symbiosys.solucoes.cronospharma.modules.petronas.models.request.OrderItem
@@ -12,6 +11,7 @@ import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
+import java.math.BigDecimal
 import java.sql.ResultSet
 import java.time.LocalDate
 
@@ -52,8 +52,13 @@ class PedidoPalmPetronasRepositoryImpl(
         jdbcTemplate.update(query,  MapSqlParameterSource("numPedido", numPedido))
     }
     override fun findItems(numPedidoCronos: String, cancelados: Boolean): List<OrderItem> {
-        val mapper = RowMapper<OrderItem> { rs: ResultSet, rowNum: Int ->
+        val mapper = RowMapper<OrderItem> { rs: ResultSet, _: Int ->
             OrderItem().apply {
+                val valorProduto = rs.getBigDecimal("LineNetAmount")
+                val percentualDesconto = rs.getBigDecimal("LineNetAmount")
+                val percentualDecimal = percentualDesconto.divide(BigDecimal.valueOf(100))
+                val valorADeduzir = valorProduto.multiply(percentualDecimal)
+
                 orderNumberSfa = rs.getString("SFAOrderNumber")
                 orderNumberErp = rs.getString("ERPOrderNumber")
                 orderItemNumberSfa = rs.getString("SFAOrderItemNumber")
@@ -74,7 +79,7 @@ class PedidoPalmPetronasRepositoryImpl(
                 totalCost = rs.getDouble("COGS")
                 active = true
                 dtCode = rs.getString("DTCode")
-                finalUnitPrice = rs.getDouble("LineNetAmount")
+                finalUnitPrice = valorProduto.subtract(valorADeduzir).toDouble()
 
             }
         }
