@@ -55,7 +55,7 @@ class PedidoPalmPetronasRepositoryImpl(
         val mapper = RowMapper<OrderItem> { rs: ResultSet, _: Int ->
             OrderItem().apply {
                 val valorProduto = rs.getBigDecimal("LineNetAmount")
-                val percentualDesconto = rs.getBigDecimal("LineNetAmount")
+                val percentualDesconto = rs.getBigDecimal("DiscountPercentage")
                 val percentualDecimal = percentualDesconto.divide(BigDecimal.valueOf(100))
                 val valorADeduzir = valorProduto.multiply(percentualDecimal)
 
