@@ -55,9 +55,7 @@ class PedidoPalmPetronasRepositoryImpl(
         val mapper = RowMapper<OrderItem> { rs: ResultSet, _: Int ->
             OrderItem().apply {
                 val valorProduto = rs.getBigDecimal("LineNetAmount")
-                val percentualDesconto = rs.getBigDecimal("DiscountPercentage")
-                val percentualDecimal = percentualDesconto.divide(BigDecimal.valueOf(100))
-                val valorADeduzir = valorProduto.multiply(percentualDecimal)
+                val quantidadeVendida = rs.getBigDecimal("OrderQuantity")
 
                 orderNumberSfa = rs.getString("SFAOrderNumber")
                 orderNumberErp = rs.getString("ERPOrderNumber")
@@ -79,7 +77,7 @@ class PedidoPalmPetronasRepositoryImpl(
                 totalCost = rs.getDouble("COGS")
                 active = true
                 dtCode = rs.getString("DTCode")
-                finalUnitPrice = valorProduto.subtract(valorADeduzir).toDouble()
+                finalUnitPrice = valorProduto.divide(quantidadeVendida).toDouble()
 
             }
         }
