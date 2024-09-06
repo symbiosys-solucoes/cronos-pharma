@@ -41,7 +41,7 @@ class InvoiceLinePetronasRepositoryImpl(private val jdbcTemplate: NamedParameter
 
     override fun findAll(salesid: String): List<InvoiceLine> {
         return jdbcTemplate.query(
-            "SELECT * FROM sym_petronas_invoice_lines WHERE InvoiceSalesId = ${salesid}",
+            "SELECT * FROM sym_petronas_invoice_lines WHERE InvoiceSalesId = '${salesid}'",
             mapperInvoiceLinePetronas
         )
     }

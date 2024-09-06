@@ -30,7 +30,7 @@ class SendInvoicesToSFAUseCaseImpl (
             response.body?.forEach {
                 if (it.isSuccess && it.isCreated) {
                     logger.info("Nota ${it.externalId} enviado e criado com sucesso")
-                    val nfInfo = it.externalId!!.split("|")
+                    val nfInfo = it.externalId!!.split("-")
                     invoicePetronasRepository.markAsCreated(nfInfo[1], nfInfo[0], it.sfdcId!!)
                     sendInvoiceLineToSFAUseCase.execute(it.sfdcId!!)
                 }
