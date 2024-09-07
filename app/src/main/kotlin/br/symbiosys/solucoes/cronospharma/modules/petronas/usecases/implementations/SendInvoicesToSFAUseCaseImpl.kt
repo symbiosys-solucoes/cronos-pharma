@@ -9,6 +9,7 @@ import br.symbiosys.solucoes.cronospharma.sym.model.SymErros
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 
@@ -24,20 +25,25 @@ class SendInvoicesToSFAUseCaseImpl (
 
 
     override fun execute() {
+        this.execute(null, null, null)
+    }
+
+    override fun execute(initialDate: LocalDate?, endDate: LocalDate?, erpInvoiceNumber: String?) {
+        logger.info("Iniciando busca de pedidos para envio com os seguintes parametros: ${initialDate} - ${endDate} - ${erpInvoiceNumber}")
         val erros = mutableListOf<SymErros>()
-        invoicePetronasRepository.findAll(enviados = false).chunked(50).forEach {
+        invoicePetronasRepository.findAll(initialDate, endDate, erpInvoiceNumber).chunked(50).forEach {
             val response = apiPetronasInvoices.upsertInvoices(it)
             response.body?.forEach {
                 if (it.isSuccess && it.isCreated) {
                     logger.info("Nota ${it.externalId} enviado e criado com sucesso")
                     val nfInfo = it.externalId!!.split("-")
                     invoicePetronasRepository.markAsCreated(nfInfo[1], nfInfo[0], it.sfdcId!!)
-                    sendInvoiceLineToSFAUseCase.execute(it.sfdcId!!)
+                    sendInvoiceLineToSFAUseCase.execute(it.externalId!!)
                 }
                 if (it.isSuccess && !it.isCreated) {
                     logger.info("Nota ${it.externalId} enviado e atualizado com sucesso")
                     invoicePetronasRepository.markAsUpdated(it.sfdcId!!)
-                    sendInvoiceLineToSFAUseCase.execute(it.sfdcId!!)
+                    sendInvoiceLineToSFAUseCase.execute(it.externalId!!)
                 }
                 if (!it.isSuccess) {
                     logger.error("erro ao enviar NOTA ${it.externalId}")
@@ -51,7 +57,6 @@ class SendInvoicesToSFAUseCaseImpl (
             }
         }
         symErrosRepository.saveAll(erros)
-
     }
 
 

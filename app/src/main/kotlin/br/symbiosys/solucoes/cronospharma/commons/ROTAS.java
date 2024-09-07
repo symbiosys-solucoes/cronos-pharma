@@ -13,5 +13,6 @@ public final class ROTAS {
     public static final String PETRONAS_CADASTRAR_PEDIDOS =  BASE_URL + "/petronas/Sfa/BR/Order";
     public static final String PETRONAS_CADASTRAR_ITEM_PEDIDOS =  BASE_URL + "/petronas/Sfa/BR/OrderItem";
     public static final String PETRONAS_CANCELA_PEDIDOS =  BASE_URL + "/petronas/cancela/pedidos";
+    public static final String PETRONAS_ENVIO_NOTAS =  BASE_URL + "/petronas/envio/notas";
 
 }

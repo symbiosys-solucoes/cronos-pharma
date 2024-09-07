@@ -19,25 +19,18 @@ class SendInvoiceLineToSFAUseCaseImpl(
 ) : SendInvoiceLineToSFAUseCase {
 
 
-
     val logger = LoggerFactory.getLogger(SendInvoiceLineToSFAUseCaseImpl::class.java)
     val mapper = ObjectMapper()
 
 
-    override fun  execute(salesId: String) {
+    override fun execute(salesId: String) {
         val erros = mutableListOf<SymErros>()
         invoiceLinePetronasRepository.findAll(salesId).chunked(50).forEach {
             val response = apiPetronasInvoices.upsertInvoiceLines(it)
             response.body?.forEach {
-                if (it.isSuccess && it.isCreated) {
+                if (it.isSuccess) {
                     logger.info("Items da Nota ${it.externalId} enviado e criado com sucesso")
-                    invoiceLinePetronasRepository.markAsCreated(it.externalId!!.toInt(), it.sfdcId!!)
-                }
-                if (it.isSuccess && !it.isCreated) {
-                    logger.info("Items da Nota ${it.externalId} enviado e atualizado com sucesso")
-                    invoiceLinePetronasRepository.markAsUpdated(it.externalId!!.toInt(), it.sfdcId!!)
-                }
-                if (!it.isSuccess) {
+                } else {
                     logger.error("erro ao enviar ITEM NOTA ${it.externalId}")
                     erros.add(SymErros().apply {
                         dataOperacao = LocalDateTime.now()

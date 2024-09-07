@@ -5,9 +5,11 @@ import br.symbiosys.solucoes.cronospharma.modules.petronas.models.request.Invoic
 import br.symbiosys.solucoes.cronospharma.modules.petronas.ports.repositories.InvoicePetronasRepository
 import org.slf4j.LoggerFactory
 import org.springframework.jdbc.core.RowMapper
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
 import java.sql.ResultSet
+import java.time.LocalDate
 
 @Repository
 class InvoicePetronasRepositoryImpl(private val jdbcTemplate: NamedParameterJdbcTemplate) : InvoicePetronasRepository {
@@ -69,6 +71,19 @@ class InvoicePetronasRepositoryImpl(private val jdbcTemplate: NamedParameterJdbc
     override fun findAll(enviados: Boolean): List<Invoice> {
         return jdbcTemplate.query("SELECT * FROM sym_petronas_invoices WHERE PrecisaEnviar = 1", mapperInvoicePetronas)
     }
+
+    override fun findAll(initialDate: LocalDate?, endDate: LocalDate?, erpInvoiceNumber: String?): List<Invoice> {
+        if(erpInvoiceNumber != null) {
+            return jdbcTemplate.query("SELECT * FROM sym_petronas_invoices WHERE InvoiceDocumentNumber = :numpedido", MapSqlParameterSource("numpedido", erpInvoiceNumber), mapperInvoicePetronas)
+        }
+        if (initialDate != null && endDate != null) {
+            return jdbcTemplate.query("SELECT * FROM sym_petronas_invoices WHERE InvoiceDate BETWEEN :initialDate AND :endDate",
+                MapSqlParameterSource("initialDate", initialDate).addValue("endDate", endDate), mapperInvoicePetronas
+            )
+        }
+        return jdbcTemplate.query("SELECT * FROM sym_petronas_invoices WHERE PrecisaEnviar = 1", mapperInvoicePetronas)
+    }
+
 
 
     companion object {
