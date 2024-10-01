@@ -25,13 +25,15 @@ class SendInvoicesToSFAUseCaseImpl (
 
 
     override fun execute() {
-        this.execute(null, null, null)
+        val dataAtual = LocalDate.now()
+        val seteDiasAtras = dataAtual.minusDays(7)
+        this.execute(seteDiasAtras, dataAtual, null)
     }
 
     override fun execute(initialDate: LocalDate?, endDate: LocalDate?, erpInvoiceNumber: String?) {
         logger.info("Iniciando busca de pedidos para envio com os seguintes parametros: ${initialDate} - ${endDate} - ${erpInvoiceNumber}")
         val erros = mutableListOf<SymErros>()
-        invoicePetronasRepository.findAll(initialDate, endDate, erpInvoiceNumber).chunked(50).forEach {
+        invoicePetronasRepository.findAll(initialDate, endDate, erpInvoiceNumber).chunked(100).forEach {
             val response = apiPetronasInvoices.upsertInvoices(it)
             response.body?.forEach {
                 if (it.isSuccess && it.isCreated) {

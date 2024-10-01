@@ -25,7 +25,7 @@ class SendInvoiceLineToSFAUseCaseImpl(
 
     override fun execute(salesId: String) {
         val erros = mutableListOf<SymErros>()
-        invoiceLinePetronasRepository.findAll(salesId).chunked(50).forEach {
+        invoiceLinePetronasRepository.findAll(salesId).chunked(100).forEach {
             val response = apiPetronasInvoices.upsertInvoiceLines(it)
             response.body?.forEach {
                 if (it.isSuccess) {

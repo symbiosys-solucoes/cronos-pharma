@@ -1,18 +1,15 @@
 package br.symbiosys.solucoes.cronospharma.modules.petronas.usecases.implementations
 
-import br.symbiosys.solucoes.cronospharma.modules.petronas.ports.repositories.PedidoPalmPetronasRepository
 import br.symbiosys.solucoes.cronospharma.modules.petronas.models.request.Order
 import br.symbiosys.solucoes.cronospharma.modules.petronas.models.response.UpsertResponse
+import br.symbiosys.solucoes.cronospharma.modules.petronas.ports.repositories.PedidoPalmPetronasRepository
 import br.symbiosys.solucoes.cronospharma.modules.petronas.usecases.SendOrderToERPUseCase
 import br.symbiosys.solucoes.cronospharma.modules.petronas.usecases.converters.SFAOrderToPetronasPedidoPalm
 import br.symbiosys.solucoes.cronospharma.sym.gateway.repository.SymParametrosRepository
 import org.slf4j.LoggerFactory
-import org.springframework.scheduling.annotation.EnableScheduling
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 @Component
-@EnableScheduling
 class SendOrderToERPUseCaseImpl(
     private val symParametrosRepository: SymParametrosRepository,
     private val pedidoPalmPetronasRepository: PedidoPalmPetronasRepository
@@ -59,9 +56,6 @@ class SendOrderToERPUseCaseImpl(
         return response
     }
 
-    @Scheduled(cron = "\${app.cron.petronas.envia.geral}")
-    fun convertOrderToMovimento() {
-        pedidoPalmPetronasRepository.convertAll()
-    }
+
 
 }
