@@ -1,6 +1,9 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Prod_Profile" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <option name="ACTIVE_PROFILES" value="prod" />
+    <envs>
+      <env name="CRON_PETRONAS_CONVERTE_PEDIDO" value="0 */3 7-22 * * 1-6" />
+    </envs>
     <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
     <module name="cronos-pharma.main" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="br.symbiosys.solucoes.cronospharma.CronosPharmaApplicationKt" />

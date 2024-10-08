@@ -10,161 +10,174 @@ import java.sql.ResultSet
 
 @Repository
 class BloqueioMovimentoRepository(
-    private val jdbcTemplate: NamedParameterJdbcTemplate
+    private val jdbcTemplate: NamedParameterJdbcTemplate,
 ) {
     @Value("\${app.usa.regras.comercias}")
     private lateinit var usaRegrasComercias: String
+
     @Value("\${app.usa.regras.financeiras}")
     private lateinit var usaRegrasFinanceiras: String
+
     @Value("\${app.usa.regras.finalizacao}")
     private lateinit var usaRegrasFinalizacao: String
 
     val logger = LoggerFactory.getLogger(BloqueioMovimentoRepository::class.java)
-    fun findByTipoBloqueio(tipoBloqueio: String): List<BloqueioMovimento>{
 
-       return jdbcTemplate.query(sqlTipoBloqueioByTipo, MapSqlParameterSource().addValue("tipoBloqueio", tipoBloqueio),
-           mapperBloqueioMovimento )
-
-
-    }
+    fun findByTipoBloqueio(tipoBloqueio: String): List<BloqueioMovimento> =
+        jdbcTemplate.query(
+            sqlTipoBloqueioByTipo,
+            MapSqlParameterSource().addValue("tipoBloqueio", tipoBloqueio),
+            mapperBloqueioMovimento,
+        )
 
     fun executaRegrasTipoGravarRetornos(pedido: PedidoPalm) {
+        if (pedido.IdPedidoPalm != null)
+            {
+                val regras = findByTipoBloqueio("023")
 
-        if(pedido.IdPedidoPalm != null){
-
-            val regras = findByTipoBloqueio("023")
-
-            regras.forEach {
-                if(it.ExpressaoSQL != null && it.Inativo != "S"){
-
-                    jdbcTemplate.query(it.ExpressaoSQL!!.uppercase(),
-                        MapSqlParameterSource().addValue("PINT1",pedido.IdPedidoPalm),
-                        { rs: ResultSet, rowNum: Int -> rs.getString(1) }
-                    )
+                regras.forEach {
+                    if (it.ExpressaoSQL != null && it.Inativo != "S")
+                        {
+                            jdbcTemplate.query(
+                                it.ExpressaoSQL!!.uppercase(),
+                                MapSqlParameterSource().addValue("PINT1", pedido.IdPedidoPalm),
+                                { rs: ResultSet, rowNum: Int -> rs.getString(1) },
+                            )
+                        }
                 }
-
             }
-
-        }
-
     }
+
     fun executaRegrasTipoGravarRetornos(id: Long) {
+        val regras = findByTipoBloqueio("023")
 
-            val regras = findByTipoBloqueio("023")
-
-            regras.forEach {
-                if(it.ExpressaoSQL != null && it.Inativo != "S"){
-
-                    jdbcTemplate.query(it.ExpressaoSQL!!.uppercase(),
-                        MapSqlParameterSource().addValue("PINT1",id),
-                        { rs: ResultSet, rowNum: Int -> rs.getString(1) }
+        regras.forEach {
+            if (it.ExpressaoSQL != null && it.Inativo != "S")
+                {
+                    jdbcTemplate.query(
+                        it.ExpressaoSQL!!.uppercase(),
+                        MapSqlParameterSource().addValue("PINT1", id),
+                        { rs: ResultSet, rowNum: Int -> rs.getString(1) },
                     )
                 }
-
-            }
-
-
-
+        }
     }
 
     fun executaRegrasMovimento(idMov: Long): List<RetornoRegras> {
-
         val listaDeResultados = mutableListOf<RetornoRegras>()
-        if(usaRegrasComercias == "true") {
-            val regrasBloqueioComercial = jdbcTemplate.query(sqlTipoBloqueioByTipoAndAcao, MapSqlParameterSource("tipoAcao", "AUT").addValue("tipoBloqueio", "COM"), mapperBloqueioMovimento)
+        if (usaRegrasComercias == "true") {
+            val regrasBloqueioComercial =
+                jdbcTemplate.query(
+                    sqlTipoBloqueioByTipoAndAcao,
+                    MapSqlParameterSource("tipoAcao", "AUT").addValue("tipoBloqueio", "COM"),
+                    mapperBloqueioMovimento,
+                )
 
             regrasBloqueioComercial.forEach {
                 try {
-                    if(it.ExpressaoSQL != null){
-                        val resultado = jdbcTemplate.queryForObject(
-                            it.ExpressaoSQL!!.uppercase(),
-                            MapSqlParameterSource("PCHAR1","2.1").addValue("IDMOV", idMov),
-                            String::class.java
-                        )
-                        listaDeResultados.add(RetornoRegras(it.NomeBloqueio, resultado, "COMERCIAL"))
-                    }
-                } catch (e: Exception){
-                    logger.error("Erro ao executar regra: ${it.NomeBloqueio} | ${e.message}")
+                    if (it.ExpressaoSQL != null)
+                        {
+                            val resultado =
+                                jdbcTemplate.queryForObject(
+                                    it.ExpressaoSQL!!.uppercase(),
+                                    MapSqlParameterSource("PCHAR1", "2.7").addValue("IDMOV", idMov),
+                                    String::class.java,
+                                )
+                            listaDeResultados.add(RetornoRegras(it.NomeBloqueio, resultado, "COMERCIAL"))
+                        }
+                } catch (e: Exception) {
+                    logger.error("Falha ao executar regra: ${it.NomeBloqueio}")
                 }
-
             }
         }
 
-        if(usaRegrasFinanceiras == "true") {
-            val regrasBloqueioFinanceiro = jdbcTemplate.query(sqlTipoBloqueioByTipoAndAcao, MapSqlParameterSource("tipoAcao", "AUF").addValue("tipoBloqueio", "COM"), mapperBloqueioMovimento)
+        if (usaRegrasFinanceiras == "true") {
+            val regrasBloqueioFinanceiro =
+                jdbcTemplate.query(
+                    sqlTipoBloqueioByTipoAndAcao,
+                    MapSqlParameterSource("tipoAcao", "AUF").addValue("tipoBloqueio", "COM"),
+                    mapperBloqueioMovimento,
+                )
 
             regrasBloqueioFinanceiro.forEach {
                 try {
-                    if(it.ExpressaoSQL != null){
-                        val resultado = jdbcTemplate.queryForObject(
-                            it.ExpressaoSQL!!.uppercase(),
-                            MapSqlParameterSource("PCHAR1","2.1").addValue("IDMOV", idMov),
-                            String::class.java
-                        )
-                        listaDeResultados.add(RetornoRegras(it.NomeBloqueio, resultado, "FINANCEIRO"))
-                    }
-                } catch (e: Exception){
-                    logger.error("Erro ao executar regra: ${it.NomeBloqueio} | ${e.message}")
+                    if (it.ExpressaoSQL != null)
+                        {
+                            val resultado =
+                                jdbcTemplate.queryForObject(
+                                    it.ExpressaoSQL!!.uppercase(),
+                                    MapSqlParameterSource("PCHAR1", "2.1").addValue("IDMOV", idMov),
+                                    String::class.java,
+                                )
+                            listaDeResultados.add(RetornoRegras(it.NomeBloqueio, resultado, "FINANCEIRO"))
+                        }
+                } catch (e: Exception) {
+                    logger.error("Falha ao executar regra: ${it.NomeBloqueio}")
                 }
-
             }
-
         }
 
-        if(usaRegrasFinalizacao == "true"){
-            val regrasAbortaFinalizacao = jdbcTemplate.query(sqlTipoBloqueioByTipoAndAcao, MapSqlParameterSource("tipoAcao", "FIN").addValue("tipoBloqueio", "COM"), mapperBloqueioMovimento)
+        if (usaRegrasFinalizacao == "true")
+            {
+                val regrasAbortaFinalizacao =
+                    jdbcTemplate.query(
+                        sqlTipoBloqueioByTipoAndAcao,
+                        MapSqlParameterSource("tipoAcao", "FIN").addValue("tipoBloqueio", "COM"),
+                        mapperBloqueioMovimento,
+                    )
 
-            regrasAbortaFinalizacao.forEach {
-                try {
-                    if(it.ExpressaoSQL != null){
-                        val resultado = jdbcTemplate.queryForObject(
-                            it.ExpressaoSQL!!.uppercase(),
-                            MapSqlParameterSource("PCHAR1","2.1").addValue("IDMOV", idMov),
-                            String::class.java
-                        )
-                        listaDeResultados.add(RetornoRegras(it.NomeBloqueio, resultado, "FINALIZACAO"))
+                regrasAbortaFinalizacao.forEach {
+                    try {
+                        if (it.ExpressaoSQL != null)
+                            {
+                                val resultado =
+                                    jdbcTemplate.queryForObject(
+                                        it.ExpressaoSQL!!.uppercase(),
+                                        MapSqlParameterSource("PCHAR1", "2.1").addValue("IDMOV", idMov),
+                                        String::class.java,
+                                    )
+                                listaDeResultados.add(RetornoRegras(it.NomeBloqueio, resultado, "FINALIZACAO"))
+                            }
+                    } catch (e: Exception) {
+                        logger.error("Erro ao executar regra: ${it.NomeBloqueio} | ${e.message}")
                     }
-                } catch (e: Exception){
-                    logger.error("Erro ao executar regra: ${it.NomeBloqueio} | ${e.message}")
                 }
-
             }
-
-        }
 
         return listaDeResultados
-
     }
 
-    companion object{
-        private val mapperBloqueioMovimento = RowMapper<BloqueioMovimento> {rs: ResultSet, rowNum: Int ->
-            BloqueioMovimento(
-                IdBloqueioMovimento = rs.getLong("IdBloqueioMovimento"),
-                TipoBloqueio = rs.getString("TipoBloqueio"),
-                NomeBloqueio = rs.getString("NomeBloqueio"),
-                ExpressaoSQL = rs.getString("ExpressaoSQL"),
-                Inativo = rs.getString("Inativo"),
-                TipoAcao = rs.getString("TipoAcao"),
-                OrdemExec = rs.getInt("OrdemExec"),
-                DataOperacao = rs.getTimestamp("DataOperacao")?.toLocalDateTime() ?: null,
-                IdUsuario = rs.getString("IdUsuario"),
-                DataUltAlteracao = rs.getTimestamp("DataUltAlteracao")?.toLocalDateTime() ?: null,
-                UserUltAlteracao = rs.getString("UserUltAlteracao")
-            )
-        }
-        private val sqlTipoBloqueioByTipo = "" +
+    companion object {
+        private val mapperBloqueioMovimento =
+            RowMapper<BloqueioMovimento> { rs: ResultSet, rowNum: Int ->
+                BloqueioMovimento(
+                    IdBloqueioMovimento = rs.getLong("IdBloqueioMovimento"),
+                    TipoBloqueio = rs.getString("TipoBloqueio"),
+                    NomeBloqueio = rs.getString("NomeBloqueio"),
+                    ExpressaoSQL = rs.getString("ExpressaoSQL"),
+                    Inativo = rs.getString("Inativo"),
+                    TipoAcao = rs.getString("TipoAcao"),
+                    OrdemExec = rs.getInt("OrdemExec"),
+                    DataOperacao = rs.getTimestamp("DataOperacao")?.toLocalDateTime() ?: null,
+                    IdUsuario = rs.getString("IdUsuario"),
+                    DataUltAlteracao = rs.getTimestamp("DataUltAlteracao")?.toLocalDateTime() ?: null,
+                    UserUltAlteracao = rs.getString("UserUltAlteracao"),
+                )
+            }
+        private val sqlTipoBloqueioByTipo =
+            "" +
                 "\n" +
                 "SELECT * FROM BloqueioMovimento WHERE TipoBloqueio = :tipoBloqueio"
 
-        private val sqlTipoBloqueioByTipoAndAcao = "" +
+        private val sqlTipoBloqueioByTipoAndAcao =
+            "" +
                 "\n" +
                 "SELECT * FROM BloqueioMovimento WHERE TipoBloqueio = :tipoBloqueio AND TipoAcao = :tipoAcao AND ISNULL(Inativo, 'N') = 'N'"
     }
-
 }
 
 data class RetornoRegras(
     val nome: String?,
     val ok: String?,
-    val tipo: String?
+    val tipo: String?,
 )

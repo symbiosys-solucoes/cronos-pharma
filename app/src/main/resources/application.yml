@@ -74,7 +74,7 @@ logging:
               petronas:
                 ports:
                   api:
-                    implementation: DEBUG
+                    implementation: ${LOG_LEVEL:INFO}
 feign:
   client:
     config:
