@@ -132,7 +132,7 @@ class BloqueioMovimentoRepository(
                         listaDeResultados.add(RetornoRegras(it.NomeBloqueio, resultado, "FINALIZACAO"))
                     }
                 } catch (e: Exception) {
-                    logger.error("Erro ao executar regra: ${it.NomeBloqueio} | ${e.message}")
+                    logger.error("Erro ao executar regra: ${it.NomeBloqueio}")
                 }
             }
         }

@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package br.symbiosys.solucoes.cronospharma.modules.petronas.usecases.implementations
 
 import br.symbiosys.solucoes.cronospharma.modules.petronas.ports.repositories.PedidoPalmPetronasRepository
@@ -31,25 +33,18 @@ class ScheduledSendToSFAImpl(
 
     @Scheduled(cron = "\${app.cron.petronas.envia.pedidos}")
     fun sendOrdersAndARs() {
-        // executor.submit {
         sendOrdersToSFAUseCase.execute()
-        sendInvoicesToSFAUseCase.execute()
-        sendAccountARsToSFAUseCase.execute()
-        // }
     }
 
     @Scheduled(cron = "\${app.cron.petronas.envia.notas}")
     fun sendOrdersInvoicesAndARs() {
-        // executor.submit {
         sendInvoicesToSFAUseCase.execute()
-        // }
+        sendAccountARsToSFAUseCase.execute()
     }
 
-    @Scheduled(cron = "\${app.cron.petronas.converte.pedido}")
+    @Scheduled(fixedRate = (1000 * 60) * 3)
     fun convertOrderToMovimento() {
-        //  executor.submit {
         pedidoPalmPetronasRepository.convertAll()
-        // }
     }
 
     @Bean
@@ -59,18 +54,4 @@ class ScheduledSendToSFAImpl(
         threadPoolTaskScheduler.setThreadNamePrefix("ThreadPoolTaskScheduler")
         return threadPoolTaskScheduler
     }
-    /**
-     @PreDestroy
-     fun shutdownExecutor() {
-     executor.shutdown()
-     try {
-     if (!executor.awaitTermination(180, java.util.concurrent.TimeUnit.SECONDS)) {
-     executor.shutdownNow()
-     }
-     } catch (e: InterruptedException) {
-     executor.shutdownNow()
-     Thread.currentThread().interrupt()
-     }
-     }
-     */
 }

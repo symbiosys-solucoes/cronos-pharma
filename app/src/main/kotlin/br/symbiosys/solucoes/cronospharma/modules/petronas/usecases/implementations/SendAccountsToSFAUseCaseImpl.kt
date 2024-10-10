@@ -20,13 +20,10 @@ import java.time.LocalDateTime
 class SendAccountsToSFAUseCaseImpl(
     private val symErrosRepository: SymErrosRepository,
     private val petronasAccountsRepository: PetronasAccountsRepository,
-    private val apiPetronasUpsertAccounts: ApiPetronasUpsertAccounts
+    private val apiPetronasUpsertAccounts: ApiPetronasUpsertAccounts,
 ) : SendAccountsToSFAUseCase {
-
-
     val logger = LoggerFactory.getLogger(SendAccountsToSFAUseCaseImpl::class.java)
     val mapper = ObjectMapper()
-
 
     override fun execute(full: Boolean) {
         val customers = petronasAccountsRepository.findAll(full)
@@ -43,40 +40,37 @@ class SendAccountsToSFAUseCaseImpl(
                 if (response.statusCode == HttpStatus.OK) {
                     val body = response.body!!
                     body.filter { it.isSuccess && it.isCreated }.forEach {
-
                         val accountNumber = it.externalId!!.split("-")[1]
-                        logger.info("cliente ${it.externalId} cadastrado com sucesso")
                         petronasAccountsRepository.markAsCreated(it.sfdcId!!, accountNumber)
-
                     }
                     body.filter { !it.isCreated && it.isSuccess }.forEach {
                         val accountNumber = it.externalId!!.split("-")[1]
-                        logger.info("cliente ${it.externalId} atualizado com sucesso")
                         petronasAccountsRepository.markAsCreated(it.sfdcId!!, accountNumber)
                     }
                     body.filter { !it.isSuccess }.forEach {
                         logger.error("cliente ${it.externalId} não foi atualizado nem cadastrado")
-                        erros.add(SymErros().apply {
-                            dataOperacao = LocalDateTime.now()
-                            tipoOperacao = "CADASTRO CLIENTE SFA"
-                            petronasResponse = mapper.writeValueAsString(it)
-                        })
+                        erros.add(
+                            SymErros().apply {
+                                dataOperacao = LocalDateTime.now()
+                                tipoOperacao = "CADASTRO CLIENTE SFA"
+                                petronasResponse = mapper.writeValueAsString(it)
+                            },
+                        )
                     }
                 }
                 symErrosRepository.saveAll(erros)
                 erros.clear()
             } catch (e: Exception) {
                 logger.error("erro ao enviar request {$i} de ${accounts.size} para SFA", e)
-                symErrosRepository.save(SymErros().apply {
-                    dataOperacao = LocalDateTime.now()
-                    tipoOperacao = "CADASTRO CLIENTE SFA"
-                    petronasResponse = mapper.writeValueAsString(e.message)
-                })
+                symErrosRepository.save(
+                    SymErros().apply {
+                        dataOperacao = LocalDateTime.now()
+                        tipoOperacao = "CADASTRO CLIENTE SFA"
+                        petronasResponse = mapper.writeValueAsString(e.message)
+                    },
+                )
             }
-
         }
-
-
     }
 
     @Async
@@ -93,12 +87,11 @@ class SendAccountsToSFAUseCaseImpl(
         val result = handleSfaResponse(response)
         if (!result.first().isSuccess) throw PetronasException(result.first().errors)
         return petronasAccountsRepository.findByCode(code)
-
     }
 
     private fun handleSfaResponse(
         response: ResponseEntity<List<UpsertResponse>>,
-        code: String? = null
+        code: String? = null,
     ): MutableList<UpsertResponse> {
         val result = mutableListOf<UpsertResponse>()
         try {
@@ -106,35 +99,37 @@ class SendAccountsToSFAUseCaseImpl(
                 val body = response.body!!
                 body.filter { it.isSuccess && it.isCreated }.forEach {
                     val accountNumber = it.externalId!!.split("-")[1]
-                    logger.info("cliente ${it.externalId} cadastrado com sucesso")
                     result.add(it)
                     petronasAccountsRepository.markAsCreated(it.sfdcId!!, accountNumber)
                 }
                 body.filter { !it.isCreated && it.isSuccess }.forEach {
                     val accountNumber = it.externalId!!.split("-")[1]
-                    logger.info("cliente ${it.externalId} atualizado com sucesso")
                     result.add(it)
                     petronasAccountsRepository.markAsCreated(it.sfdcId!!, accountNumber)
                 }
                 body.filter { !it.isSuccess }.forEach {
                     logger.error("cliente ${it.externalId} não foi atualizado nem cadastrado")
                     result.add(it)
-                    symErrosRepository.save(SymErros().apply {
-                        dataOperacao = LocalDateTime.now()
-                        tipoOperacao = "CADASTRO CLIENTE SFA"
-                        petronasResponse = mapper.writeValueAsString(it)
-                        cronosId = it.externalId!!.split("-")[1]
-                    })
+                    symErrosRepository.save(
+                        SymErros().apply {
+                            dataOperacao = LocalDateTime.now()
+                            tipoOperacao = "CADASTRO CLIENTE SFA"
+                            petronasResponse = mapper.writeValueAsString(it)
+                            cronosId = it.externalId!!.split("-")[1]
+                        },
+                    )
                 }
             }
         } catch (e: Exception) {
             logger.error("erro ao enviar cliente para SFA", e)
-            symErrosRepository.save(SymErros().apply {
-                dataOperacao = LocalDateTime.now()
-                tipoOperacao = "CADASTRO CLIENTE SFA"
-                petronasResponse = mapper.writeValueAsString(e.message)
-                cronosId = code
-            })
+            symErrosRepository.save(
+                SymErros().apply {
+                    dataOperacao = LocalDateTime.now()
+                    tipoOperacao = "CADASTRO CLIENTE SFA"
+                    petronasResponse = mapper.writeValueAsString(e.message)
+                    cronosId = code
+                },
+            )
         }
         return result
     }

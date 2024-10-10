@@ -10,25 +10,22 @@ import br.symbiosys.solucoes.cronospharma.sym.model.SymErros
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Async
-import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
 @Component
-class SendProductInfoToSFAUseCaseImpl (
+class SendProductInfoToSFAUseCaseImpl(
     private val productsRepository: ProductsPetronasRepository,
     private val keyPetronasRepository: ProductsKeyPetronasRepository,
     private val productsInventoryPetronasRepository: ProductsInventoryPetronasRepository,
     private val symErrosRepository: SymErrosRepository,
-    private val apiPetronasUpsertProducts: ApiPetronasUpsertProducts
+    private val apiPetronasUpsertProducts: ApiPetronasUpsertProducts,
 ) : SendProductInfoToSFAUseCase {
-
     private val logger = LoggerFactory.getLogger(SendProductInfoToSFAUseCase::class.java)
 
     val mapper = ObjectMapper()
 
-
-    override  fun info(full: Boolean)  {
+    override fun info(full: Boolean) {
         val products = productsRepository.findAll(full).chunked(1000).toList()
         var i = 1
         val erros = mutableListOf<SymErros>()
@@ -39,25 +36,24 @@ class SendProductInfoToSFAUseCaseImpl (
             val body = response.body!!
             body.filter { it.isSuccess && it.isCreated }.forEach {
                 val codProduto = it.externalId!!.split("-")[1]
-                logger.info("Produto criado com sucesso no SFA: $codProduto")
                 productsRepository.markAsCreated(codProduto)
             }
             body.filter { it.isSuccess && !it.isCreated }.forEach {
                 val codProduto = it.externalId!!.split("-")[1]
-                logger.info("Produto atualizado com sucesso no SFA: $codProduto")
                 productsRepository.markAsUpdated(codProduto)
             }
             body.filter { !it.isSuccess }.forEach {
                 logger.error("produto ${it.externalId} não foi atualizado nem cadastrado")
-                erros.add(SymErros().apply {
-                    dataOperacao = LocalDateTime.now()
-                    tipoOperacao = "CADASTRO PRODUTO SFA"
-                    petronasResponse = mapper.writeValueAsString(it)
-                })
+                erros.add(
+                    SymErros().apply {
+                        dataOperacao = LocalDateTime.now()
+                        tipoOperacao = "CADASTRO PRODUTO SFA"
+                        petronasResponse = mapper.writeValueAsString(it)
+                    },
+                )
             }
         }
         symErrosRepository.saveAll(erros)
-
     }
 
     @Async
@@ -76,21 +72,21 @@ class SendProductInfoToSFAUseCaseImpl (
                 val body = response.body!!
                 body.filter { it.isSuccess && it.isCreated }.forEach {
                     val codProduto = it.externalId!!.split("-")[1]
-                    logger.info("Preco criado com sucesso no SFA: $codProduto")
                     keyPetronasRepository.markAsCreated(codProduto)
                 }
                 body.filter { it.isSuccess && !it.isCreated }.forEach {
                     val codProduto = it.externalId!!.split("-")[1]
-                    logger.info("Preco atualizado com sucesso no SFA: $codProduto")
                     keyPetronasRepository.markAsUpdated(codProduto)
                 }
                 body.filter { !it.isSuccess }.forEach {
                     logger.error("Preco ${it.externalId} não foi atualizado nem cadastrado")
-                    erros.add(SymErros().apply {
-                        dataOperacao = LocalDateTime.now()
-                        tipoOperacao = "CADASTRO PRECO SFA"
-                        petronasResponse = mapper.writeValueAsString(it)
-                    })
+                    erros.add(
+                        SymErros().apply {
+                            dataOperacao = LocalDateTime.now()
+                            tipoOperacao = "CADASTRO PRECO SFA"
+                            petronasResponse = mapper.writeValueAsString(it)
+                        },
+                    )
                 }
                 symErrosRepository.saveAll(erros)
                 erros.clear()
@@ -103,10 +99,9 @@ class SendProductInfoToSFAUseCaseImpl (
                         dataOperacao = LocalDateTime.now()
                         tipoOperacao = "CADASTRO PRECO SFA"
                         petronasResponse = mapper.writeValueAsString(e.message)
-                    }
+                    },
                 )
             }
-
         }
     }
 
@@ -115,8 +110,7 @@ class SendProductInfoToSFAUseCaseImpl (
         this.prices(full)
     }
 
-
-    override fun inventory(full: Boolean){
+    override fun inventory(full: Boolean)  {
         val estoques = productsInventoryPetronasRepository.findAll().chunked(1000).toList()
 
         var i = 1
@@ -126,17 +120,15 @@ class SendProductInfoToSFAUseCaseImpl (
             i++
             val response = apiPetronasUpsertProducts.upsertKeyProductsInventory(request)
             val body = response.body!!
-            body.filter { it.isSuccess }.forEach {
-                logger.info("Estoque atualizado com sucesso no SFA: ${it.externalId}")
-            }
             body.filter { !it.isSuccess }.forEach {
                 logger.error("Preco ${it.externalId} não foi atualizado nem cadastrado")
-                erros.add(SymErros().apply {
-                    dataOperacao = LocalDateTime.now()
-                    tipoOperacao = "CADASTRO ESTOQUE SFA"
-                    petronasResponse = mapper.writeValueAsString(it)
-
-                })
+                erros.add(
+                    SymErros().apply {
+                        dataOperacao = LocalDateTime.now()
+                        tipoOperacao = "CADASTRO ESTOQUE SFA"
+                        petronasResponse = mapper.writeValueAsString(it)
+                    },
+                )
             }
         }
         symErrosRepository.saveAll(erros)
@@ -146,5 +138,4 @@ class SendProductInfoToSFAUseCaseImpl (
     override suspend fun inventoryAsync(full: Boolean) {
         this.inventory(full)
     }
-
 }
