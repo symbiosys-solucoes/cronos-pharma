@@ -12,26 +12,28 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-
 @Service
-class SendInvoicesToSFAUseCaseImpl (
+class SendInvoicesToSFAUseCaseImpl(
     private val apiPetronasInvoices: ApiPetronasInvoices,
     private val invoicePetronasRepository: InvoicePetronasRepository,
     private val sendInvoiceLineToSFAUseCase: SendInvoiceLineToSFAUseCase,
-    private val symErrosRepository: SymErrosRepository
+    private val symErrosRepository: SymErrosRepository,
 ) : SendInvoicesToSFAUseCase {
     val logger = LoggerFactory.getLogger(SendInvoicesToSFAUseCaseImpl::class.java)
     val mapper = ObjectMapper()
 
-
     override fun execute() {
         val dataAtual = LocalDate.now()
-        val seteDiasAtras = dataAtual.minusDays(7)
+        val seteDiasAtras = dataAtual.minusDays(1)
         this.execute(seteDiasAtras, dataAtual, null)
     }
 
-    override fun execute(initialDate: LocalDate?, endDate: LocalDate?, erpInvoiceNumber: String?) {
-        logger.info("Iniciando busca de pedidos para envio com os seguintes parametros: ${initialDate} - ${endDate} - ${erpInvoiceNumber}")
+    override fun execute(
+        initialDate: LocalDate?,
+        endDate: LocalDate?,
+        erpInvoiceNumber: String?,
+    ) {
+        logger.info("Iniciando busca de pedidos para envio com os seguintes parametros: $initialDate - $endDate - $erpInvoiceNumber")
         val erros = mutableListOf<SymErros>()
         invoicePetronasRepository.findAll(initialDate, endDate, erpInvoiceNumber).chunked(100).forEach {
             val response = apiPetronasInvoices.upsertInvoices(it)
@@ -49,18 +51,16 @@ class SendInvoicesToSFAUseCaseImpl (
                 }
                 if (!it.isSuccess) {
                     logger.error("erro ao enviar NOTA ${it.externalId}")
-                    erros.add(SymErros().apply {
-                        dataOperacao = LocalDateTime.now()
-                        tipoOperacao = "CADASTRO NF SFA"
-                        petronasResponse = mapper.writeValueAsString(it)
-                    })
+                    erros.add(
+                        SymErros().apply {
+                            dataOperacao = LocalDateTime.now()
+                            tipoOperacao = "CADASTRO NF SFA"
+                            petronasResponse = mapper.writeValueAsString(it)
+                        },
+                    )
                 }
-
             }
         }
         symErrosRepository.saveAll(erros)
     }
-
-
-
 }

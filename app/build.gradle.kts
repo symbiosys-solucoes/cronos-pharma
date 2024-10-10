@@ -40,7 +40,6 @@ dependencies {
     implementation("org.mockftpserver:MockFtpServer:2.7.1")
 
     testImplementation("org.hamcrest:hamcrest-library:2.2")
-    runtimeOnly("com.h2database:h2")
 
     // Spring WEB
     implementation("org.springframework.boot:spring-boot-starter-actuator")

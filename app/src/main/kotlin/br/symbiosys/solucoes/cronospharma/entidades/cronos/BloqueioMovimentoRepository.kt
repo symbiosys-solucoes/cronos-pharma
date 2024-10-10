@@ -31,35 +31,32 @@ class BloqueioMovimentoRepository(
         )
 
     fun executaRegrasTipoGravarRetornos(pedido: PedidoPalm) {
-        if (pedido.IdPedidoPalm != null)
-            {
-                val regras = findByTipoBloqueio("023")
+        if (pedido.IdPedidoPalm != null) {
+            val regras = findByTipoBloqueio("023")
 
-                regras.forEach {
-                    if (it.ExpressaoSQL != null && it.Inativo != "S")
-                        {
-                            jdbcTemplate.query(
-                                it.ExpressaoSQL!!.uppercase(),
-                                MapSqlParameterSource().addValue("PINT1", pedido.IdPedidoPalm),
-                                { rs: ResultSet, rowNum: Int -> rs.getString(1) },
-                            )
-                        }
+            regras.forEach {
+                if (it.ExpressaoSQL != null && it.Inativo != "S") {
+                    jdbcTemplate.query(
+                        it.ExpressaoSQL!!.uppercase(),
+                        MapSqlParameterSource().addValue("PINT1", pedido.IdPedidoPalm),
+                        { rs: ResultSet, rowNum: Int -> rs.getString(1) },
+                    )
                 }
             }
+        }
     }
 
     fun executaRegrasTipoGravarRetornos(id: Long) {
         val regras = findByTipoBloqueio("023")
 
         regras.forEach {
-            if (it.ExpressaoSQL != null && it.Inativo != "S")
-                {
-                    jdbcTemplate.query(
-                        it.ExpressaoSQL!!.uppercase(),
-                        MapSqlParameterSource().addValue("PINT1", id),
-                        { rs: ResultSet, rowNum: Int -> rs.getString(1) },
-                    )
-                }
+            if (it.ExpressaoSQL != null && it.Inativo != "S") {
+                jdbcTemplate.query(
+                    it.ExpressaoSQL!!.uppercase(),
+                    MapSqlParameterSource().addValue("PINT1", id),
+                    { rs: ResultSet, rowNum: Int -> rs.getString(1) },
+                )
+            }
         }
     }
 
@@ -75,16 +72,15 @@ class BloqueioMovimentoRepository(
 
             regrasBloqueioComercial.forEach {
                 try {
-                    if (it.ExpressaoSQL != null)
-                        {
-                            val resultado =
-                                jdbcTemplate.queryForObject(
-                                    it.ExpressaoSQL!!.uppercase(),
-                                    MapSqlParameterSource("PCHAR1", "2.7").addValue("IDMOV", idMov),
-                                    String::class.java,
-                                )
-                            listaDeResultados.add(RetornoRegras(it.NomeBloqueio, resultado, "COMERCIAL"))
-                        }
+                    if (it.ExpressaoSQL != null) {
+                        val resultado =
+                            jdbcTemplate.queryForObject(
+                                it.ExpressaoSQL!!.uppercase(),
+                                MapSqlParameterSource("PCHAR1", "2.7").addValue("IDMOV", idMov),
+                                String::class.java,
+                            )
+                        listaDeResultados.add(RetornoRegras(it.NomeBloqueio, resultado, "COMERCIAL"))
+                    }
                 } catch (e: Exception) {
                     logger.error("Falha ao executar regra: ${it.NomeBloqueio}")
                 }
@@ -101,48 +97,45 @@ class BloqueioMovimentoRepository(
 
             regrasBloqueioFinanceiro.forEach {
                 try {
-                    if (it.ExpressaoSQL != null)
-                        {
-                            val resultado =
-                                jdbcTemplate.queryForObject(
-                                    it.ExpressaoSQL!!.uppercase(),
-                                    MapSqlParameterSource("PCHAR1", "2.1").addValue("IDMOV", idMov),
-                                    String::class.java,
-                                )
-                            listaDeResultados.add(RetornoRegras(it.NomeBloqueio, resultado, "FINANCEIRO"))
-                        }
+                    if (it.ExpressaoSQL != null) {
+                        val resultado =
+                            jdbcTemplate.queryForObject(
+                                it.ExpressaoSQL!!.uppercase(),
+                                MapSqlParameterSource("PCHAR1", "2.7").addValue("IDMOV", idMov),
+                                String::class.java,
+                            )
+                        listaDeResultados.add(RetornoRegras(it.NomeBloqueio, resultado, "FINANCEIRO"))
+                    }
                 } catch (e: Exception) {
                     logger.error("Falha ao executar regra: ${it.NomeBloqueio}")
                 }
             }
         }
 
-        if (usaRegrasFinalizacao == "true")
-            {
-                val regrasAbortaFinalizacao =
-                    jdbcTemplate.query(
-                        sqlTipoBloqueioByTipoAndAcao,
-                        MapSqlParameterSource("tipoAcao", "FIN").addValue("tipoBloqueio", "COM"),
-                        mapperBloqueioMovimento,
-                    )
+        if (usaRegrasFinalizacao == "true") {
+            val regrasAbortaFinalizacao =
+                jdbcTemplate.query(
+                    sqlTipoBloqueioByTipoAndAcao,
+                    MapSqlParameterSource("tipoAcao", "FIN").addValue("tipoBloqueio", "COM"),
+                    mapperBloqueioMovimento,
+                )
 
-                regrasAbortaFinalizacao.forEach {
-                    try {
-                        if (it.ExpressaoSQL != null)
-                            {
-                                val resultado =
-                                    jdbcTemplate.queryForObject(
-                                        it.ExpressaoSQL!!.uppercase(),
-                                        MapSqlParameterSource("PCHAR1", "2.1").addValue("IDMOV", idMov),
-                                        String::class.java,
-                                    )
-                                listaDeResultados.add(RetornoRegras(it.NomeBloqueio, resultado, "FINALIZACAO"))
-                            }
-                    } catch (e: Exception) {
-                        logger.error("Erro ao executar regra: ${it.NomeBloqueio} | ${e.message}")
+            regrasAbortaFinalizacao.forEach {
+                try {
+                    if (it.ExpressaoSQL != null) {
+                        val resultado =
+                            jdbcTemplate.queryForObject(
+                                it.ExpressaoSQL!!.uppercase(),
+                                MapSqlParameterSource("PCHAR1", "2.7").addValue("IDMOV", idMov),
+                                String::class.java,
+                            )
+                        listaDeResultados.add(RetornoRegras(it.NomeBloqueio, resultado, "FINALIZACAO"))
                     }
+                } catch (e: Exception) {
+                    logger.error("Erro ao executar regra: ${it.NomeBloqueio} | ${e.message}")
                 }
             }
+        }
 
         return listaDeResultados
     }
