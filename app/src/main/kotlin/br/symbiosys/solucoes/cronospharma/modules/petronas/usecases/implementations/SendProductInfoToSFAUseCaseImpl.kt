@@ -26,7 +26,7 @@ class SendProductInfoToSFAUseCaseImpl(
     val mapper = ObjectMapper()
 
     override fun info(full: Boolean) {
-        val products = productsRepository.findAll(full).chunked(1000).toList()
+        val products = productsRepository.findAll(full).chunked(100).toList()
         var i = 1
         val erros = mutableListOf<SymErros>()
         for (p in products) {
@@ -62,7 +62,7 @@ class SendProductInfoToSFAUseCaseImpl(
     }
 
     override fun prices(full: Boolean) {
-        val keyProducts = keyPetronasRepository.findAll().chunked(1000).toList()
+        val keyProducts = keyPetronasRepository.findAll().chunked(100).toList()
         var i = 1
         val erros = mutableListOf<SymErros>()
         for (request in keyProducts) {
@@ -110,8 +110,8 @@ class SendProductInfoToSFAUseCaseImpl(
         this.prices(full)
     }
 
-    override fun inventory(full: Boolean)  {
-        val estoques = productsInventoryPetronasRepository.findAll().chunked(1000).toList()
+    override fun inventory(full: Boolean) {
+        val estoques = productsInventoryPetronasRepository.findAll().chunked(100).toList()
 
         var i = 1
         val erros = mutableListOf<SymErros>()

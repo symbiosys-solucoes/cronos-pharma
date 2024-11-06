@@ -31,7 +31,7 @@ class SendAccountsToSFAUseCaseImpl(
 
         var i = 1
         val erros = mutableListOf<SymErros>()
-        val accounts = customers.chunked(200).toList()
+        val accounts = customers.chunked(100).toList()
         for (request in accounts) {
             logger.info("enviando request {$i} de ${accounts.size} para SFA")
             i++
