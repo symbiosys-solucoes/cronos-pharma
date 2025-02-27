@@ -34,6 +34,7 @@ class ScheduledSendToSFAImpl(
     @Scheduled(cron = "\${app.cron.petronas.envia.pedidos}")
     fun sendOrdersAndARs() {
         sendOrdersToSFAUseCase.execute()
+        sendInvoicesToSFAUseCase.execute()
     }
 
     @Scheduled(cron = "\${app.cron.petronas.envia.notas}")
