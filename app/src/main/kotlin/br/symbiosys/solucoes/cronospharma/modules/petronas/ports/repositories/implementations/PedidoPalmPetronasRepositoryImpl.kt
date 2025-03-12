@@ -85,7 +85,7 @@ class PedidoPalmPetronasRepositoryImpl(
                 "DECLARE @PEDIDO VARCHAR(50)\n" +
                 "\n" +
                 "SET @PEDIDO = :numpedido\n" +
-                "IF EXISTS (SELECT 1 FROM dbo.sym_petronas_order_item WHERE ERPOrderNumber = @PEDIDO and SFAOrderNumber is not null)\n" +
+                "IF EXISTS (SELECT 1 FROM dbo.sym_petronas_order_item  WHERE ERPOrderNumber = @PEDIDO and SFAOrderNumber is not null)\n" +
                 "\tBEGIN\n" +
                 "\t\tSELECT * FROM dbo.sym_petronas_order_item WHERE ERPOrderNumber = @PEDIDO and OrderItemStatus = 'FATURADO' \n" +
                 "\tEND\n" +
@@ -230,7 +230,7 @@ class PedidoPalmPetronasRepositoryImpl(
         val result = jdbcTemplate.queryForObject(query, params, String::class.java)
         if (!result.isNullOrBlank()) {
             try {
-                val idmov: Int =   result.split("-")[1].toInt()
+                val idmov: Int =   result.split("-", limit = 2)[1].toInt()
                 if (idmov != 0) {
                     finalizaMovimento.finaliza(idmov)
                     val resultado =  finalizaMovimento.finaliza(idmov)

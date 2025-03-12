@@ -40,11 +40,11 @@ class SendAccountsToSFAUseCaseImpl(
                 if (response.statusCode == HttpStatus.OK) {
                     val body = response.body!!
                     body.filter { it.isSuccess && it.isCreated }.forEach {
-                        val accountNumber = it.externalId!!.split("-")[1]
+                        val accountNumber = it.externalId!!.split("-", limit = 2)[1]
                         petronasAccountsRepository.markAsCreated(it.sfdcId!!, accountNumber)
                     }
                     body.filter { !it.isCreated && it.isSuccess }.forEach {
-                        val accountNumber = it.externalId!!.split("-")[1]
+                        val accountNumber = it.externalId!!.split("-", limit = 2)[1]
                         petronasAccountsRepository.markAsCreated(it.sfdcId!!, accountNumber)
                     }
                     body.filter { !it.isSuccess }.forEach {
@@ -98,12 +98,12 @@ class SendAccountsToSFAUseCaseImpl(
             if (response.statusCode == HttpStatus.OK) {
                 val body = response.body!!
                 body.filter { it.isSuccess && it.isCreated }.forEach {
-                    val accountNumber = it.externalId!!.split("-")[1]
+                    val accountNumber = it.externalId!!.split("-", limit = 2)[1]
                     result.add(it)
                     petronasAccountsRepository.markAsCreated(it.sfdcId!!, accountNumber)
                 }
                 body.filter { !it.isCreated && it.isSuccess }.forEach {
-                    val accountNumber = it.externalId!!.split("-")[1]
+                    val accountNumber = it.externalId!!.split("-", limit = 2)[1]
                     result.add(it)
                     petronasAccountsRepository.markAsCreated(it.sfdcId!!, accountNumber)
                 }
@@ -115,7 +115,7 @@ class SendAccountsToSFAUseCaseImpl(
                             dataOperacao = LocalDateTime.now()
                             tipoOperacao = "CADASTRO CLIENTE SFA"
                             petronasResponse = mapper.writeValueAsString(it)
-                            cronosId = it.externalId!!.split("-")[1]
+                            cronosId = it.externalId!!.split("-", limit = 2)[1]
                         },
                     )
                 }

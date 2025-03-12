@@ -20,7 +20,7 @@ class SFAOrderToPetronasPedidoPalm {
                 condicaoPagamento = order.paymentKeyTerms?:""
                 dataEntrega = if(!order.expectedDeliveryDate.isNullOrBlank()){ LocalDateTime.parse(order.expectedDeliveryDate!!.split("+").get(0))} else null
                 numeroPedidoPalmAux = order.customerOrderNumber
-                codigoVendedor = order.userCode?.split("-")?.get(1)
+                codigoVendedor = order.userCode?.split("-", limit = 2)?.get(1)
                 totalPedido = order.totalAmount
                 observacoes = if (order.driverMessage != null && order.driverMessage!!.length > 400) {
                     order.driverMessage!!.substring(0,400)} else {if (order.driverMessage != null) {order.driverMessage} else {""}}

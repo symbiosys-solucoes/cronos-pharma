@@ -39,7 +39,7 @@ class SendInvoicesToSFAUseCaseImpl(
             val response = apiPetronasInvoices.upsertInvoices(it)
             response.body?.forEach {
                 if (it.isSuccess && it.isCreated) {
-                    val nfInfo = it.externalId!!.split("-")
+                    val nfInfo = it.externalId!!.split("-", limit = 2)
                     invoicePetronasRepository.markAsCreated(nfInfo[1], nfInfo[0], it.sfdcId!!)
                     sendInvoiceLineToSFAUseCase.execute(it.externalId!!)
                 }

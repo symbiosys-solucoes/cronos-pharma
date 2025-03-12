@@ -26,13 +26,13 @@ class SendOrderItemToSFAUseCaseImpl(
             response.body?.forEach {
                 if (it.isSuccess && it.isCreated) {
                     logger.info("Item ${it.externalId} enviado e criado com sucesso")
-                    val numItem = it.externalId!!.split("-")[1].toInt()
+                    val numItem = it.externalId!!.split("-", limit = 2)[1].toInt()
                     pedidoPalmPetronasRepository.markAsSent(numItem, it.sfdcId!!)
                 }
                 if (it.isSuccess && !it.isCreated) {
                     logger.info("Item ${it.externalId} enviado e atualizado com sucesso")
                     if(it.externalId != null){
-                        val numItem = it.externalId!!.split("-")[1].toInt()
+                        val numItem = it.externalId!!.split("-", limit = 2)[1].toInt()
                         pedidoPalmPetronasRepository.markAsSent(numItem, it.sfdcId!!)
                     }
 

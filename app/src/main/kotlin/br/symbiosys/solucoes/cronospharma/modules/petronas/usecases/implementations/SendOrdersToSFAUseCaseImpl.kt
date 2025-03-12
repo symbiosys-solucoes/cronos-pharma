@@ -30,12 +30,12 @@ class SendOrdersToSFAUseCaseImpl(
             val erros = mutableListOf<SymErros>()
             response.body?.forEach {
                 if (it.isSuccess && it.isCreated) {
-                    val numPedido = it.externalId!!.split("-")[1]
+                    val numPedido = it.externalId!!.split("-", limit = 2)[1]
                     pedidoPalmPetronasRepository.markAsSent(numPedido)
                     sendOrderItemToSFAUseCase.execute(numPedido)
                 }
                 if (it.isSuccess && !it.isCreated) {
-                    val numPedido = it.externalId!!.split("-")[1]
+                    val numPedido = it.externalId!!.split("-", limit = 2)[1]
                     pedidoPalmPetronasRepository.markAsSent(numPedido)
                     sendOrderItemToSFAUseCase.execute(numPedido)
                 }
@@ -71,12 +71,12 @@ class SendOrdersToSFAUseCaseImpl(
             response.body?.forEach {
                 logger.info(it.toString())
                 if (it.isSuccess && it.isCreated) {
-                    val numPedido = it.externalId!!.split("-")[1]
+                    val numPedido = it.externalId!!.split("-", limit = 2)[1]
                     pedidoPalmPetronasRepository.markAsSent(numPedido)
                     sendOrderItemToSFAUseCase.execute(numPedido)
                 }
                 if (it.isSuccess && !it.isCreated) {
-                    val numPedido = it.externalId!!.split("-")[1]
+                    val numPedido = it.externalId!!.split("-", limit = 2)[1]
                     pedidoPalmPetronasRepository.markAsSent(numPedido)
                     sendOrderItemToSFAUseCase.execute(numPedido)
                 }

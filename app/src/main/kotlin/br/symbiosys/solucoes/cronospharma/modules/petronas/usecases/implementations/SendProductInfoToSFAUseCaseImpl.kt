@@ -35,11 +35,11 @@ class SendProductInfoToSFAUseCaseImpl(
             val response = apiPetronasUpsertProducts.upsertProducts(p)
             val body = response.body!!
             body.filter { it.isSuccess && it.isCreated }.forEach {
-                val codProduto = it.externalId!!.split("-")[1]
+                val codProduto = it.externalId!!.split("-", limit = 2)[1]
                 productsRepository.markAsCreated(codProduto)
             }
             body.filter { it.isSuccess && !it.isCreated }.forEach {
-                val codProduto = it.externalId!!.split("-")[1]
+                val codProduto = it.externalId!!.split("-", limit = 2)[1]
                 productsRepository.markAsUpdated(codProduto)
             }
             body.filter { !it.isSuccess }.forEach {
@@ -71,11 +71,11 @@ class SendProductInfoToSFAUseCaseImpl(
                 val response = apiPetronasUpsertProducts.upsertKeyProducts(request)
                 val body = response.body!!
                 body.filter { it.isSuccess && it.isCreated }.forEach {
-                    val codProduto = it.externalId!!.split("-")[1]
+                    val codProduto = it.externalId!!.split("-", limit = 2)[1]
                     keyPetronasRepository.markAsCreated(codProduto)
                 }
                 body.filter { it.isSuccess && !it.isCreated }.forEach {
-                    val codProduto = it.externalId!!.split("-")[1]
+                    val codProduto = it.externalId!!.split("-", limit = 2)[1]
                     keyPetronasRepository.markAsUpdated(codProduto)
                 }
                 body.filter { !it.isSuccess }.forEach {
