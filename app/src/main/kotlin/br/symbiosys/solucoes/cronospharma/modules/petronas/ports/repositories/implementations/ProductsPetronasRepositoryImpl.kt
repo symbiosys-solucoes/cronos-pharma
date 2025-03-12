@@ -29,7 +29,7 @@ class ProductsPetronasRepositoryImpl(private val jdbcTemplate: NamedParameterJdb
         val query = "" +
                 "DECLARE @IDPRODUTO INT\n" +
                 "SET @IDPRODUTO = (SELECT IdProduto FROM Produtos WHERE CODPRODUTO = :codproduto)\n" +
-                "IF NOT EXISTS (SELECT 1 FROM ZProdutosCompl WHERE IdProduto = @IDPRODUTO)\n" +
+                "IF NOT EXISTS (SELECT 1 FROM ZProdutosCompl WHERE IdProduto = @IDPRODUTO) AND ISNULL(@IDPRODUTO,0) > 0\n" +
                 "BEGIN\n" +
                 "INSERT INTO ZProdutosCompl (IdProduto, sym_enviar_petronas) VALUES (@IDPRODUTO, 0)\n" +
                 "END\n" +
@@ -48,7 +48,7 @@ class ProductsPetronasRepositoryImpl(private val jdbcTemplate: NamedParameterJdb
         val query = "" +
                 "DECLARE @IDPRODUTO INT\n" +
                 "SET @IDPRODUTO = (SELECT IdProduto FROM Produtos WHERE CODPRODUTO = :codproduto)\n" +
-                "IF NOT EXISTS (SELECT 1 FROM ZProdutosCompl WHERE IdProduto = @IDPRODUTO)\n" +
+                "IF NOT EXISTS (SELECT 1 FROM ZProdutosCompl WHERE IdProduto = @IDPRODUTO) AND ISNULL(@IDPRODUTO,0) > 0\n" +
                 "BEGIN\n" +
                 "INSERT INTO ZProdutosCompl (IdProduto, sym_enviar_petronas) VALUES (@IDPRODUTO, 0)\n" +
                 "END\n" +
