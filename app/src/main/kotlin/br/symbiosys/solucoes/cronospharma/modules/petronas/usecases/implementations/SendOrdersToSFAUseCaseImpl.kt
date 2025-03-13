@@ -29,6 +29,7 @@ class SendOrdersToSFAUseCaseImpl(
             val response = apiPetronasUpsertOrders.upsertOrders(it.map { OrderRequest.from(it) }.toList())
             val erros = mutableListOf<SymErros>()
             response.body?.forEach {
+                if(it.isSuccess) logger.info("pedido ${it.externalId} enviado com sucesso")
                 if (it.isSuccess && it.isCreated) {
                     val numPedido = it.externalId!!.split("-", limit = 2)[1]
                     pedidoPalmPetronasRepository.markAsSent(numPedido)

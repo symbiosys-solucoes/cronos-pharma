@@ -23,7 +23,7 @@ class ProductsKeyPetronasRepositoryImpl(private val jdbcTemplate: NamedParameter
         val query = "" +
                 "DECLARE @IDPRODUTO INT\n" +
                 "SET @IDPRODUTO = ISNULL((SELECT IdProduto FROM Produtos WHERE CODPRODUTO = :codproduto), (SELECT IdProduto FROM Produtos WHERE CodProdutoFabr = :codproduto AND ProdutoInativo = 'N') )\n" +
-                "IF NOT EXISTS (SELECT 1 FROM ZProdutosCompl WHERE IdProduto = @IDPRODUTO)\n" +
+                "IF NOT EXISTS (SELECT 1 FROM ZProdutosCompl WHERE IdProduto = @IDPRODUTO) AND ISNULL(@IDPRODUTO,0) > 0\n" +
                 "BEGIN\n" +
                 "INSERT INTO ZProdutosCompl (IdProduto, sym_enviar_petronas) VALUES (@IDPRODUTO, 0)\n" +
                 "END\n" +
@@ -47,7 +47,7 @@ class ProductsKeyPetronasRepositoryImpl(private val jdbcTemplate: NamedParameter
         val query = "" +
                 "DECLARE @IDPRODUTO INT\n" +
                 "SET @IDPRODUTO = ISNULL((SELECT IdProduto FROM Produtos WHERE CODPRODUTO = :codproduto), (SELECT IdProduto FROM Produtos WHERE CodProdutoFabr = :codproduto AND ProdutoInativo = 'N'))\n" +
-                "IF NOT EXISTS (SELECT 1 FROM ZProdutosCompl WHERE IdProduto = @IDPRODUTO)\n" +
+                "IF NOT EXISTS (SELECT 1 FROM ZProdutosCompl WHERE IdProduto = @IDPRODUTO) AND ISNULL(@IDPRODUTO,0) > 0\n" +
                 "BEGIN\n" +
                 "INSERT INTO ZProdutosCompl (IdProduto, sym_enviar_petronas) VALUES (@IDPRODUTO, 0)\n" +
                 "END\n" +

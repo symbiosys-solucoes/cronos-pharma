@@ -45,7 +45,13 @@ class ScheduledSendToSFAImpl(
 
     @Scheduled(fixedRate = (1000 * 60) * 3)
     fun convertOrderToMovimento() {
-        pedidoPalmPetronasRepository.convertAll()
+        sendOrdersToSFAUseCase.execute()
+
+    }
+    @Scheduled(fixedRate = (1000 * 60) * 15)
+    fun sendOrderToSfa() {
+        sendOrdersToSFAUseCase.execute()
+
     }
 
     @Bean

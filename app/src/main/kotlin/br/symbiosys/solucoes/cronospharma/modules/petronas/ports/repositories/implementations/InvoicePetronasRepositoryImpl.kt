@@ -47,7 +47,7 @@ class InvoicePetronasRepositoryImpl(private val jdbcTemplate: NamedParameterJdbc
                 "SET @IDMOV = (SELECT IdMov FROM Movimento WHERE CodFilial = :filial AND NumMov = :numero AND TipoMov = '2.4')\n" +
                 "IF @IDMOV IS NOT NULL\n" +
                 "BEGIN\n" +
-                "\tIF NOT EXISTS (SELECT 1 FROM ZMovimentoCompl WHERE IdMov = @IDMOV)\n" +
+                "\tIF NOT EXISTS (SELECT 1 FROM ZMovimentoCompl WHERE IdMov = @IDMOV) AND ISNULL(@IDPRODUTO,0) > 0\n" +
                 "\tBEGIN\n" +
                 "\t\tINSERT INTO ZMovimentoCompl (IdMov, sym_enviar_petronas) VALUES (@IDMOV, 0)\n" +
                 "\tEND\n" +
