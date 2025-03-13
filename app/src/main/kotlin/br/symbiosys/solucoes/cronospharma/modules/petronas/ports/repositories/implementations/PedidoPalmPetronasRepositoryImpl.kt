@@ -114,29 +114,8 @@ class PedidoPalmPetronasRepositoryImpl(
 
     override fun markAsSent(numPedidoCronos: String, atualizado: Boolean) {
         val query = "DECLARE @IDMOV INT, @TIPOMOV VARCHAR(5), @IDPEDIDO INT\n" +
-                "SELECT TOP 1 @IDMOV = IdMov, @TIPOMOV = TipoMov, @IDPEDIDO = IdPedidoPalm FROM Movimento WHERE NUMMOV = :numpedido AND TipoMov IN ('2.1', '2.4', '2.7')\n" +
-                "IF @TIPOMOV IN ('2.7')\n" +
-                "\tBEGIN\n" +
-                "\tDECLARE @ID INT\n" +
-                "        \n" +
-                "\tDECLARE XCURSOR CURSOR FOR \n" +
-                "\t\t\n" +
-                "\t\tSELECT IdMov FROM Movimento WHERE IdPedidoPalm = @IDPEDIDO\n" +
-                "\t\t\n" +
-                "\tOPEN XCURSOR\n" +
-                "\tFETCH NEXT FROM XCURSOR INTO @ID\n" +
-                "\t\n" +
-                "\tWHILE @@FETCH_STATUS = 0\n" +
-                "\tBEGIN\n" +
-                "\t\tUPDATE Movimento SET NumPrisma = 0 WHERE IdMov = @ID\n" +
-                "\n" +
-                "\tFETCH NEXT FROM XCURSOR INTO @ID\n" +
-                "\tEND\n" +
-                "\t\n" +
-                "\tCLOSE XCURSOR\n" +
-                "\tDEALLOCATE XCURSOR\n" +
-                "\tEND\n" +
-                "ELSE\n" +
+                "SELECT TOP 1 @IDMOV = IdMov, @TIPOMOV = TipoMov FROM Movimento WHERE NUMMOV = :numpedido AND TipoMov IN ('2.1', '2.4', '2.7', '2.8', '2.3')\n" +
+                "IF @IDMOV IS NOT NULL\n" +
                 "\tBEGIN\n" +
                 "\t\tUPDATE Movimento SET NumPrisma = 0 WHERE IdMov = @IDMOV\n" +
                 "\tEND\n"
