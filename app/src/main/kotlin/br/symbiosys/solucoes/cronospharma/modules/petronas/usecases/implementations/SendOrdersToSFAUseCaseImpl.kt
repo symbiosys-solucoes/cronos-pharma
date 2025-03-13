@@ -25,20 +25,19 @@ class SendOrdersToSFAUseCaseImpl(
     val mapper = ObjectMapper()
 
     override fun execute() {
-        pedidoPalmPetronasRepository.findAll(enviados = false).chunked(50).forEach {
-            val response = apiPetronasUpsertOrders.upsertOrders(it.map { OrderRequest.from(it) }.toList())
+        pedidoPalmPetronasRepository.findAll(enviados = false).forEach { pedidoCronos ->
+            val response = apiPetronasUpsertOrders.upsertOrders(listOf(OrderRequest.from(pedidoCronos)))
             val erros = mutableListOf<SymErros>()
             response.body?.forEach {
-                if(it.isSuccess) logger.info("pedido ${it.externalId} enviado com sucesso")
+                if (it.isSuccess) logger.info("pedido ${it.externalId} enviado com sucesso")
                 if (it.isSuccess && it.isCreated) {
-                    val numPedido = it.externalId!!.split("-", limit = 2)[1]
-                    pedidoPalmPetronasRepository.markAsSent(numPedido)
-                    sendOrderItemToSFAUseCase.execute(numPedido)
+                    pedidoCronos.idCronos?.let { it1 -> pedidoPalmPetronasRepository.markAsSent(it1) }
+                    pedidoCronos.orderNumberErp?.let { it1 -> sendOrderItemToSFAUseCase.execute(it1) }
+
                 }
                 if (it.isSuccess && !it.isCreated) {
-                    val numPedido = it.externalId!!.split("-", limit = 2)[1]
-                    pedidoPalmPetronasRepository.markAsSent(numPedido)
-                    sendOrderItemToSFAUseCase.execute(numPedido)
+                    pedidoCronos.idCronos?.let { it1 -> pedidoPalmPetronasRepository.markAsSent(it1) }
+                    pedidoCronos.orderNumberErp?.let { it1 -> sendOrderItemToSFAUseCase.execute(it1) }
                 }
                 if (!it.isSuccess) {
                     logger.error("erro ao enviar pedido ${it.externalId}")
@@ -53,6 +52,7 @@ class SendOrdersToSFAUseCaseImpl(
             }
             symErrosRepository.saveAll(erros)
         }
+        logger.info("Concluido envio de Lote de Pedidos para SFA")
     }
 
     @Async
@@ -73,12 +73,14 @@ class SendOrdersToSFAUseCaseImpl(
                 logger.info(it.toString())
                 if (it.isSuccess && it.isCreated) {
                     val numPedido = it.externalId!!.split("-", limit = 2)[1]
-                    pedidoPalmPetronasRepository.markAsSent(numPedido)
+                    val distribuidor = it.externalId!!.split("-", limit = 2)[0]
+                    pedidoPalmPetronasRepository.markAsSent(numPedido, distribuidor = distribuidor)
                     sendOrderItemToSFAUseCase.execute(numPedido)
                 }
                 if (it.isSuccess && !it.isCreated) {
                     val numPedido = it.externalId!!.split("-", limit = 2)[1]
-                    pedidoPalmPetronasRepository.markAsSent(numPedido)
+                    val distribuidor = it.externalId!!.split("-", limit = 2)[0]
+                    pedidoPalmPetronasRepository.markAsSent(numPedido, distribuidor = distribuidor)
                     sendOrderItemToSFAUseCase.execute(numPedido)
                 }
                 if (!it.isSuccess) {

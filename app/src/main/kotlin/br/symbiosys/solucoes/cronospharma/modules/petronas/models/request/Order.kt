@@ -1,5 +1,6 @@
 package br.symbiosys.solucoes.cronospharma.modules.petronas.models.request
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 
 open class Order {
@@ -78,6 +79,9 @@ open class Order {
 
     @JsonProperty("ShipToAccountNumber__c")
     var shipToAccountNumber: String? = null
+
+    @JsonIgnore
+    var idCronos: Int? = null
 
 }
 
